@@ -1,2 +1,3 @@
-# paris-traffic-prediction
-University project for prediction using ML techniques
+# Paris Traffic Prediction
+
+University project for prediction using ML techniques on time series data.
