@@ -1,0 +1,64 @@
+#-------- Start Header for any file -----------#
+# First, set working directory to Folder with repo:
+setwd("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction")
+#setwd("/Users/guilllaume/...TODO")
+rm(list=objects()) # Clean the global environment
+library(XML)
+library(RCurl)
+library(magrittr)
+library(mgcv)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(weathermetrics)
+library(ranger)
+#----------- End Header ----------------#
+
+data_2014_w00 <- read_delim("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction/data/data_raw_2014/trafic_capteurs_2014_W00_20140101_20140102.txt", 
+                             col_names =TRUE, delim=';')
+str(data_2014_w00)
+# Signification de variables:
+# iu_ac = graph edge unique identifier
+# libelle = street name of where the graph edge is placed
+# iu_nd_amont = ID of the node just before in street
+# libelle_nd_amont = exact name of the node before
+# iu_nd_aval = ID of the node just after in street
+# libelle_nd_aval = exact name of the node after
+# t_1h = timestamp of measurement
+# q = number of cars passing within hour of measurement
+# k = occupation of measurememnt point in percent = traffic density
+# etat_trafic = a strict function of k; indicates traffic status
+# etat_barre = status of the street arc (see iu_ac): constructions etc
+# Dessin = code for drawing the street arc.
+
+head(data_2014_w00, 15)
+tss = data_2014_w00$t_1h
+summary(tss)
+
+just_799 = filter(data_2014_w00, iu_ac == 799)[c("iu_ac", "t_1h", "k", "q")]
+dim(just_799)
+print("We note that the 2014 dataset contains only data for single days!")
+
+
+
+#### 2015 first week ####
+data_2015_w00 <- read_delim("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction/data/data_raw_2015/trafic_capteurs_2015_W00_20150101_20150108.txt", 
+                            col_names =TRUE, delim=';')
+str(data_2015_w00)
+again_799 = filter(data_2015_w00, iu_ac == 799)[c("iu_ac", "t_1h", "k", "q")]
+again_799
+
+par(mfrow=c(1,1))
+plot(again_799$t_1h, again_799$k, type='l')
+
+
+#### 2020 first week: Data is not complete for node 799, so we use node 200 ####
+data_2020_w00 <- read_delim("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction/data/data_raw_2020/trafic_capteurs_2020_W00_20200101_20200108.txt", 
+                            col_names =TRUE, delim=';')
+str(data_2020_w00)
+compare_200 = filter(data_2020_w00, iu_ac == 200)[c("iu_ac", "t_1h", "k", "q")]
+compare_200
+
+par(mfrow=c(1,1))
+plot(compare_200$t_1h, compare_200$k, type='l')
+
