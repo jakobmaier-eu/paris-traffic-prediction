@@ -67,3 +67,4 @@ wo_periph = d[!(str_sub(d$libelle, 1,2) == "PE" | str_sub(d$libelle, 1,2)== "PI"
 
 main_streets = wo_periph[order(wo_periph$q, decreasing = T),]
 
+
