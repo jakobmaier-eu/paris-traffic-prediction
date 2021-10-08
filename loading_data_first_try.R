@@ -55,7 +55,7 @@ plot(again_799$t_1h, again_799$k, type='l')
 
 #--------------- 
 
-data_2020_w00 <- read_delim("data/data_raw_2020/trafic_capteurs_2020_W00_20200101_20200108.txt", 
+data_2020_w00 <- read_delim("data/data_raw_2020/trafic_capteurs_2020_W02_20200115_20200122.txt", 
                            col_names =TRUE, delim=';')
 
 selection = data_2020_w00[order(data_2020_w00$q, decreasing = T),]
@@ -68,13 +68,14 @@ d = data_2020_w00
 
 wo_periph = d[!(str_sub(d$libelle, 1,2) == "PE" | str_sub(d$libelle, 1,2)== "PI"),]
 
-main_streets = wo_periph[order(wo_periph$q, decreasing = T),]
+#main_streets = wo_periph[order(wo_periph$q, decreasing = T),]
 
-main_streets = main_streets[c("libelle","q")]
+streets_frequency_rows = wo_periph[c("libelle","q")]
 
-main_streets_aggregated_by_libelle = aggregate(main_streets$q,
-                                               by = list(main_streets$libelle),
-                                               FUN = mean)
+main_streets_aggregated_by_libelle = aggregate(streets_frequency_rows$q,
+                                               by = list(streets_frequency_rows$libelle),
+                                               FUN = mean,
+                                               na.rm = TRUE)
 
 main_streets_aggregated_by_libelle_decreasing = main_streets_aggregated_by_libelle[order(main_streets_aggregated_by_libelle$x, decreasing = T),]
 
