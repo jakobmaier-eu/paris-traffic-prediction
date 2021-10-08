@@ -1,7 +1,6 @@
 #-------- Start Header for any file -----------#
 # First, set working directory to Folder with repo:
-setwd("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction")
-#setwd("/Users/guilllaume/...TODO")
+
 rm(list=objects()) # Clean the global environment
 library(XML)
 library(RCurl)
@@ -14,7 +13,7 @@ library(weathermetrics)
 library(ranger)
 #----------- End Header ----------------#
 
-d <- read_delim("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction/data/data_raw_2014/trafic_capteurs_2014_W00_20140101_20140102.txt", 
+d <- read_delim("data/data_raw_2014/trafic_capteurs_2014_W00_20140101_20140102.txt", 
                              col_names =TRUE, delim=';')
 str(d)
 # Signification de variables:
@@ -33,7 +32,7 @@ str(d)
 
 
 #### Visualize 2015 first week ####
-data_2015_w00 <- read_delim("/Users/jakob/Dropbox/Uni/ProjetML/paris-traffic-prediction/data/data_raw_2015/trafic_capteurs_2015_W00_20150101_20150108.txt",
+data_2015_w00 <- read_delim("data/data_raw_2015/trafic_capteurs_2015_W00_20150101_20150108.txt",
                             col_names =TRUE, delim=';')
 str(data_2015_w00)
 again_799 = filter(data_2015_w00, iu_ac == 799)[c("iu_ac", "t_1h", "k", "q")]
@@ -56,15 +55,26 @@ plot(again_799$t_1h, again_799$k, type='l')
 
 #--------------- 
 
+data_2020_w00 <- read_delim("data/data_raw_2020/trafic_capteurs_2020_W00_20200101_20200108.txt", 
+                           col_names =TRUE, delim=';')
 
-selection = data_2014_w00[order(data_2014_w00$q, decreasing = T),]
-summary(data_2014_w00 %>% drop_na(q))
+selection = data_2020_w00[order(data_2020_w00$q, decreasing = T),]
+summary(data_2020_w00 %>% drop_na(q))
 
 
-# TODO: Aggrég libellés before identifying main axes.
+# TODO: Aggr?g libell?s before identifying main axes.
+
+d = data_2020_w00
 
 wo_periph = d[!(str_sub(d$libelle, 1,2) == "PE" | str_sub(d$libelle, 1,2)== "PI"),]
 
 main_streets = wo_periph[order(wo_periph$q, decreasing = T),]
 
+main_streets = main_streets[c("libelle","q")]
+
+main_streets_aggregated_by_libelle = aggregate(main_streets$q,
+                                               by = list(main_streets$libelle),
+                                               FUN = mean)
+
+main_streets_aggregated_by_libelle_decreasing = main_streets_aggregated_by_libelle[order(main_streets_aggregated_by_libelle$x, decreasing = T),]
 
