@@ -79,8 +79,19 @@ main_streets_aggregated_by_libelle = aggregate(streets_frequency_rows$q,
 
 main_streets_aggregated_by_libelle_decreasing = main_streets_aggregated_by_libelle[order(main_streets_aggregated_by_libelle$x, decreasing = T),]
 
+##Aggregation of main_streets (all years)
 
+foldername = "./data/find_main_streets"
+filenames = list.files(foldername)
+dataframes = data.frame()
 
+for(filename in filenames){
+  dataframes = rbind(dataframes, data.frame(readRDS(paste("./data/find_main_streets/",filename,sep=""))))
+}
+  
+main_streets = aggregate(dataframes$q, by=list(dataframes$libelle), FUN=mean, na.rm = TRUE)
+names(main_streets) = c("libelle", "q")
+main_streets = main_streets[order(main_streets$q, decreasing = T),]
 
 
 

@@ -27,7 +27,7 @@ library(ranger)
 
 
 years = c(2014, 2015, 2016, 2017, 2018, 2019, 2020)
-years = c(2016)
+years = c(2020)
 for (year in years){
   foldername = paste("data/data_raw_", year, sep="")
   filenames = list.files(foldername)
