@@ -79,3 +79,8 @@ main_streets_aggregated_by_libelle = aggregate(streets_frequency_rows$q,
 
 main_streets_aggregated_by_libelle_decreasing = main_streets_aggregated_by_libelle[order(main_streets_aggregated_by_libelle$x, decreasing = T),]
 
+
+
+
+
+
