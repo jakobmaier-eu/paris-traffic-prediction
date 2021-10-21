@@ -93,5 +93,5 @@ main_streets = aggregate(dataframes$q, by=list(dataframes$libelle), FUN=mean, na
 names(main_streets) = c("libelle", "q")
 main_streets = main_streets[order(main_streets$q, decreasing = T),]
 
-
+saveRDS(main_streets, file=paste("data/find_main_streets/main_streets_agregated_all_years.rds", sep = ""))
 
