@@ -79,19 +79,51 @@ main_streets_aggregated_by_libelle = aggregate(streets_frequency_rows$q,
 
 main_streets_aggregated_by_libelle_decreasing = main_streets_aggregated_by_libelle[order(main_streets_aggregated_by_libelle$x, decreasing = T),]
 
-##Aggregation of main_streets (all years)
+##Aggregation of main_streets (all years) EXECUTED AND SAVED
 
-foldername = "./data/find_main_streets"
-filenames = list.files(foldername)
-dataframes = data.frame()
+# foldername = "./data/find_main_streets"
+# filenames = list.files(foldername)
+# dataframes = data.frame()
+# 
+# for(filename in filenames){
+#   dataframes = rbind(dataframes, data.frame(readRDS(paste("./data/find_main_streets/",filename,sep=""))))
+# }
+#   
+# main_streets = aggregate(dataframes$q, by=list(dataframes$libelle), FUN=mean, na.rm = TRUE)
+# names(main_streets) = c("libelle", "q")
+# main_streets = main_streets[order(main_streets$q, decreasing = T),]
+# 
+# saveRDS(main_streets, file=paste("data/find_main_streets/main_streets_agregated_all_years.rds", sep = ""))
 
-for(filename in filenames){
-  dataframes = rbind(dataframes, data.frame(readRDS(paste("./data/find_main_streets/",filename,sep=""))))
-}
+## Libelle function for map
+
+#load main_streets_agregated_all_years
+main_streets = readRDS(paste("./data/find_main_streets/main_streets_agregated_all_years.rds"))
+
+str = ""
+first = T
+i = 0
+
+for (street in main_streets$libelle){
+  if (first){
+    str = street; first = F
+  }
+  str = paste(str, " OR ", street, sep="")
   
-main_streets = aggregate(dataframes$q, by=list(dataframes$libelle), FUN=mean, na.rm = TRUE)
-names(main_streets) = c("libelle", "q")
-main_streets = main_streets[order(main_streets$q, decreasing = T),]
+  if(i>200){
+    break
+  }
+  
+  i = i + 1
+}
 
-saveRDS(main_streets, file=paste("data/find_main_streets/main_streets_agregated_all_years.rds", sep = ""))
+str
+
+writeClipboard(str)
+
+
+
+
+
+
 
