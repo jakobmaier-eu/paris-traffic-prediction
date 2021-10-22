@@ -1,0 +1,53 @@
+ARETES:
+pont aval - pont de l'alma
+versa
+pont de l'alma - concorde
+versa
+pont de la concorde - rond point étoile
+versa
+rond point étoile - pont de l'alma
+porte maillot - rond point étoile
+versa
+rond point étoile - porte d'asnières
+versa
+porte d'asnières - saint lazare
+versa
+saint lazare - concorde
+versa
+concorde - saint michel
+versa
+concorde - chatelet
+versa
+saint michel - chatelet
+versa
+denfert rochereau - saint michel
+versa
+denfert rochereau - porte d'orleans
+versa
+pont d'austerlitz - place d'italie
+versa
+porte d'italie - place d'italie
+versa
+pont aval - pont d'austerlitz
+versa
+porte de vincennes - bastille
+versa
+bastille - strasbourg saint denis
+versa
+pont d'austerlitz - bastille
+versa
+bastille-chatelet
+saint michel - jussieu
+versa
+jussieu - pont d'austerlitz
+versa
+jussieu - bastille
+chatelet - pont d'austerlitz
+versa
+chatelet - strasbourg saint denis
+versa
+
+
+- TODO finish
+- TODO check it all
+- TODO add periph
