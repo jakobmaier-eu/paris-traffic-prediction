@@ -56,4 +56,20 @@ for (year in years){
 
 #-------------------------------------------------#
 
+#### Establishing partitions of libelles into graph edges:
+processFile = function(filepath) {
+  lines_list = list()
+  con = file(filepath, "r")
+  while ( TRUE ) {
+    line = readLines(con, n = 1)
+    if ( length(line) == 0 ) {
+      break
+    }
+    lines_list = c(lines_list, line)
+  }
+  close(con)
+  return(lines_list)
+}
+list_edges = processFile("./liste_aretes.txt")
+
 

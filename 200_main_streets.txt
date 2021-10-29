@@ -1,1 +1,207 @@
-A4_Y OR A4_Y OR A4_W OR A1_W OR A1_Y OR Quai_de_Bercy_W OR Quai_Rapee_Bercy_Y OR Quai_de_Bercy_Y OR A6A_W_bretelle_9 OR AE_A6B OR Voie_Mazas OR Quai_de_la_Rapee_Y OR SI_A6B_bretelle_1 OR SE_A3_bretelle_4 OR A6A_W OR A1_bretelle_8 OR Quai_Bercy_Rapee_W OR Quai_Anatole_France OR Bercy_bretelle_13 OR VGP_Quai_des_Tuileries OR AE_A1_bretelle_8 OR Pl_de_la_Nation OR Pl_Institut OR Quai_Conti OR Quai_Malaquais OR Quai_Voltaire OR Chapelle_bretelle_4 OR Av_de_Neuilly OR Bercy_bretelle_9 OR Souterrain_Tuileries OR Quai_du_Louvre OR Av_Grande_Armee OR Voie_Georges_Pompidou OR Quai_de_la_Rapee_W OR Pont_d'Austerlitz OR Pt_d'Austerlitz OR VGP_Quai_Tuileries OR VGP_Souterrain_Tuileries OR Concorde_Ouest OR V.G.P OR Av_de_la_Grande_Armee OR Souterrain_Invalides_VGP OR AI_A3_bretelle_7 OR AE_A6A_bretelle_8 OR Porte_Maillot OR SE_A4_bretelle_5 OR Quai_de_Gesvres OR Quai_des_Tuileries OR AV_Champs_Elysees OR Bd_Sebastopol OR SE_Bercy_bretelle_4 OR Souterrain_Concorde OR Av_des_Champs_Elysees OR Quai_Tuileries OR Quai_de_la_Megisserie OR AE_RN13_bretelle_16 OR Quai_Grands_Augustins OR SI_A4_bretelle_2 OR Quai_Henri_IV OR Pt_Sully OR SE_A6A OR A3_W OR AE_A3_bretelle_1 OR SE_A13_bretelle_4 OR Quai_Montebello OR VGP_Souterrain_Henri_IV OR Souterrain_Alma_VGP OR Renard OR A3W OR A13_Y OR Av_Pte_Vincennes OR Av_Champs_Elysees OR AI_A13_bretelle_3 OR Quai_St_Michel OR Av_de_New_York OR Bd_St_Germain OR Pl_25_Aout_1944 OR Pte_d'Orleans OR SI_RN13_bretelle_8 OR Pl_Republique OR SI_A3_bretelle_2 OR VGP OR Rivoli OR Quai_d'Issy-Leblanc OR Cours_de_Vincennes OR Quai_Celestins OR Bd_Bourdon OR Quai_de_la_Rapee OR Royale OR Av_du_Trone OR Concorde_Nord OR A13_W OR Concorde OR A3_Y OR Bd_Ney OR Rue_du_Fbg_St_Martin OR Bd_de_Stasbourg OR Quai_Hotel_de_Ville OR Chapelle_bretelle_1 OR AE_A13_bretelle_5 OR Concorde_Est OR Av_de_Wagram OR Bd_du_Palais OR Pt_au_Change OR Pt_St_Michel OR Quai_Tournelle OR Bd_Henri_IV OR Quai_Andre_Citroen OR Quai_St_Exupery OR Souterrain_Etoile OR Chapelle_bretelle_2 OR Bd_Poissonniere OR AI_Maillot_2_bretelle_10 OR Coutellerie OR Bd_St-Martin OR Pt_Concorde OR Souterrain_Varsovie_VGP OR Bd_Haussmann OR Cite OR Petit_Pont OR Pt_Notre_Dame OR Bd_de_Strasbourg OR Quai_St_Bernard OR VGP_Cours_la_Reine OR Chatelet OR Bd_Bourdon-Acces_Mazas OR Beaubourg OR Bd_Beaumarchais OR Reaumur Voitures (Thermicam) OR Sout_Citroen OR Pont_Charles_de_Gaulle OR Pt_Charles_de_Gaulle OR Pt_de_l'Alma OR Av_du_Mal_Gallieni OR Av_General_Leclerc OR Av_Pte_Villette OR Contre-Allee_Concorde OR Contre_Allee_Concorde OR Cours Albert 1er_VGP OR AI_RN13_bretelle_15 OR VGP_Souterrain_Concorde OR AI_A3_bretelle_2 OR Bd_Bastille OR Chapelle OR Av_de_la_Pte_de_St_Ouen OR Chapelle_Bretelle_5 OR Av_Marceau OR Av_Pte_Asnieres OR Quai_d'Orsay OR Pepiniere OR Av_Pte_d'Italie OR Bagnolet_bretelle_6 OR Bd_Bonne_Nouvelle OR Rue St Lazare OR 4_Septembre OR Pl_de_la_Bourse_cote_Reaumur OR Max_Dormoy OR Bd_St_Michel OR SI_A13_bretelle_6 OR Bd_Montmartre OR Quai_d'Issy OR Pt_de_Bercy OR Av_Pte_Clignancourt OR Lemonnier OR Pl_Denfert_Rochereau OR Rue de Rivoli OR Bd_Filles_du_Calvaire OR Rte_Pte_des_Sablons_bretelle_2 OR Av_Foch OR Pyramides OR A3_bretelle_6 OR Av_de_St_Cloud OR Av_Pte_Bagnolet OR Av_Pdt_Wilson OR Reaumur OR Maillot_bretelle_15_(RN13) OR Bd_Morland OR Bd_St_Denis OR Av_Pdt_Kennedy OR Bd_du_Temple OR Observatoire OR Av_Pte_Sevres OR Alain OR St_Martin OR Bd_de_la_Villette OR Quai_de_Grenelle OR Quai_Branly OR Gallieni_Invalides OR Auber OR Bd_Ornano OR Reaumur Voitures Thermicam OR St_Antoine OR Av_Villiers OR Bd_Malesherbes OR Av_Pte_St_Cloud OR Bd_de_l'Hopital OR Rd_Point_Pte_Sevres OR Pt_d'Iena OR Pont_du_Garigliano OR Bd_des_Invalides OR Bd_Jules_Ferry OR Av_d'Italie OR Bd_St_Martin
+A4_Y > vire
+A4_Y > vire
+A4_W > vire
+A1_W > vire
+A1_Y > vire
+Quai_de_Bercy_W > pont amont - pont austerlitz
+Quai_Rapee_Bercy_Y > pont austerlitz - pont amont
+Quai_de_Bercy_Y > pont austerlitz - pont amont
+A6A_W_bretelle_9 > vire
+AE_A6B > vire
+Voie_Mazas > vire car entre deux aretes
+Quai_de_la_Rapee_Y > pont austerlitz - pont amont
+SI_A6B_bretelle_1 > vire
+SE_A3_bretelle_4 > vire
+A6A_W > vire
+A1_bretelle_8 > vire
+Quai_Bercy_Rapee_W > pont amont - pont austerlitz
+Quai_Anatole_France > saint michel - concorde
+Bercy_bretelle_13 > vire
+VGP_Quai_des_Tuileries > concorde - chatelet
+AE_A1_bretelle_8 > vire
+Pl_de_la_Nation > vire (porte de vincennes - bastille)
+Pl_Institut > saint michel - concorde
+Quai_Conti > saint michel - concorde
+Quai_Malaquais > saint michel - concorde
+Quai_Voltaire > saint michel - concorde
+Chapelle_bretelle_4 > vire
+Av_de_Neuilly > vire
+Bercy_bretelle_9 > vire
+Souterrain_Tuileries > vire par manque de donnees
+Quai_du_Louvre > concorde - chatelet
+Av_Grande_Armee > rond point etoile - porte maillot
+Voie_Georges_Pompidou > vire par manque de donnees
+Quai_de_la_Rapee_W > chatelet - pont austerlitz
+Pont_d'Austerlitz > vire car sur un point
+Pt_d'Austerlitz > vire car sur un point
+VGP_Quai_Tuileries > concorde - chatelet
+VGP_Souterrain_Tuileries > concorde - chatelet
+Concorde_Ouest > vire car sur on point
+V.G.P > chatelet - pont austerlitz
+Av_de_la_Grande_Armee > porte maillot - rond point etoile
+Souterrain_Invalides_VGP > pont alma - concorde
+AI_A3_bretelle_7 > vire
+AE_A6A_bretelle_8 > vire
+Porte_Maillot > vire
+SE_A4_bretelle_5 > vire
+Quai_de_Gesvres > vire car entre deux aretes
+Quai_des_Tuileries > concorde - chatelet
+! AV_Champs_Elysees > concorde - rond point etoile
+! AV_Champs_Elysees > rond point etoile - concorde
+Bd_Sebastopol > chatelet - strasboug saint denis
+SE_Bercy_bretelle_4 > vire
+Souterrain_Concorde > vire car on na pas trouvé
+Av_des_Champs_Elysees > vire car ca casse les couilles
+Quai_Tuileries > concorde - chatelet
+Quai_de_la_Megisserie > concorde - chatelet
+AE_RN13_bretelle_16 > vire
+Quai_Grands_Augustins > saint michel - concorde
+SI_A4_bretelle_2 > vire
+Quai_Henri_IV > chatelet - pont austerlitz
+Pt_Sully > jussieu - bastille
+SE_A6A > vire
+A3_W > vire
+AE_A3_bretelle_1 > vire
+SE_A13_bretelle_4 > vire
+Quai_Montebello > jussieu - saint michel
+VGP_Souterrain_Henri_IV > chatelet - pont austerlitz
+Souterrain_Alma_VGP > vire car sur un point
+Renard > strasbourg saint denis - chatelet
+A3W > vire
+A13_Y > vire
+Av_Pte_Vincennes > vire pout linstant
+Av_Champs_Elysees > vire ici
+AI_A13_bretelle_3 > vire
+Quai_St_Michel > jussieu - saint michel
+! Av_de_New_York > pont alma - pont aval
+! Av_de_New_York > pont aval - pont alma
+Bd_St_Germain > concorde - saint michel
+! Pl_25_Aout_1944 > porte orleans - denfert rochereau
+! Pl_25_Aout_1944 > denfert rochereau - porte orleans
+Pte_d'Orleans > porte orleans - denfert rochereau
+SI_RN13_bretelle_8 > vire
+Pl_Republique > vire car trop complique
+SI_A3_bretelle_2 > vire
+VGP > vire
+Rivoli > chatelet - concorde
+Quai_d'Issy-Leblanc > vire car trop petit
+! Cours_de_Vincennes > porte de vincennes - bastille
+! Cours_de_Vincennes > bastille - porte de vincennes
+! Quai_Celestins >
+Bd_Bourdon > bastille - pont austerlitz
+Quai_de_la_Rapee > vire
+! Royale > concorde - saint lazare
+! Royale > 
+Av_du_Trone > vire
+Concorde_Nord > vire car sur un point
+A13_W > vire
+Concorde > vire
+A3_Y > vire
+Bd_Ney > vire car chelou dans le nord
+Rue_du_Fbg_St_Martin > vire 
+Bd_de_Stasbourg > strasbourg saint denis - porte de la chapelle
+! Quai_Hotel_de_Ville >  
+Chapelle_bretelle_1 > vire
+AE_A13_bretelle_5 > vire
+Concorde_Est > vire
+! Av_de_Wagram > vire
+Bd_du_Palais > saint michel - chatelet
+Pt_au_Change > saint michel - chatelet
+Pt_St_Michel > saint michel - chatelet
+Quai_Tournelle > jussieu - saint michel
+Bd_Henri_IV > jussieu - bastille
+! Quai_Andre_Citroen > 
+Quai_St_Exupery > pont aval - pont alma
+Souterrain_Etoile > vire
+Chapelle_bretelle_2 > vire
+! Bd_Poissonniere > strasbourg saint denis - saint lazare
+AI_Maillot_2_bretelle_10 > vire
+Coutellerie > vire
+Bd_St-Martin > vire
+Pt_Concorde > vire
+Souterrain_Varsovie_VGP > vire
+! Bd_Haussmann > strasbourg saint denis - saint lazare
+Cite > chatelet - saint michel
+Petit_Pont > chatelet - saint michel
+Pt_Notre_Dame > chatelet - saint michel
+Bd_de_Strasbourg > strasbourg saint denis - porte de la chapelle
+! Quai_St_Bernard > jussieu - pont austerlitz
+! VGP_Cours_la_Reine > concorde - pont alma
+Chatelet > vire
+Bd_Bourdon-Acces_Mazas > vire
+Beaubourg > strasbourg saint denis - chatelet
+! Bd_Beaumarchais > bastille - strasbourg saint denis
+Reaumur Voitures (Thermicam) > vire
+! Sout_Citroen > pont amont - pont alma
+Pont_Charles_de_Gaulle > vire
+Pt_Charles_de_Gaulle > vire
+Pt_de_l'Alma > vire
+Av_du_Mal_Gallieni > vire
+! Av_General_Leclerc > porte orleans - denfert rochereau
+Av_Pte_Villette > vire
+Contre-Allee_Concorde > vire car dans un point
+Cours Albert 1er_VGP > concorde - pont alma
+AI_RN13_bretelle_15 > vire
+VGP_Souterrain_Concorde > vire
+AI_A3_bretelle_2 > vire
+Bd_Bastille > pont austerlitz - bastille
+! Chapelle > pont de la chapelle - strasbourg saint denis
+! Av_de_la_Pte_de_St_Ouen > vire
+Chapelle_Bretelle_5 > vire
+Av_Marceau > round point etoile - pont alma
+Av_Pte_Asnieres > vire
+! Quai_d'Orsay > pont alma - concorde
+Pepiniere > vire
+! Av_Pte_d'Italie > porte italie - place italie
+Bagnolet_bretelle_6 > vire
+! Bd_Bonne_Nouvelle > strasbourg saint denis - saint lazare
+Rue St Lazare > vire
+4_Septembre > saint lazare - strasbourg saint denis
+Pl_de_la_Bourse_cote_Reaumur > saint lazare - strasbourg saint denis
+Max_Dormoy > vire
+! Bd_St_Michel > denfert rocherau - saint michel
+SI_A13_bretelle_6 > vire
+! Bd_Montmartre > saint lazare - strasbourg saint denis
+! Quai_d'Issy > pont aval - pont alma
+Pt_de_Bercy > vire
+Av_Pte_Clignancourt > vire
+Lemonnier > vire
+Pl_Denfert_Rochereau > vire
+Rue de Rivoli > vire
+! Bd_Filles_du_Calvaire > bastille - strasbourg saint denis
+Rte_Pte_des_Sablons_bretelle_2 > vire
+Av_Foch > vire
+Pyramides > vire
+A3_bretelle_6 > vire
+Av_de_St_Cloud > vire
+Av_Pte_Bagnolet > vire
+Av_Pdt_Wilson > vire 
+Reaumur > vire
+Maillot_bretelle_15_(RN13) > vire
+Bd_Morland > pont austerlitz - chatelet
+Bd_St_Denis > vire
+! Av_Pdt_Kennedy > pont alma - pont aval 
+! Bd_du_Temple > bastille - strasbourg saint denis
+Observatoire > vire
+Av_Pte_Sevres > vire
+Alain > vire
+St_Martin > vire 
+Bd_de_la_Villette > vire
+! Quai_de_Grenelle > pont alma - pont aval
+! Quai_Branly > pont alma - pont aval
+Gallieni_Invalides > vire
+Auber > vire
+Bd_Ornano > vire
+Reaumur Voitures Thermicam > vire
+St_Antoine > bastille - chatelet
+Av_Villiers > vire
+! Bd_Malesherbes > porte asnieres - saint lazare
+Av_Pte_St_Cloud > vire
+! Bd_de_l'Hopital > place italie - pont austerlitz
+Rd_Point_Pte_Sevres > vire
+Pt_d'Iena > vire
+Pont_du_Garigliano > vire
+Bd_des_Invalides > vire
+Bd_Jules_Ferry > vire
+! Av_d'Italie > porte italie - place italie
+Bd_St_Martin > vire

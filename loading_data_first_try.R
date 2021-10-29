@@ -122,6 +122,29 @@ str
 writeClipboard(str)
 
 
+#--- Pour file
+
+str = ""
+first = T
+i = 0
+
+for (street in main_streets$libelle){
+  if (first){
+    str = street; first = F
+  }
+  str = paste(str, "\n\r", street, sep="")
+  
+  if(i>200){
+    break
+  }
+  
+  i = i + 1
+}
+
+str
+
+writeClipboard(str)
+
 
 
 
