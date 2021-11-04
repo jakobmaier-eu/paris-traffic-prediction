@@ -1,24 +1,24 @@
 Périph :
 pont aval
-porte d'orleans
-porte d'italie
+porte orleans
+porte italie
 pont amont
 porte vincennes
 bagnolet
 porte de la chapelle
-porte d'asnières
+porte asnieres
 porte maillot
 
 intérieur :
-rond point étoile
-pont de l'alma
+rond point etoile
+pont alma
 concorde
 saint lazare
 denfert rochereau
-place 'italie
+place italie
 bastille rond point
 strasbourg saint denis
 saint michel
 chatelet
-pont d'austerlitz
+pont austerlitz
 jussieu

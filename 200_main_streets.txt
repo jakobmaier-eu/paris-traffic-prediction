@@ -46,8 +46,8 @@ Porte_Maillot > vire
 SE_A4_bretelle_5 > vire
 Quai_de_Gesvres > vire car entre deux aretes
 Quai_des_Tuileries > concorde - chatelet
-! AV_Champs_Elysees > concorde - rond point etoile
-! AV_Champs_Elysees > rond point etoile - concorde
+! AV_Champs_Elysees 4399 224 > concorde - rond point etoile
+! AV_Champs_Elysees 4269 223 > rond point etoile - concorde
 Bd_Sebastopol > chatelet - strasboug saint denis
 SE_Bercy_bretelle_4 > vire
 Souterrain_Concorde > vire car on na pas trouvé
@@ -73,11 +73,11 @@ Av_Pte_Vincennes > vire pout linstant
 Av_Champs_Elysees > vire ici
 AI_A13_bretelle_3 > vire
 Quai_St_Michel > jussieu - saint michel
-! Av_de_New_York > pont alma - pont aval
-! Av_de_New_York > pont aval - pont alma
+! Av_de_New_York 4580 > pont alma - pont aval
+! Av_de_New_York 4581 > pont aval - pont alma
 Bd_St_Germain > concorde - saint michel
-! Pl_25_Aout_1944 > porte orleans - denfert rochereau
-! Pl_25_Aout_1944 > denfert rochereau - porte orleans
+! Pl_25_Aout_1944 714 > porte orleans - denfert rochereau
+! Pl_25_Aout_1944 1532 > denfert rochereau - porte orleans
 Pte_d'Orleans > porte orleans - denfert rochereau
 SI_RN13_bretelle_8 > vire
 Pl_Republique > vire car trop complique
@@ -85,13 +85,14 @@ SI_A3_bretelle_2 > vire
 VGP > vire
 Rivoli > chatelet - concorde
 Quai_d'Issy-Leblanc > vire car trop petit
-! Cours_de_Vincennes > porte de vincennes - bastille
-! Cours_de_Vincennes > bastille - porte de vincennes
-! Quai_Celestins >
+! Cours_de_Vincennes 4928 6713 > porte de vincennes - bastille
+! Cours_de_Vincennes 4926 6712 > bastille - porte de vincennes
+! Quai_Celestins 443 > pont austerlitz - chatelet
+! Quai_Celestins 442 > chatelet - pont austerlitz
 Bd_Bourdon > bastille - pont austerlitz
 Quai_de_la_Rapee > vire
-! Royale > concorde - saint lazare
-! Royale > 
+! Royale 245 240 > concorde - saint lazare
+! Royale 244 239 > saint lazare - concorde
 Av_du_Trone > vire
 Concorde_Nord > vire car sur un point
 A13_W > vire
@@ -100,44 +101,53 @@ A3_Y > vire
 Bd_Ney > vire car chelou dans le nord
 Rue_du_Fbg_St_Martin > vire 
 Bd_de_Stasbourg > strasbourg saint denis - porte de la chapelle
-! Quai_Hotel_de_Ville >  
+! Quai_Hotel_de_Ville 13 > pont austerlitz - chatelet
+! Quai_Hotel_de_Ville 12 > chatelet - pont austerlitz
 Chapelle_bretelle_1 > vire
 AE_A13_bretelle_5 > vire
 Concorde_Est > vire
-! Av_de_Wagram > vire
+! Av_de_Wagram 7175 4418 > rond point etoile - porte asnieres
+! Av_de_Wagram 7176 4416 > porte asnieres - rond point etoile
 Bd_du_Palais > saint michel - chatelet
 Pt_au_Change > saint michel - chatelet
 Pt_St_Michel > saint michel - chatelet
 Quai_Tournelle > jussieu - saint michel
 Bd_Henri_IV > jussieu - bastille
-! Quai_Andre_Citroen > 
+! Quai_Andre_Citroen 4481 > pont aval - pont alma
+! Quai_Andre_Citroen 4480 > pont alma - pont aval
 Quai_St_Exupery > pont aval - pont alma
 Souterrain_Etoile > vire
 Chapelle_bretelle_2 > vire
-! Bd_Poissonniere > strasbourg saint denis - saint lazare
+! Bd_Poissonniere 5118 > strasbourg saint denis - saint lazare
+! Bd_Poissonniere 6788 > saint lazare - strasbourg saint denis 
 AI_Maillot_2_bretelle_10 > vire
 Coutellerie > vire
 Bd_St-Martin > vire
 Pt_Concorde > vire
 Souterrain_Varsovie_VGP > vire
-! Bd_Haussmann > strasbourg saint denis - saint lazare
+! Bd_Haussmann 1946 > strasbourg saint denis - saint lazare
 Cite > chatelet - saint michel
 Petit_Pont > chatelet - saint michel
 Pt_Notre_Dame > chatelet - saint michel
 Bd_de_Strasbourg > strasbourg saint denis - porte de la chapelle
-! Quai_St_Bernard > jussieu - pont austerlitz
-! VGP_Cours_la_Reine > concorde - pont alma
+! Quai_St_Bernard 518 > jussieu - pont austerlitz
+! Quai_St_Bernard 490 > pont austerlitz - jussieu
+! VGP_Cours_la_Reine 272 > concorde - pont alma
+! VGP_Cours_la_Reine 271 > pont alma - concorde
 Chatelet > vire
 Bd_Bourdon-Acces_Mazas > vire
 Beaubourg > strasbourg saint denis - chatelet
-! Bd_Beaumarchais > bastille - strasbourg saint denis
+! Bd_Beaumarchais 1380 > bastille - strasbourg saint denis
+! Bd_Beaumarchais 1380 > strasbourg saint denis - bastille
 Reaumur Voitures (Thermicam) > vire
-! Sout_Citroen > pont amont - pont alma
+! Sout_Citroen 1228 > pont aval - pont alma
+! Sout_Citroen 1229 > pont alma - pont aval
 Pont_Charles_de_Gaulle > vire
 Pt_Charles_de_Gaulle > vire
 Pt_de_l'Alma > vire
 Av_du_Mal_Gallieni > vire
-! Av_General_Leclerc > porte orleans - denfert rochereau
+! Av_General_Leclerc 681 712 > porte orleans - denfert rochereau
+! Av_General_Leclerc 680 1535 > denfert rochereau - porte orleans
 Av_Pte_Villette > vire
 Contre-Allee_Concorde > vire car dans un point
 Cours Albert 1er_VGP > concorde - pont alma
@@ -145,30 +155,38 @@ AI_RN13_bretelle_15 > vire
 VGP_Souterrain_Concorde > vire
 AI_A3_bretelle_2 > vire
 Bd_Bastille > pont austerlitz - bastille
-! Chapelle > pont de la chapelle - strasbourg saint denis
-! Av_de_la_Pte_de_St_Ouen > vire
+! Chapelle 1645 > pont de la chapelle - strasbourg saint denis
+! Chapelle 1644 > strasbourg saint denis - pont de la chapelle
+Av_de_la_Pte_de_St_Ouen > vire
 Chapelle_Bretelle_5 > vire
 Av_Marceau > round point etoile - pont alma
 Av_Pte_Asnieres > vire
-! Quai_d'Orsay > pont alma - concorde
+! Quai_d'Orsay 6793 > pont alma - concorde
+! Quai_d'Orsay 4398 > concorde - pont alma
 Pepiniere > vire
-! Av_Pte_d'Italie > porte italie - place italie
+! Av_Pte_d'Italie 813 > porte italie - place italie
+! Av_Pte_d'Italie 812 > place italie - porte italie
 Bagnolet_bretelle_6 > vire
-! Bd_Bonne_Nouvelle > strasbourg saint denis - saint lazare
+! Bd_Bonne_Nouvelle 808 > strasbourg saint denis - saint lazare
+! Bd_Bonne_Nouvelle 6789 > saint lazare - strasbourg saint denis
 Rue St Lazare > vire
 4_Septembre > saint lazare - strasbourg saint denis
 Pl_de_la_Bourse_cote_Reaumur > saint lazare - strasbourg saint denis
 Max_Dormoy > vire
-! Bd_St_Michel > denfert rocherau - saint michel
+! Bd_St_Michel 585 589 > denfert rocherau - saint michel
+! Bd_St_Michel 584 590 > saint michel - denfert rocherau
 SI_A13_bretelle_6 > vire
-! Bd_Montmartre > saint lazare - strasbourg saint denis
-! Quai_d'Issy > pont aval - pont alma
+! Bd_Montmartre 6787 > saint lazare - strasbourg saint denis
+! Bd_Montmartre 5120 > strasbourg saint denis - saint lazare
+! Quai_d'Issy 1075 > pont aval - pont alma
+! Quai_d'Issy 1074 > pont alma - pont aval
 Pt_de_Bercy > vire
 Av_Pte_Clignancourt > vire
 Lemonnier > vire
 Pl_Denfert_Rochereau > vire
 Rue de Rivoli > vire
-! Bd_Filles_du_Calvaire > bastille - strasbourg saint denis
+! Bd_Filles_du_Calvaire 1374 > bastille - strasbourg saint denis
+! Bd_Filles_du_Calvaire 1373 > strasbourg saint denis -bastille
 Rte_Pte_des_Sablons_bretelle_2 > vire
 Av_Foch > vire
 Pyramides > vire
@@ -180,28 +198,35 @@ Reaumur > vire
 Maillot_bretelle_15_(RN13) > vire
 Bd_Morland > pont austerlitz - chatelet
 Bd_St_Denis > vire
-! Av_Pdt_Kennedy > pont alma - pont aval 
-! Bd_du_Temple > bastille - strasbourg saint denis
+! Av_Pdt_Kennedy 4522 > pont alma - pont aval 
+! Av_Pdt_Kennedy 4521 > pont aval - pont alma
+! Bd_du_Temple 1366 > bastille - strasbourg saint denis
+! Bd_du_Temple 1365 > strasbourg saint denis - bastille
 Observatoire > vire
 Av_Pte_Sevres > vire
 Alain > vire
 St_Martin > vire 
 Bd_de_la_Villette > vire
-! Quai_de_Grenelle > pont alma - pont aval
-! Quai_Branly > pont alma - pont aval
+! Quai_de_Grenelle 4473 > pont alma - pont aval
+! Quai_de_Grenelle 4471 > pont aval - pont alma
+! Quai_Branly 6796 4454 > pont alma - pont aval
+! Quai_Branly 4431 4457 > pont aval - pont alma
 Gallieni_Invalides > vire
 Auber > vire
 Bd_Ornano > vire
 Reaumur Voitures Thermicam > vire
 St_Antoine > bastille - chatelet
 Av_Villiers > vire
-! Bd_Malesherbes > porte asnieres - saint lazare
+! Bd_Malesherbes 6799 6074 > porte asnieres - saint lazare
+! Bd_Malesherbes 6798 6073 > saint lazare - porte asnieres
 Av_Pte_St_Cloud > vire
-! Bd_de_l'Hopital > place italie - pont austerlitz
+! Bd_de_l'Hopital 506 5068 > place italie - pont austerlitz
+! Bd_de_l'Hopital 505 5067 > pont austerlitz - place italie
 Rd_Point_Pte_Sevres > vire
 Pt_d'Iena > vire
 Pont_du_Garigliano > vire
 Bd_des_Invalides > vire
 Bd_Jules_Ferry > vire
-! Av_d'Italie > porte italie - place italie
+! Av_d'Italie 6119 > porte italie - place italie
+! Av_d'Italie 6118 > place italie - porte italie
 Bd_St_Martin > vire

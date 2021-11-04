@@ -25,7 +25,7 @@ denfert rochereau - porte orleans
 porte orleans - denfert rochereau
 pont austerlitz - place italie
 place italie - pont austerlitz
-porte italie - place italie
+porte italie - place itali
 place italie - porte italie
 pont amont - pont austerlitz
 pont austerlitz - pont amont
