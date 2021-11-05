@@ -167,17 +167,55 @@ c("Bd_du_Palais","Pt_au_Change","Pt_St_Michel")
 #rond point etoile - porte maillot
 c("Av_Grande_Armee")
 
+#rond point etoile - porte asnieres
+c(7175, 4418)
+
+#porte asnieres - rond point etoile
+c(7176, 4416)
+
+#porte asnieres - saint lazare
+c(6799, 6074)
+
+#saint lazare - porte asnieres
+c(6798, 6073)
+
+#saint lazare - concorde
+c(244, 239)
+
+#concorde - saint lazare
+c(245, 240)
+
 #chatelet - pont austerlitz
 c("Quai_de_la_Rapee_W","V.G.P","Quai_Henri_IV","VGP_Souterrain_Henri_IV")
+c(442, 12)
 
 #chatelet - saint michel
 c("Petit_Pont","Pt_Notre_Dame","Cite")
 
+#denfert rochereau - saint michel
+c(585, 589)
+
+#saint michel - denfert rochereau
+c(584, 590)
+
+#denfert rochereau - porte orleans
+c(1532, 680, 1535)
+
 #jussieu - bastille
 c("Pt_Sully","Bd_Henri_IV")
 
+#jussieu - pont austerlitz
+c(518)
+
+#pont austerlitz - jussieu
+c(490)
+
 #strasbourg saint denis - porte de la chapelle
 c("Bd_de_Stasbourg","Bd_de_Strasbourg")
+c(1644)
+
+#porte de la chapelle - strasbourg saint denis
+c(1645)
 
 #porte maillot - rond point etoile
 c("Av_de_la_Grande_Armee")
@@ -185,29 +223,51 @@ c("Av_de_la_Grande_Armee")
 #jussieu - saint michel
 c("Quai_Tournelle","Quai_Montebello","Quai_St_Michel")
 
+#saint michel - jussieu
+c(208)
+
 #strasbourg saint denis - chatelet
 c("Renard","Beaubourg")
 
 #pont alma - concorde
 c("Souterrain_Invalides_VGP")
+c(271, 6793)
 
 #concorde - saint michel
-c("Bd_St_Germain")
+c(331, 161)
 
 #bastille - chatelet
 c("St_Antoine")
 
 #pont austerlitz - chatelet
 c("Bd_Morland")
+c(443, 13)
+
+#chatelet - strasbourg saint denis
+c("Bd_Sebastopol")
 
 #saint lazare - strasbourg saint denis
 c("4_Septembre","Pl_de_la_Bourse_cote_Reaumur")
+c(6788, 6789, 6787)
 
-#chatelet - strasboug saint denis
-c("Bd_Sebastopol")
+#strasbourg saint denis - saint lazare
+c(5118, 1946, 808, 5120)
 
 #porte orleans - denfert rochereau
 c("Pte_d'Orleans")
+c(714, 681, 712)
+
+#pont austerlitz - place italie
+c(505, 5067)
+
+#place italie - pont austerlitz
+c(506, 5068)
+
+#porte italie - place italie
+c(813, 6119)
+
+#place italie - porte italie
+c(812, 6118)
 
 #chatelet - concorde
 c("Rivoli")
@@ -217,15 +277,38 @@ c("Bd_Bourdon")
 
 #pont aval - pont alma
 c("Quai_St_Exupery")
+c(4581, 4481, 1228, 1075, 4521, 4471, 4431, 4457)
+
+#pont alma - pont aval
+c(4580, 4480, 1229, 1074, 4522, 4473, 6796, 4454)
 
 #concorde - pont alma
 c("Cours Albert 1er_VGP")
+c(272, 4398)
 
 #pont austerlitz - bastille
 c("Bd_Bastille")
 
 #round point etoile - pont alma
 c("Av_Marceau")
+
+#concorde - rond point etoile
+c(4399, 224)
+
+#rond point etoile - concorde
+c(4269, 223)
+
+#porte de vincennes - bastille
+c(4928, 6713)
+
+#bastille - porte de vincennes
+c(4926, 6712)
+
+#bastille - strasbourg saint denis
+c(1380, 1374, 1366)
+
+#strasbourg saint denis - bastille
+c(1379, 1373, 1365)
 
 #pont aval - porte orleans
 c("PE_Parc_Expo_Ouest","PE_Plaine","PE_Chatillon")
@@ -274,5 +357,12 @@ c("PE_Champerret")
 
 #porte maillot - porte asnieres
 c("PI_Champerret")
+
+#porte maillot - pont aval
+c("PE_Parc_Princes")
+
+#pont aval - porte maillot
+c("PI_Parc_Princes")
+
 
 

@@ -75,7 +75,7 @@ AI_A13_bretelle_3 > vire
 Quai_St_Michel > jussieu - saint michel
 ! Av_de_New_York 4580 > pont alma - pont aval
 ! Av_de_New_York 4581 > pont aval - pont alma
-Bd_St_Germain > concorde - saint michel
+!!Bd_St_Germain > concorde - saint michel AND saint michel - jussieu
 ! Pl_25_Aout_1944 714 > porte orleans - denfert rochereau
 ! Pl_25_Aout_1944 1532 > denfert rochereau - porte orleans
 Pte_d'Orleans > porte orleans - denfert rochereau
@@ -137,8 +137,12 @@ Bd_de_Strasbourg > strasbourg saint denis - porte de la chapelle
 Chatelet > vire
 Bd_Bourdon-Acces_Mazas > vire
 Beaubourg > strasbourg saint denis - chatelet
+
+
+
+
 ! Bd_Beaumarchais 1380 > bastille - strasbourg saint denis
-! Bd_Beaumarchais 1380 > strasbourg saint denis - bastille
+! Bd_Beaumarchais 1379 > strasbourg saint denis - bastille
 Reaumur Voitures (Thermicam) > vire
 ! Sout_Citroen 1228 > pont aval - pont alma
 ! Sout_Citroen 1229 > pont alma - pont aval
