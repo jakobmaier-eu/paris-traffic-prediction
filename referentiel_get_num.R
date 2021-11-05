@@ -16,17 +16,19 @@ numbersFromLibelle <- function(libelleList){
   d <- read_delim("data/referentiel.csv", 
                   col_names =TRUE, delim=';')
   
-  numbersList = c()
+  numbersList = "c("
   
   for(libelle in libelleList)
   {
     for(i in 1:dim(d)[1]){
       if(d$Libelle[i] == libelle){
-        numbersList = c(numbersList, d$`Identifiant arc`[i])
+        numbersList = paste0(numbersList, d$`Identifiant arc`[i], ", ")
       }
     }
   }
-  
+  numbersList = str_trunc(numbersList, width = nchar(numbersList)-2, side = "right", ellipsis = "")
+  numbersList = paste0(numbersList, ")")
+  writeClipboard(numbersList)
   return(numbersList)
 }
 

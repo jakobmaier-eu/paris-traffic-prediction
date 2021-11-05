@@ -147,25 +147,37 @@ writeClipboard(str)
 
 ########
 
-edges_name <- read.delim("liste_aretes.txt", header = F)$V1
+edges_numbers <- vector("list", length(edges_name))
+edges_name <- vector("list", length(edges_name))
 
-#pont amont - pont austerlitz
-c("Quai_de_Bercy_W","Quai_Bercy_Rapee_W")
+i = 1
+
+edges_name[[i]] = "pont amont - pont austerlitz"
+a = c("Quai_de_Bercy_W","Quai_Bercy_Rapee_W")
+edges_numbers[[i]] = c(4143, 6105, 4141, 1840, 4141, 1825, 1816)
+i = i+1
+
+#TODO
 
 #pont austerlitz - pont amont
-c("Quai_Rapee_Bercy_Y","Quai_de_Bercy_Y","Quai_de_la_Rapee_Y")
+a=c("Quai_Rapee_Bercy_Y","Quai_de_Bercy_Y","Quai_de_la_Rapee_Y")
+c(1817, 4140, 4140, 4140, 1822, 459, 458)
 
 #saint michel - concorde
-c("Quai_Anatole_France","Quai_Conti","Quai_Malaquais","Quai_Voltaire","Quai_Grands_Augustins")
+a=c("Quai_Anatole_France","Quai_Conti","Quai_Malaquais","Quai_Voltaire","Quai_Grands_Augustins")
+c(316, 4184, 315, 314, 313, 316, 6297, 69, 70, 74, 73, 178, 206, 178, 204, 68, 6294)
 
 #concorde - chatelet
-c("VGP_Quai_des_Tuileries","Quai_du_Louvre","Quai_de_la_Megisserie","Quai_Tuileries","Quai_des_Tuileries","VGP_Souterrain_Tuileries","VGP_Quai_Tuileries","Quai_du_Louvre","VGP_Quai_des_Tuileries")
+a=c("VGP_Quai_des_Tuileries","Quai_du_Louvre","Quai_de_la_Megisserie","Quai_Tuileries","Quai_des_Tuileries","VGP_Souterrain_Tuileries","VGP_Quai_Tuileries","Quai_du_Louvre","VGP_Quai_des_Tuileries")
+c(217, 217, 4, 2, 1, 4, 3, 3, 6, 5, 7, 215, 6757, 6756, 203, 216, 6758, 4, 2, 1, 4, 3, 3, 217, 217)
 
 #saint michel - chatelet
-c("Bd_du_Palais","Pt_au_Change","Pt_St_Michel")
+a=c("Bd_du_Palais","Pt_au_Change","Pt_St_Michel")
+c(42, 41, 43, 40)
 
 #rond point etoile - porte maillot
-c("Av_Grande_Armee")
+a=c("Av_Grande_Armee")
+c(5259, 5257, 5260, 5258)
 
 #rond point etoile - porte asnieres
 c(7175, 4418)
@@ -186,11 +198,12 @@ c(244, 239)
 c(245, 240)
 
 #chatelet - pont austerlitz
-c("Quai_de_la_Rapee_W","V.G.P","Quai_Henri_IV","VGP_Souterrain_Henri_IV")
-c(442, 12)
+a=c("Quai_de_la_Rapee_W","V.G.P","Quai_Henri_IV","VGP_Souterrain_Henri_IV")
+c(442, 12, 461, 6168, 462, 460, 848, 6299, 446, 447, 6555, 448, 437, 1538)
 
 #chatelet - saint michel
-c("Petit_Pont","Pt_Notre_Dame","Cite")
+a=c("Petit_Pont","Pt_Notre_Dame","Cite")
+c(55, 52, 53, 54)
 
 #denfert rochereau - saint michel
 c(585, 589)
@@ -202,7 +215,8 @@ c(584, 590)
 c(1532, 680, 1535)
 
 #jussieu - bastille
-c("Pt_Sully","Bd_Henri_IV")
+a=c("Pt_Sully","Bd_Henri_IV")
+c(428, 427, 429, 430, 431, 433, 431, 432)
 
 #jussieu - pont austerlitz
 c(518)
@@ -211,51 +225,58 @@ c(518)
 c(490)
 
 #strasbourg saint denis - porte de la chapelle
-c("Bd_de_Stasbourg","Bd_de_Strasbourg")
-c(1644)
+a=c("Bd_de_Stasbourg","Bd_de_Strasbourg")
+c(1644, 1551, 527, 1548, 1576, 1548)
+
 
 #porte de la chapelle - strasbourg saint denis
 c(1645)
 
 #porte maillot - rond point etoile
-c("Av_de_la_Grande_Armee")
+a=c("Av_de_la_Grande_Armee")
+c(4364, 4366, 4373, 4375, 4371, 4405, 4404, 4368)
 
 #jussieu - saint michel
-c("Quai_Tournelle","Quai_Montebello","Quai_St_Michel")
+a=c("Quai_Tournelle","Quai_Montebello","Quai_St_Michel")
+c(6296, 210, 424, 424, 65, 6295, 64, 67, 66)
 
 #saint michel - jussieu
 c(208)
 
 #strasbourg saint denis - chatelet
-c("Renard","Beaubourg")
+a=c("Renard","Beaubourg")
+c(48, 49, 156, 47, 533, 534, 6536)
 
 #pont alma - concorde
-c("Souterrain_Invalides_VGP")
-c(271, 6793)
+a=c("Souterrain_Invalides_VGP")
+c(271, 6793, 4621)
 
 #concorde - saint michel
 c(331, 161)
 
 #bastille - chatelet
-c("St_Antoine")
+a=c("St_Antoine")
+c(515, 375, 372, 373, 374, 376)
 
 #pont austerlitz - chatelet
-c("Bd_Morland")
-c(443, 13)
+a=c("Bd_Morland")
+c(443, 13, 450, 449, 451, 6575)
 
 #chatelet - strasbourg saint denis
-c("Bd_Sebastopol")
+a=c("Bd_Sebastopol")
+c(522, 526, 524, 519, 1218, 45, 523, 520, 525, 521, 46)
 
 #saint lazare - strasbourg saint denis
-c("4_Septembre","Pl_de_la_Bourse_cote_Reaumur")
-c(6788, 6789, 6787)
+a=c("4_Septembre","Pl_de_la_Bourse_cote_Reaumur")
+c(6788, 6789, 6787, 4060, 1963, 1977, 1964, 1978, 1965)
 
 #strasbourg saint denis - saint lazare
 c(5118, 1946, 808, 5120)
 
 #porte orleans - denfert rochereau
-c("Pte_d'Orleans")
-c(714, 681, 712)
+a=c("Pte_d'Orleans")
+c(714, 681, 712, 773, 925, 926)
+
 
 #pont austerlitz - place italie
 c(505, 5067)
@@ -270,27 +291,32 @@ c(813, 6119)
 c(812, 6118)
 
 #chatelet - concorde
-c("Rivoli")
+a=c("Rivoli")
+c(279, 371, 26, 25, 31, 31, 281, 21, 28, 32, 282, 34, 35, 33, 283, 176, 29, 370, 27, 30, 4189, 22, 280)
 
 #bastille - pont austerlitz 
-c("Bd_Bourdon")
+a=c("Bd_Bourdon")
+c(6576, 454, 453)
 
 #pont aval - pont alma
-c("Quai_St_Exupery")
-c(4581, 4481, 1228, 1075, 4521, 4471, 4431, 4457)
+a=c("Quai_St_Exupery")
+c(4581, 4481, 1228, 1075, 4521, 4471, 4431, 4457, 6433, 4658)
+
 
 #pont alma - pont aval
 c(4580, 4480, 1229, 1074, 4522, 4473, 6796, 4454)
 
 #concorde - pont alma
-c("Cours Albert 1er_VGP")
-c(272, 4398)
+a=c("Cours Albert 1er_VGP")
+c(272, 4398, 4618)
 
 #pont austerlitz - bastille
-c("Bd_Bastille")
+a=c("Bd_Bastille")
+c(468, 467, 469)
 
 #round point etoile - pont alma
-c("Av_Marceau")
+a=c("Av_Marceau")
+c(4365, 4372, 6285, 4369, 4372, 6609, 4455, 4452)
 
 #concorde - rond point etoile
 c(4399, 224)
@@ -311,58 +337,76 @@ c(1380, 1374, 1366)
 c(1379, 1373, 1365)
 
 #pont aval - porte orleans
-c("PE_Parc_Expo_Ouest","PE_Plaine","PE_Chatillon")
+a=c("PE_Parc_Expo_Ouest","PE_Plaine","PE_Chatillon")
+c(5175, 5177, 5182)
 
 #porte orleans - pont aval
-c("PI_Parc_Expo_Ouest","PI_Plaine","PI_Chatillon")
+a=c("PI_Parc_Expo_Ouest","PI_Plaine","PI_Chatillon")
+c(5208, 5205, 5186)
 
 #porte orleans - porte italie
-c("PE_Gentilly")
+a=c("PE_Gentilly")
+c(5264)
 
 #porte italie - porte orleans
-c("PI_Gentilly")
+a=c("PI_Gentilly")
+c(5312)
 
 #porte italie - pont amont
-c("PE_Haubans")
+a=c("PE_Haubans")
+c(5279)
 
 #pont amont - porte italie
-c("PI_Haubans")
+a=c("PI_Haubans")
+c(5298)
 
 #pont amont - porte vincennes
-c("PE_Reuilly")
+a=c("PE_Reuilly")
+c(5325)
 
 #porte vincennes - pont amont
-c("PI_Reuilly")
+a=c("PI_Reuilly")
+c(5338)
 
 #porte vincennes - bagnolet
-c("PE_Louis_Lumiere")
+a=c("PE_Louis_Lumiere")
+c(5347)
 
 #bagnolet - porte vincennes
-c("PI_Louis_Lumiere")
+a=c("PI_Louis_Lumiere")
+c(5360)
 
 #bagnolet - porte de la chapelle
-c("PE_Chaumont","PE_Aubervilliers")
+a=c("PE_Chaumont","PE_Aubervilliers")
+c(5363, 5369)
 
 #porte de la chapelle - bagnolet
-c("PI_Chaumont","PI_Aubervilliers")
+a=c("PI_Chaumont","PI_Aubervilliers")
+c(5387, 5380)
 
 #porte de la chapelle - porte asnieres
-c("PE_Batignolles","PE_Poissonniers")
+a=c("PE_Batignolles","PE_Poissonniers")
+c(5406, 5390)
 
 #porte asnieres - porte de la chapelle
-c("PI_Batignolles","PI_Poissonniers")
+a=c("PI_Batignolles","PI_Poissonniers")
+c(5411, 5395)
 
 #porte asnieres - porte maillot
-c("PE_Champerret")
+a=c("PE_Champerret")
+c(5418)
 
 #porte maillot - porte asnieres
-c("PI_Champerret")
+a=c("PI_Champerret")
+c(5419)
 
 #porte maillot - pont aval
-c("PE_Parc_Princes")
+a=c("PE_Parc_Princes")
+c(5446)
 
 #pont aval - porte maillot
-c("PI_Parc_Princes")
+a=c("PI_Parc_Princes")
+c(5451)
 
 
 
