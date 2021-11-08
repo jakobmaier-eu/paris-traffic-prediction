@@ -32,47 +32,41 @@ numbersFromLibelle <- function(libelleList){
   return(numbersList)
 }
 
-edges_name <- read.delim("liste_aretes.txt", header = F)$V1
+edges_names <- read.delim("liste_aretes.txt", header = F)$V1
 
 ######
 
-listOfDataframe = list()
-list_numList = 
 
-for(k in 1:70){
-  
-  numList = list_numList(k)
-  dataframe = data.frame()
-  
-  #years = c(2014, 2015, 2016, 2017, 2018, 2019, 2020)
-  years = c(2020)
-  
-  ptm <- proc.time()
-  for (year in years){
-    foldername = paste("data/data_raw_", year, sep="")
-    filenames = list.files(foldername)
-    i = 0
-    for (filename in filenames){
-      filepath = paste(foldername, "/", filename, sep = "")
-      week_df = read_delim(filepath, col_names =TRUE, delim=';')[c("iu_ac","t_1h","q","k","etat_barre")]
-      
-      dataframe_temp = data.frame()
-      for(j in 1:dim(week_df)[1]){
-        
-        if(week_df$iu_ac[j] %in% numList){
-          
-          dataframe_temp <- rbind(dataframe_temp,week_df[j,])
-          
-        }
-      }
-      #print("o")
-      agg_edge = aggregate(dataframe_temp, by=list(dataframe_temp$t_1h), FUN=mean, na.rm = TRUE)
-      dataframe = rbind(dataframe,agg_edge)
-    }
-  }
-  proc.time() - ptm
-  listOfDataframe = append(listOfDataframe,dataframe)
+#years = c(2014, 2015, 2016, 2017, 2018, 2019, 2020)
+years = c(2020)
+
+# Suppose we have the edges list of node lists.
+
+edges_dfs = vector("list", length(edges))
+names(edges_dfs) = names(edges)
+for (i in 1:length(edges_dfs)){
+  edges_dfs[[i]] = data.frame()
 }
+
+ptm <- proc.time()
+for (year in years){
+  foldername = paste("Data/data_cleaner_", year, sep="")
+  filenames = list.files(foldername)
+  i = 0
+  for (filename in filenames){
+    if (i == 3){break}
+    filepath = paste(foldername, "/", filename, sep = "")
+    week_df = readRDS(filepath) # Reads the dataframe we had earlier.
+    for (edgename in names(edges)){
+      temp_df = filter(week_df, iu_ac %in% edges[edgename][[1]])
+      agg_edge = aggregate(temp_df, by=list(temp_df$t_1h), FUN=mean, na.rm = TRUE)[c("iu_ac", "t_1h", "q", "k", "etat_barre")]
+      edges_dfs[edgename] = rbind(edges_dfs[edgename],agg_edge)
+    }
+    i = i+1
+  }
+}
+proc.time() - ptm
+listOfDataframe = append(listOfDataframe,dataframe)
 
 
 
