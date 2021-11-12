@@ -24,6 +24,16 @@ for (i in 1:length(edges)){
   }
 }
 
+# Histogram of NA
+perct = c()
+for(l in 1:69){
+  perct = c(perct, sum(is.na(edges[[l]]$q))/nrow(edges[[i]]))
+}
 
+hist(perct, breaks=seq(0,1,0.01))
 
+# Visualisation of NA
+library(visdat)
+
+vis_miss(edges[[3]][3:4]) + theme(axis.text.x = element_text(angle=80))
 
