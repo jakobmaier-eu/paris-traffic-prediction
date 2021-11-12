@@ -146,8 +146,8 @@ str
 writeClipboard(str)
 
 ########
-
-edges = vector("list", length(edges_name))
+no_edges = 69
+edges = vector("list", length=no_edges)
 
 i = 1
 edges[[i]] = c(4143, 6105, 4141, 1840, 4141, 1825, 1816)
@@ -538,5 +538,5 @@ names(edges)[i] = "pont aval - porte maillot"
 a=c("PI_Parc_Princes")
 edges[[i]] = c(5451)
 
-
+saveRDS(object = edges, file = "Data/edges.rds")
 
