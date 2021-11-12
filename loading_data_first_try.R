@@ -160,16 +160,17 @@ names(edges)[i] = "pont austerlitz - pont amont"
 a=c("Quai_Rapee_Bercy_Y","Quai_de_Bercy_Y","Quai_de_la_Rapee_Y")
 edges[[i]] = c(1817, 4140, 4140, 4140, 1822, 459, 458)
 
+#"saint michel - concorde" : CHECKED
 i = 3
 names(edges)[i] = "saint michel - concorde"
 a=c("Quai_Anatole_France","Quai_Conti","Quai_Malaquais","Quai_Voltaire","Quai_Grands_Augustins")
-edges[[i]] = c(316, 4184, 315, 314, 313, 316, 6297, 69, 70, 74, 73, 178, 206, 178, 204, 68, 6294)
+edges[[i]] =  c(316, 4184, 315, 314, 313, 6297, 70, 74, 73, 178, 206, 178, 204, 68, 6294)
 
 #concorde - chatelet
 i = 4
 names(edges)[i] = "concorde - chatelet"
 a=c("VGP_Quai_des_Tuileries","Quai_du_Louvre","Quai_de_la_Megisserie","Quai_Tuileries","Quai_des_Tuileries","VGP_Souterrain_Tuileries","VGP_Quai_Tuileries","Quai_du_Louvre","VGP_Quai_des_Tuileries")
-edges[[i]] = c(217, 217, 4, 2, 1, 4, 3, 3, 6, 5, 7, 215, 6757, 6756, 203, 216, 6758, 4, 2, 1, 4, 3, 3, 217, 217)
+edges[[i]] = c(1, 2, 3, 4, 5, 6, 7, 215, 6757, 6756, 203, 216, 6758, 217)
 
 #saint michel - chatelet
 i = 5
@@ -177,13 +178,13 @@ names(edges)[i] = "saint michel - chatelet"
 a=c("Bd_du_Palais","Pt_au_Change","Pt_St_Michel")
 edges[[i]] = c(42, 41, 43, 40)
 
-#rond point etoile - porte maillot
+#rond point etoile - porte maillot - CHECKED
 i = 6
 names(edges)[i] = "rond point etoile - porte maillot"
 a=c("Av_Grande_Armee")
-edges[[i]] = c(5259, 5257, 5260, 5258)
+edges[[i]] = c(4404, 4368, 4366, 4373, 5257, 5258)
 
-#rond point etoile - porte asnieres
+#rond point etoile - porte asnieres # PEU DE DONNEES
 i = 7
 names(edges)[i] = "rond point etoile - porte asnieres"
 edges[[i]] = c(7175, 4418)
@@ -191,14 +192,14 @@ edges[[i]] = c(7175, 4418)
 #porte asnieres - rond point etoile
 i = 8
 names(edges)[i] = "porte asnieres - rond point etoile"
-edges[[i]] = c(7176, 4416)
+edges[[i]] = c(7176, 4416, 4419, 4342, 7168, 7170, 7172, 7174)
 
-#porte asnieres - saint lazare
+#porte asnieres - saint lazare # PEU DE DONNEES
 i = 9
 names(edges)[i] = "porte asnieres - saint lazare"
 edges[[i]] = c(6799, 6074)
 
-#saint lazare - porte asnieres
+#saint lazare - porte asnieres # PEU DE DONNEES
 i = 10
 names(edges)[i] = "saint lazare - porte asnieres"
 edges[[i]] = c(6798, 6073)
@@ -206,12 +207,14 @@ edges[[i]] = c(6798, 6073)
 #saint lazare - concorde
 i = 11
 names(edges)[i] = "saint lazare - concorde"
-edges[[i]] = c(244, 239)
+edges[[i]] = c(242,244, 246, 237, 239, 6021)
 
 #concorde - saint lazare
 i = 12
 names(edges)[i] = "concorde - saint lazare"
-edges[[i]] = c(245, 240)
+edges[[i]] = c(243, 245, 247, 238,240, 6020)
+
+# TODO
 
 #chatelet - pont austerlitz
 i = 13
@@ -223,17 +226,17 @@ edges[[i]] = c(442, 12, 461, 6168, 462, 460, 848, 6299, 446, 447, 6555, 448, 437
 i = 14
 names(edges)[i] = "chatelet - saint michel"
 a=c("Petit_Pont","Pt_Notre_Dame","Cite")
-edges[[i]] = c(55, 52, 53, 54)
+edges[[i]] = c(51, 52, 53, 54, 55)
 
 #denfert rochereau - saint michel
 i = 15
 names(edges)[i] = "denfert rochereau - saint michel"
-edges[[i]] = c(585, 589)
+edges[[i]] = c(585, 589, 591, 593)
 
 #saint michel - denfert rochereau
 i = 16
 names(edges)[i] = "saint michel - denfert rochereau"
-edges[[i]] = c(584, 590)
+edges[[i]] = c(584, 586, 588, 590, 592, 594)
 
 #denfert rochereau - porte orleans
 i = 17
@@ -249,12 +252,12 @@ edges[[i]] = c(428, 427, 429, 430, 431, 433, 431, 432)
 #jussieu - pont austerlitz
 i = 19
 names(edges)[i] = "jussieu - pont austerlitz"
-edges[[i]] = c(518)
+edges[[i]] = c(488, 6167, 518)
 
 #pont austerlitz - jussieu
 i = 20
 names(edges)[i] = "pont austerlitz - jussieu"
-edges[[i]] = c(490)
+edges[[i]] = c(490, 491, 489, 6166)
 
 #strasbourg saint denis - porte de la chapelle
 i = 21
@@ -268,11 +271,11 @@ i = 22
 names(edges)[i] = "porte de la chapelle - strasbourg saint denis"
 edges[[i]] = c(1645)
 
-#porte maillot - rond point etoile
+#porte maillot - rond point etoile - CHECKED
 i = 23
 names(edges)[i] = "porte maillot - rond point etoile"
 a=c("Av_de_la_Grande_Armee")
-edges[[i]] = c(4364, 4366, 4373, 4375, 4371, 4405, 4404, 4368)
+edges[[i]] = c(5259, 5260, 4375, 4364, 4371, 4405)
 
 #jussieu - saint michel
 i = 24
@@ -368,7 +371,7 @@ edges[[i]] = c(279, 371, 26, 25, 31, 31, 281, 21, 28, 32, 282, 34, 35, 33, 283, 
 i = 40
 names(edges)[i] = "bastille - pont austerlitz "
 a=c("Bd_Bourdon")
-edges[[i]] = c(6576, 454, 453)
+edges[[i]] = c(6576, 454, 453, 1221, 6239)
 
 #pont aval - pont alma
 i = 41
@@ -418,12 +421,12 @@ edges[[i]] = c(4928, 6713)
 #bastille - porte de vincennes
 i = 49
 names(edges)[i] = "bastille - porte de vincennes"
-edges[[i]] = c(4926, 6712)
+edges[[i]] = c(5114, 4665, 4680, 4731, 4934, 4922, 4924,4926, 909, 6426, 6712, 914)
 
 #bastille - strasbourg saint denis
 i = 50
 names(edges)[i] = "bastille - strasbourg saint denis"
-edges[[i]] = c(1380, 1374, 1366)
+edges[[i]] = c(401, 403, 405, 407, 1380, 1378, 1374, 1372, 1368, 1366, 1364, 547, 1211, 6742, 1240, 1245)
 
 #strasbourg saint denis - bastille
 i = 51
@@ -481,8 +484,8 @@ edges[[i]] = c(5338)
 #porte vincennes - bagnolet
 i = 60
 names(edges)[i] = "porte vincennes - bagnolet"
-a=c("PE_Louis_Lumiere")
-edges[[i]] = c(5347)
+a=c("PE_Louis_Lumiere") # et autres!
+edges[[i]] = c(5347, 5329, 5530, 5531, 5347, 5350, 5351)
 
 #bagnolet - porte vincennes
 i = 61
@@ -517,8 +520,8 @@ edges[[i]] = c(5411, 5395)
 #porte asnieres - porte maillot
 i = 66
 names(edges)[i] = "porte asnieres - porte maillot"
-a=c("PE_Champerret")
-edges[[i]] = c(5418)
+a=c("PE_Champerret") # et plus.
+edges[[i]] = c(5416, 5418, 5420, 5422, 5423, 5424)
 
 #porte maillot - porte asnieres
 i = 67
@@ -535,8 +538,9 @@ edges[[i]] = c(5446)
 #pont aval - porte maillot
 i = 69
 names(edges)[i] = "pont aval - porte maillot"
-a=c("PI_Parc_Princes")
-edges[[i]] = c(5451)
+a=c("PI_Parc_Princes") # et plus car donnees manquantes
+edges[[i]] = c(5451, 5215, 5217, 5449, 5450, 5452, 5453, 5454, 5455, 5440, 5439, 5436, 5434, 5432)
 
 saveRDS(object = edges, file = "Data/edges.rds")
 
+i = 1
