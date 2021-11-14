@@ -50,7 +50,7 @@ for (i in 1:length(edges_dfs)){
   colnames(edges_dfs[[i]]) <- c("iu_ac", "t_1h", "q", "k", "etat_barre")
 }
 
-years = c(2014, 2015, 2016, 2017, 2018, 2019)
+years = c(2014, 2015, 2016, 2017, 2018, 2019, 2020)
 ptm <- proc.time()
 for (year in years){
   edges_dfs = vector("list", length(edges))
@@ -77,8 +77,11 @@ for (year in years){
 }
 proc.time() - ptm
 
+#utilisateur     système      écoulé 
+#1108.59       50.57     1177.37 
 
-## Reagr�ger:
+
+## Reagr?ger:
 years = c(2014, 2015, 2016, 2017, 2018, 2019, 2020)
 ptm <- proc.time()
 edges = readRDS("Data/edges.rds")
