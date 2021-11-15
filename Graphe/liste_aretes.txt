@@ -1,0 +1,69 @@
+pont aval - pont alma
+pont alma - pont aval
+pont alma - concorde
+concorde - pont alma
+concorde - rond point etoile
+rond point etoile - concorde
+rond point etoile - pont alma
+porte maillot - rond point etoile
+rond point etoile - porte maillot
+rond point etoile - porte asnieres
+porte asnieres - rond point etoile
+porte asnieres - saint lazare
+saint lazare - porte asnieres
+saint lazare - concorde
+concorde - saint lazare
+concorde - saint michel
+saint michel - concorde
+concorde - chatelet
+chatelet - concorde
+saint michel - chatelet
+chatelet - saint michel
+denfert rochereau - saint michel
+saint michel - denfert rochereau
+denfert rochereau - porte orleans
+porte orleans - denfert rochereau
+pont austerlitz - place italie
+place italie - pont austerlitz
+porte italie - place italie
+place italie - porte italie
+pont amont - pont austerlitz
+pont austerlitz - pont amont
+porte de vincennes - bastille
+bastille - porte de vincennes
+bastille - strasbourg saint denis
+strasbourg saint denis - bastille
+strasbourg saint denis - saint lazare
+saint lazare - strasbourg saint denis
+strasbourg saint denis - porte de la chapelle
+porte de la chapelle - strasbourg saint denis
+pont austerlitz - bastille
+bastille - pont austerlitz
+bastille - chatelet
+saint michel - jussieu
+jussieu - saint michel
+jussieu - pont austerlitz
+pont austerlitz - jussieu
+jussieu - bastille
+chatelet - pont austerlitz
+pont austerlitz - chatelet
+chatelet - strasbourg saint denis
+strasbourg saint denis - chatelet
+pont aval - porte orleans
+porte orleans - pont aval
+porte orleans - porte italie
+porte italie - porte orleans
+porte italie - pont amont
+pont amont - porte italie
+pont amont - porte de vincennes
+porte de vincennes - pont amont
+porte de vincennes - bagnolet
+bagnolet - porte de vincennes
+bagnolet - porte de la chapelle
+porte de la chapelle - bagnolet
+porte de la chapelle - porte asnieres
+porte asnieres - porte de la chapelle
+porte asnieres - porte maillot
+porte maillot - porte asnieres
+porte maillot - pont aval
+pont aval - porte maillot
