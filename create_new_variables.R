@@ -49,8 +49,28 @@ covid_index_data_raw <- read_delim("data/covid_index_data_raw.csv",
 
 covid_index_data_raw <- covid_index_data_raw[which(covid_index_data_raw$Entity == "France"),]
 
-#faire une boucle sur les date(edges[[i]]$t_1h) et assigner la valeur du covid index correspondante
+covid_index_data_raw <- covid_index_data_raw[which(covid_index_data_raw$Entity == "France"),][1:346,]
 
+covid_index_data_raw = covid_index_data_raw %>% filter(Day > as.Date("2020-01-01"))
+
+zero_vector <- rep(x = 0,times=dim(edges[[1]])[1]-dim(covid_index_data_raw)[1]*24)
+
+covid_vector <- c()
+
+for(d in 1:dim(covid_index_data_raw)[1]){
+  covid_vector <- c(covid_vector, rep(x = covid_index_data_raw$stringency_index[d], times = 24))
+}
+
+vector <- c(zero_vector, covid_vector)
+
+for (i in 1:length(edges)){
+    edges[[i]] <- mutate(edges[[i]], 
+                         vector)
+}
+
+saveRDS(edges, "Data/data_with_new_variables.rds")
+
+#
 
 
 
