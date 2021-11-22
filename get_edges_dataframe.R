@@ -469,7 +469,7 @@ proc.time() - ptm
 for (j in 1:length(edges_dfs_allyrs)){
   print(names(edges_dfs_allyrs)[j])
   edges_dfs_allyrs[[j]] = aggregate(edges_dfs_allyrs[[j]], 
-                 by = list(elem$t_1h), FUN = mean, na.rm = TRUE)
+                 by = list(edges_dfs_allyrs[[j]]$t_1h), FUN = mean, na.rm = TRUE)
 }
 
 saveRDS(edges_dfs_allyrs, "Data/data_agg69_plain/edges_dfs_allyrs.rds")
