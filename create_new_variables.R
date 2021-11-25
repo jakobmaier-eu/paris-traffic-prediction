@@ -275,6 +275,8 @@ library(ranger)
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
 
+edges = readRDS("Data/data_with_new_variables.rds")
+
 library(xts)
 test <- xts(edges[[8]]$k[1:(365*24)], order.by = edges[[1]]$t_1h[1:(365*24)])
 
@@ -282,9 +284,17 @@ plot(test)
 
 
 p <- 24*30*11
-q <- 24*30*12
+q <- 24*31*12
 
-test <- xts(edges[[60]]$k[p:q], order.by = edges[[1]]$t_1h[p:q])
+test <- xts(edges[[9]]$k[p:q], order.by = edges[[1]]$t_1h[p:q])
+
+plot(test)
+
+
+p <- 24*30*6
+q <- 24*31*8
+
+test <- xts(edges[[3]]$k[p:q], order.by = edges[[1]]$t_1h[p:q])
 
 plot(test)
 
