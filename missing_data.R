@@ -65,7 +65,59 @@ sum(is.na(edges$`saint michel - concorde`[4]) & edges$`saint michel - concorde`[
 
 plot(edges$`porte maillot - porte asnieres`[10000:10500,4],type='l')
 
+####
 
+list_median <- c()
+
+for (i in 1:69){
+  timestamps_na <- edges[[i]]$t_1h[(is.na(edges[[i]][4]) == T)]
+  
+  timestamps_na <- edges[[i]]$t_1h[(is.na(edges[[i]][4]) == T)]
+  
+  print(median(diff(timestamps_na)))
+  
+  list_median <- c(list_median, as.numeric(diff(timestamps_na)))
+  
+  hist(as.numeric(diff(timestamps_na)),breaks=50)
+}
+
+hist(list_median,breaks=50)
+
+####
+
+mat <- data.frame(matrix(ncol = length(edges$`pont amont - pont austerlitz`$t_1h), nrow = 69))
+
+for (i in 1:69){
+  mat[i,] = is.na(edges[[i]][4]) 
+}
+
+library('plot.matrix')
+plot(as.matrix(mat[,(61481-24):61481]))
+
+sum((mat[,(61481-365*24):61481]))
+
+####
+
+library(mice)
+
+imp = mice(edges[[1]], meth = "cart", minbucket = 4)
+
+test = complete(imp)
+
+#test = imp$imp
+
+plot(edges[[1]]$k, type = 'l')
+plot(test$k[400:600], type = 'l')
+
+#
+
+library(weathermetrics)
+
+data("paris")
+
+
+
+summary(edges[[1]]$t_1h)
 
 
 
