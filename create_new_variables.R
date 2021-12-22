@@ -121,7 +121,7 @@ library(ranger)
 # xtsTempMerged[2] = xtsTempMerged[3]
 # 
 # #Approximation of the NA
-# Temp <- na.approx(xtsTempMerged)
+# Temp <- as.numeric(na.approx(xtsTempMerged))
 # 
 # #Add the new variable
 # for (i in 1:length(edges)){
@@ -260,45 +260,33 @@ library(ranger)
 
 
 
-# ### DATA LAG
-# 
+### DATA LAG
+
 # for (i in 1:length(edges)){
+#   qLaggedWeek <- c(edges[[i]]$q[1:24*7], edges[[i]]$q[1:(dim(edges[[i]])[1]-24*7)])
 #   qLaggedDay <- c(edges[[i]]$q[1:24], edges[[i]]$q[1:(dim(edges[[i]])[1]-24)])
 #   qLaggedHour <- c(edges[[i]]$q[1:1], edges[[i]]$q[1:(dim(edges[[i]])[1]-1)])
 #   
+#   qFuturWeek <- c(edges[[i]]$q[(24*7):(dim(edges[[i]])[1])], edges[[i]]$q[(dim(edges[[i]])[1]-24*7):(dim(edges[[i]])[1])])
+#   qFuturDay <- c(edges[[i]]$q[(24):(dim(edges[[i]])[1])], edges[[i]]$q[(dim(edges[[i]])[1]-24):(dim(edges[[i]])[1])])
+#   qFuturHour <- c(edges[[i]]$q[(1):(dim(edges[[i]])[1])], edges[[i]]$q[(dim(edges[[i]])[1]-1):(dim(edges[[i]])[1])])
+# 
+#   kLaggedWeek <- c(edges[[i]]$k[1:24*7], edges[[i]]$k[1:(dim(edges[[i]])[1]-24*7)])
 #   kLaggedDay <- c(edges[[i]]$k[1:24], edges[[i]]$k[1:(dim(edges[[i]])[1]-24)])
 #   kLaggedHour <- c(edges[[i]]$k[1:1], edges[[i]]$k[1:(dim(edges[[i]])[1]-1)])
 #   
+#   kFuturWeek <- c(edges[[i]]$k[(24*7):(dim(edges[[i]])[1])], edges[[i]]$k[(dim(edges[[i]])[1]-24*7):(dim(edges[[i]])[1])])
+#   kFuturDay <- c(edges[[i]]$k[(24):(dim(edges[[i]])[1])], edges[[i]]$k[(dim(edges[[i]])[1]-24):(dim(edges[[i]])[1])])
+#   kFuturHour <- c(edges[[i]]$k[(1):(dim(edges[[i]])[1])], edges[[i]]$k[(dim(edges[[i]])[1]-1):(dim(edges[[i]])[1])])
+# 
 #   edges[[i]] <- mutate(edges[[i]],
-#                        qLaggedDay, qLaggedHour, kLaggedDay, kLaggedHour)
+#                        qLaggedWeek, qLaggedDay, qLaggedHour,
+#                        qFuturWeek, qFuturDay, qFuturHour,
+#                        kLaggedWeek, kLaggedDay, kLaggedHour,
+#                        kFuturWeek, kFuturDay, kFuturHour)
 # }
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
-
-edges = readRDS("Data/data_with_new_variables.rds")
-
-library(xts)
-test <- xts(edges[[8]]$k[1:(365*24)], order.by = edges[[1]]$t_1h[1:(365*24)])
-
-plot(test)
-
-
-p <- 24*30*11
-q <- 24*31*12
-
-test <- xts(edges[[9]]$k[p:q], order.by = edges[[1]]$t_1h[p:q])
-
-plot(test)
-
-
-p <- 24*30*6
-q <- 24*31*8
-
-test <- xts(edges[[3]]$k[p:q], order.by = edges[[1]]$t_1h[p:q])
-
-plot(test)
-
-
-
-
+# 
+# edges = readRDS("Data/data_with_new_variables.rds")
 

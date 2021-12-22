@@ -96,7 +96,7 @@ plot(as.matrix(mat[,(61481-24):61481]))
 
 sum((mat[,(61481-365*24):61481]))
 
-####
+#### MICE TEST
 
 library(mice)
 
@@ -109,15 +109,62 @@ test = complete(imp)
 plot(edges[[1]]$k, type = 'l')
 plot(test$k[400:600], type = 'l')
 
-#
 
-library(weathermetrics)
+######################################################################""
+### CREATION OF COMPLETE DATAFRAMES
+# 
+# edges = readRDS("Data/data_with_new_variables.rds")
+# 
+# neigh_after = readRDS('Data/neigh_after.rds')
+# neigh_before = readRDS('Data/neigh_before.rds')
+# 
+# names(edges)[45] = "rond point etoile - pont alma" #correction
+# names(edges)[21] = "strasbourg saint denis - porte chapelle"
+# names(edges)[22] = "porte chapelle - strasbourg saint denis"
+# names(edges)[40] = "bastille - pont austerlitz"
+# names(edges)[48] = "porte vincennes - bastille"
+# names(edges)[49] = "bastille - porte vincennes"
+# names(edges)[62] = "bagnolet - porte chapelle"
+# names(edges)[63] = "porte chapelle - bagnolet"
+# names(edges)[64] = "porte chapelle - porte asnieres"
+# names(edges)[65] = "porte asnieres - porte chapelle"
+# 
+# saveRDS(object = edges, file = "Data/data_with_new_variables.rds")
+# 
+# edges_dictionnary <- names(edges)
+# 
+# for(name in edges_dictionnary){
+#   for(neigh_after_name in neigh_after[[paste(name)]]){
+#     edges[[paste(name)]] <- mutate(edges[[paste(name)]], edges[[paste(neigh_after_name)]]$k, edges[[paste(neigh_after_name)]]$q)
+#     names(edges[[paste(name)]])[(dim(edges[[paste(name)]])[2]-1):(dim(edges[[paste(name)]])[2])] <- c(paste("k",gsub("-", "TO", gsub(" ", "", neigh_after_name, fixed = TRUE), fixed = TRUE),sep = "_"), paste("q",gsub("-", "TO", gsub(" ", "", neigh_after_name, fixed = TRUE), fixed = TRUE),sep = "_"))
+#   }
+# 
+#   for(neigh_before_name in neigh_before[[paste(name)]]){
+#     edges[[paste(name)]] <- mutate(edges[[paste(name)]], edges[[paste(neigh_before_name)]]$k, edges[[paste(neigh_before_name)]]$q)
+#     names(edges[[paste(name)]])[(dim(edges[[paste(name)]])[2]-1):(dim(edges[[paste(name)]])[2])] <- c(paste("k",gsub("-", "TO", gsub(" ", "", neigh_before_name, fixed = TRUE), fixed = TRUE),sep = "_"), paste("q",gsub("-", "TO", gsub(" ", "", neigh_before_name, fixed = TRUE), fixed = TRUE),sep = "_"))
+#   }
+# }
+# 
+# saveRDS(object = edges, file = "Data/edges_with_neigh.rds")
 
-data("paris")
+############################################################################
 
 
+#### MICE TEST 2
 
-summary(edges[[1]]$t_1h)
+library(mice)
+
+edges = readRDS("Data/edges_with_neigh.rds")
+
+test = edges[[1]][2:length(edges[[1]])]
+
+matrix_where = matrix(F, nrow = dim(test)[1], ncol = dim(test)[2])
+matrix_where[,3:4] = is.na(test)[,3:4]
+
+imp = mice(test, meth = "cart", minbucket = 4, where = matrix_where)
+
+testb = complete(imp)
+
 
 
 
