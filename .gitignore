@@ -1,4 +1,5 @@
 Data/data_with_new_variables.rds
+Data/edges_with_neigh.rds
 data_cleaner*
 data_raw*
 find_main_streets

@@ -350,7 +350,7 @@ library(ranger)
 # neigh_before[[i]] = c("saint michel - chatelet", "bastille - chatelet", "pont austerlitz - chatelet", "strasbourg saint denis - chatelet")
 # 
 # 
-# #bastille - pont austerlitz 
+# #bastille - pont austerlitz
 # i = 40
 # names(edges)[i] = "bastille - pont austerlitz"
 # a=c("Bd_Bourdon")
