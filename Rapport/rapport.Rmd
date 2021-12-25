@@ -1,0 +1,55 @@
+---
+title: "Rapport projet R"
+author: "Jakob Maier, Guillaume Lambert"
+date: "25/12/2021"
+output:
+  bookdown::pdf_document2: default
+  bookdown::html_document2: default
+---
+
+```{r librairies, include=FALSE, eval=TRUE}
+#library(bookdown)
+```
+
+
+## Le jeu de données
+
+### Présentation des données
+
+On présente maintenant les données que l'on a collectées et traitées afin de les utiliser dans la tâche de prédiction.
+
+**Données de comptage routier**
+
+Les données de comptage routier sont disponibles sur le site [**\textcolor{blue}{Paris Data}**](https://parisdata.opendatasoft.com/page/home/), regroupant les jeux de données de la Ville de Paris, en cliquant [ici](https://parisdata.opendatasoft.com/explore/dataset/comptages-routiers-permanents-historique/information/). Elles sont collectées grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. L'historique des données s'étend de 2014 à ???? au pas horaire. Deux types de données sont fournies : le **taux d'occupation** qui correspond au temps de présence de véhicules sur la boucle en pourcentage d’une heure et le **débit** qui est  le nombre de véhicules ayant passé le point de comptage pendant une heure. 
+
+Pour une année, il y a environ 29 millions observations réparties sur plus de 3000 points. On a donc procédé à une transformation des données afin de réduire leur nombre et les truscturer. La première étape est l'agrégation des points d'observations selon les libellés (nom de rue) associés dans le jeu de données. Ensuite, on a déterminé les principaux axes de Paris en moyennant le nombre de voitures par heure des points d'observations partageant un même libellé puis en choisissant les 200 premières valeurs (hors périphérique). On obtient le graphique \@ref(fig:200mainstreets) et on en déduit le graphe simplifié \@ref(fig:graphe) de Paris composé de 69 arêtes, correspondant à 69 jeux de données.
+
+```{r 200mainstreets, out.width='25%', fig.align='center', fig.show='hold', fig.cap="Représentation en rouge des points d'observation associés aux 200 libellés les plus fréquentés (hors périphérique)", echo = F}
+knitr::include_graphics('figures/200mainstreets.png')
+```
+
+```{r graphe, out.width='25%', fig.align='center', fig.show='hold', fig.cap="Graphe simplifié de Paris", echo = F}
+knitr::include_graphics('figures/graphe.png')
+```
+
+On obtient finalement 2 variables au pas horaire : ???? (nom des variables) le nombre de voitures et ???? le taux d'occupation. A partir de ces 2 variables, on en construit des autres en les retardant : ????? (noms). En effet, il semble pertinent d'observer l'état du traffic routier à des temps antérieurs : historique à très court terme pour ??? et historique au même instant du cycle pour ???? et ????. Cela est confirmé dans la partie ????.
+
+Enfin, il est très important de noter que ces données sont incomplètes. Une étude approfondie de cette incomplétude et de la complétion est faite dans la partie ????.
+
+#### Variables temporelles
+
+#### Index de la situation sanitaire en rapport avec le covid
+
+#### Température
+
+### Complétion du jeux de données
+
+
+
+<span style="color: red;">text</span>
+
+
+
+
+
+

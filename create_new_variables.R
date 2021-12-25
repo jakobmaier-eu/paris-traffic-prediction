@@ -15,8 +15,8 @@ library(ranger)
 # edges = readRDS("Data/data_agg69_plain/edges_dfs_allyrs.rds")
 # 
 # for (i in 1:length(edges)){
-#   edges[[i]] <- mutate(edges[[i]], 
-#                        Year = format(t_1h, "%Y"), 
+#   edges[[i]] <- mutate(edges[[i]],
+#                        Year = format(t_1h, "%Y"),
 #                        Month = format(t_1h, "%m"),
 #                        Day = format(t_1h, "%d"),
 #                        Hour = format(t_1h, "%H"),
@@ -75,6 +75,8 @@ library(ranger)
 # library(zoo)
 # library(xts)
 # 
+# #TEMPERATURE
+# 
 # #Load current data
 # edges = readRDS("Data/data_with_new_variables.rds")
 # 
@@ -85,33 +87,16 @@ library(ranger)
 #                 col_names =TRUE, delim=';')
 # 
 # #Select only temperature and date
-# weather_data_raw <- weather_data_raw[c(2,8)] #on garde la date et la température
+# temp_raw <- weather_data_raw[c(2,8)] #on garde la date et la température
 # 
 # #Rename variables to avoid problem with accent
-# names(weather_data_raw) = c("date", "temp")
+# names(temp_raw) = c("date", "temp")
 # 
 # #Order by date
-# weather_data_raw <- weather_data_raw %>% arrange(weather_data_raw$date)
+# temp_ordered <- temp_raw %>% arrange(temp_raw$date)
 # 
-# #REPLACED
-# #Creation of the temperature vector :
-# temp_vector <- c()
-# j <- 2
-# 
-# for (i in 1:dim(edges[[1]])[1]){
-#   if(edges[[1]]$t_1h[i] == weather_data_raw$date[j]){
-#     temp_vector = c(temp_vector, weather_data_raw$temp[j])
-#     j = j + 1
-#   }
-#   else{
-#     temp_vector = c(temp_vector, NA)
-#   }
-# }
-# #END REPLACED
-# 
-# 
-# #Create xts of data weather
-# xtsTemp <- xts(weather_data_raw$temp, order.by=weather_data_raw$date)
+# #Create xts of weather_temp_ordered
+# xtsTemp <- xts(temp_ordered$temp, order.by=temp_ordered$date)
 # 
 # #Merge the previous xts with dates
 # xtsTempMerged <- merge(xtsTemp,xts(,edges[[1]]$t_1h), join = "right")
@@ -131,10 +116,44 @@ library(ranger)
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
 # 
+# #PRECIPITATION
 # 
+# #Load weather data raw
+# weather_data_raw <- read_delim("data/weather_data_raw.csv",
+#                                col_names =TRUE, delim=';')
+# 
+# #Select only temperature and date
+# precipitation_raw <- weather_data_raw[c(2,40)] #on garde la date et les précipitations sur les 3 dernières heures
+# 
+# #Rename variables to avoid problem with accent
+# names(precipitation_raw) = c("date", "precipitation")
+# 
+# #Order by date
+# precipitation_ordered <- precipitation_raw %>% arrange(precipitation_raw$date)
+# 
+# #Create xts of weather_temp_ordered
+# xtsPrecipitation <- xts(precipitation_ordered$precipitation, order.by=precipitation_ordered$date)
+# 
+# #Merge the previous xts with dates
+# xtsPrecipitationMerged <- merge(xtsPrecipitation,xts(,edges[[1]]$t_1h), join = "right")
+# 
+# #Manually fill the two first NA to avoid problem with na.approx (length = length - 2)
+# xtsPrecipitationMerged[1] = xtsPrecipitationMerged[3]
+# xtsPrecipitationMerged[2] = xtsPrecipitationMerged[3]
+# 
+# #Approximation of the NA
+# Precipitation <- as.numeric(na.approx(xtsPrecipitationMerged))
+# 
+# #Add the new variable
+# for (i in 1:length(edges)){
+#   edges[[i]] <- mutate(edges[[i]],
+#                        Precipitation)
+# }
+# 
+# saveRDS(edges, "Data/data_with_new_variables.rds")
 
-### HOLIDAYS DATA
-
+# ## HOLIDAYS DATA
+# 
 # edges = readRDS("Data/data_with_new_variables.rds")
 # 
 # #Source : https://www.education.gouv.fr/les-archives-du-calendrier-scolaire-12449
@@ -200,10 +219,10 @@ library(ranger)
 # }
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
-
-
-
-
+# 
+# 
+# 
+# 
 # ### BANK HOLIDAYS
 # 
 # edges = readRDS("Data/data_with_new_variables.rds")
@@ -230,10 +249,10 @@ library(ranger)
 # }
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
-
-
-
-
+# 
+# 
+# 
+# 
 # ### Time of year
 # 
 # edges = readRDS("Data/data_with_new_variables.rds")
@@ -257,27 +276,31 @@ library(ranger)
 # }
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
-
-
-
-### DATA LAG
-
-# for (i in 1:length(edges)){
-#   qLaggedWeek <- c(edges[[i]]$q[1:24*7], edges[[i]]$q[1:(dim(edges[[i]])[1]-24*7)])
-#   qLaggedDay <- c(edges[[i]]$q[1:24], edges[[i]]$q[1:(dim(edges[[i]])[1]-24)])
-#   qLaggedHour <- c(edges[[i]]$q[1:1], edges[[i]]$q[1:(dim(edges[[i]])[1]-1)])
-#   
-#   qFuturWeek <- c(edges[[i]]$q[(24*7):(dim(edges[[i]])[1])], edges[[i]]$q[(dim(edges[[i]])[1]-24*7):(dim(edges[[i]])[1])])
-#   qFuturDay <- c(edges[[i]]$q[(24):(dim(edges[[i]])[1])], edges[[i]]$q[(dim(edges[[i]])[1]-24):(dim(edges[[i]])[1])])
-#   qFuturHour <- c(edges[[i]]$q[(1):(dim(edges[[i]])[1])], edges[[i]]$q[(dim(edges[[i]])[1]-1):(dim(edges[[i]])[1])])
 # 
-#   kLaggedWeek <- c(edges[[i]]$k[1:24*7], edges[[i]]$k[1:(dim(edges[[i]])[1]-24*7)])
-#   kLaggedDay <- c(edges[[i]]$k[1:24], edges[[i]]$k[1:(dim(edges[[i]])[1]-24)])
-#   kLaggedHour <- c(edges[[i]]$k[1:1], edges[[i]]$k[1:(dim(edges[[i]])[1]-1)])
-#   
-#   kFuturWeek <- c(edges[[i]]$k[(24*7):(dim(edges[[i]])[1])], edges[[i]]$k[(dim(edges[[i]])[1]-24*7):(dim(edges[[i]])[1])])
-#   kFuturDay <- c(edges[[i]]$k[(24):(dim(edges[[i]])[1])], edges[[i]]$k[(dim(edges[[i]])[1]-24):(dim(edges[[i]])[1])])
-#   kFuturHour <- c(edges[[i]]$k[(1):(dim(edges[[i]])[1])], edges[[i]]$k[(dim(edges[[i]])[1]-1):(dim(edges[[i]])[1])])
+# 
+# 
+###DATA LAGGED AND FUTURE (completation)
+# 
+# edges = readRDS("Data/data_with_new_variables.rds")
+# 
+# length = dim(edges[[1]])[1]
+# 
+# for (i in 1:length(edges)){
+#   qLaggedWeek <- c(edges[[i]]$q[1:(24*7)], edges[[i]]$q[1:(length-24*7)])
+#   qLaggedDay <- c(edges[[i]]$q[1:24], edges[[i]]$q[1:(length-24)])
+#   qLaggedHour <- c(edges[[i]]$q[1:1], edges[[i]]$q[1:(length-1)])
+# 
+#   qFuturWeek <- c(edges[[i]]$q[(24*7+1):(length)], edges[[i]]$q[(length-(24*7)+1):(length)])
+#   qFuturDay <- c(edges[[i]]$q[(24+1):(length)], edges[[i]]$q[(length-24+1):(length)])
+#   qFuturHour <- c(edges[[i]]$q[(1+1):(length)], edges[[i]]$q[(length-1+1):(length)])
+# 
+#   kLaggedWeek <- c(edges[[i]]$k[1:(24*7)], edges[[i]]$k[1:(length-24*7)])
+#   kLaggedDay <- c(edges[[i]]$k[1:24], edges[[i]]$k[1:(length-24)])
+#   kLaggedHour <- c(edges[[i]]$k[1:1], edges[[i]]$k[1:(length-1)])
+# 
+#   kFuturWeek <- c(edges[[i]]$k[(24*7+1):(length)], edges[[i]]$k[(length-24*7+1):(length)])
+#   kFuturDay <- c(edges[[i]]$k[(24+1):(length)], edges[[i]]$k[(length-24+1):(length)])
+#   kFuturHour <- c(edges[[i]]$k[(1+1):(length)], edges[[i]]$k[(length-1+1):(length)])
 # 
 #   edges[[i]] <- mutate(edges[[i]],
 #                        qLaggedWeek, qLaggedDay, qLaggedHour,
@@ -286,7 +309,29 @@ library(ranger)
 #                        kFuturWeek, kFuturDay, kFuturHour)
 # }
 # 
-# saveRDS(edges, "Data/data_with_new_variables.rds")
+# saveRDS(edges, "Data/data_with_new_variables_completation.rds")
+
+
+
+# ###DATA LAGGED
 # 
 # edges = readRDS("Data/data_with_new_variables.rds")
+# 
+# length = dim(edges[[1]])[1]
+# 
+# for (i in 1:length(edges)){
+#   qLaggedWeek <- c(edges[[i]]$q[1:(24*7)], edges[[i]]$q[1:(length-24*7)])
+#   qLaggedDay <- c(edges[[i]]$q[1:24], edges[[i]]$q[1:(length-24)])
+#   qLaggedHour <- c(edges[[i]]$q[1:1], edges[[i]]$q[1:(length-1)])
+#   
+#   kLaggedWeek <- c(edges[[i]]$k[1:(24*7)], edges[[i]]$k[1:(length-24*7)])
+#   kLaggedDay <- c(edges[[i]]$k[1:24], edges[[i]]$k[1:(length-24)])
+#   kLaggedHour <- c(edges[[i]]$k[1:1], edges[[i]]$k[1:(length-1)])
+#   
+#   edges[[i]] <- mutate(edges[[i]],
+#                        qLaggedWeek, qLaggedDay, qLaggedHour,
+#                        kLaggedWeek, kLaggedDay, kLaggedHour)
+# }
+# 
+# saveRDS(edges, "Data/data_with_new_variables.rds")
 
