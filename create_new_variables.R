@@ -335,3 +335,81 @@ library(ranger)
 # 
 # saveRDS(edges, "Data/data_with_new_variables.rds")
 
+# #### CHANGING NAMES
+# 
+# edges <- readRDS("Data/data_with_new_variables.rds")
+# 
+# nbParam <- dim(edges[[1]])[2]
+# 
+# for(i in 1:69){
+#   #edges[[i]] <- edges[[i]][c(2:23,27:29)]
+#   edges[[i]] <- edges[[i]][c(2:nbParam)]
+#   names(edges[[i]])[3] <- "nbCar"
+#   names(edges[[i]])[4] <- "rateCar"
+#   names(edges[[i]])[5] <- "state"
+#   names(edges[[i]])[6] <- "year"
+#   names(edges[[i]])[7] <- "month"
+#   names(edges[[i]])[8] <- "day"
+#   names(edges[[i]])[9] <- "hour"
+#   names(edges[[i]])[10] <- "time"
+#   names(edges[[i]])[11] <- "weekdays"
+#   names(edges[[i]])[14] <- "temperature"
+#   names(edges[[i]])[15] <- "precipitation"
+#   
+#   names(edges[[i]])[20] <- "nbCarLaggedWeek"
+#   names(edges[[i]])[21] <- "nbCarLaggedDay"
+#   names(edges[[i]])[22] <- "nbCarLaggedHour"
+#   # names(edges[[i]])[23] <- "nbCarFuturWeek"
+#   # names(edges[[i]])[24] <- "nbCarFuturDay"
+#   # names(edges[[i]])[25] <- "nbCarFuturHour"
+#   names(edges[[i]])[23] <- "rateCarLaggedWeek"
+#   names(edges[[i]])[24] <- "rateCarLaggedDay"
+#   names(edges[[i]])[25] <- "rateCarLaggedHour"
+#   # names(edges[[i]])[29] <- "rateCarFuturWeek"
+#   # names(edges[[i]])[30] <- "rateCarFuturDay"
+#   # names(edges[[i]])[31] <- "rateCarFuturHour"
+# }
+# 
+# saveRDS(edges, "Data/data_with_new_variables.rds")
+# 
+# ###
+#     
+# edges <- readRDS("Data/data_with_new_variables_completation.rds")
+# 
+# nbParam <- dim(edges[[1]])[2]
+# 
+# for(i in 1:69){
+#   edges[[i]] <- edges[[i]][c(2:nbParam)]
+#   names(edges[[i]])[3] <- "nbCar"
+#   names(edges[[i]])[4] <- "rateCar"
+#   names(edges[[i]])[5] <- "state"
+#   names(edges[[i]])[6] <- "year"
+#   names(edges[[i]])[7] <- "month"
+#   names(edges[[i]])[8] <- "day"
+#   names(edges[[i]])[9] <- "hour"
+#   names(edges[[i]])[10] <- "time"
+#   names(edges[[i]])[11] <- "weekdays"
+#   names(edges[[i]])[14] <- "temperature"
+#   names(edges[[i]])[15] <- "precipitation"
+#   
+#   names(edges[[i]])[20] <- "nbCarLaggedWeek"
+#   names(edges[[i]])[21] <- "nbCarLaggedDay"
+#   names(edges[[i]])[22] <- "nbCarLaggedHour"
+#   names(edges[[i]])[23] <- "nbCarFuturWeek"
+#   names(edges[[i]])[24] <- "nbCarFuturDay"
+#   names(edges[[i]])[25] <- "nbCarFuturHour"
+#   names(edges[[i]])[26] <- "rateCarLaggedWeek"
+#   names(edges[[i]])[27] <- "rateCarLaggedDay"
+#   names(edges[[i]])[28] <- "rateCarLaggedHour"
+#   names(edges[[i]])[29] <- "rateCarFuturWeek"
+#   names(edges[[i]])[30] <- "rateCarFuturDay"
+#   names(edges[[i]])[31] <- "rateCarFuturHour"
+# }
+# 
+# saveRDS(edges, "Data/data_with_new_variables_completation.rds")
+
+
+
+
+
+

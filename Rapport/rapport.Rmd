@@ -32,7 +32,7 @@ knitr::include_graphics('figures/200mainstreets.png')
 knitr::include_graphics('figures/graphe.png')
 ```
 
-On obtient finalement 2 variables au pas horaire : ???? (nom des variables) le nombre de voitures et ???? le taux d'occupation. A partir de ces 2 variables, on en construit des autres en les retardant : ????? (noms). En effet, il semble pertinent d'observer l'état du traffic routier à des temps antérieurs : historique à très court terme pour ??? et historique au même instant du cycle pour ???? et ????. Cela est confirmé dans la partie ????.
+On obtient finalement 2 variables au pas horaire : **nbCar** (nom des variables) le nombre de voitures et **rateCar** le taux d'occupation. A partir de ces 2 variables, on en construit des autres en les retardant : ????? (noms). En effet, il semble pertinent d'observer l'état du traffic routier à des temps antérieurs : historique à très court terme pour ??? et historique au même instant du cycle pour ???? et ????. Cela est confirmé dans la partie ????.
 
 Enfin, il est très important de noter que ces données sont incomplètes. Une étude approfondie de cette incomplétude et de la complétion est faite dans la partie ????.
 

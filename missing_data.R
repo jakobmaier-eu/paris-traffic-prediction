@@ -110,10 +110,10 @@ plot(edges[[1]]$k, type = 'l')
 plot(test$k[400:600], type = 'l')
 
 
-######################################################################""
-### CREATION OF COMPLETE DATAFRAMES
+# #####################################################################""
+# # CREATION OF COMPLETE DATAFRAMES
 # 
-# edges = readRDS("Data/data_with_new_variables.rds")
+# edges = readRDS("Data/data_with_new_variables_completation.rds")
 # 
 # neigh_after = readRDS('Data/neigh_after.rds')
 # neigh_before = readRDS('Data/neigh_before.rds')
