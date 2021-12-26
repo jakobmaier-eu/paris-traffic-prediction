@@ -40,6 +40,8 @@ library(ranger)
 # 
 # 
 # ## Covid index
+#
+# # Source : https://www.bsg.ox.ac.uk/research/research-projects/covid-19-government-response-tracker
 # 
 # covid_index_data_raw <- read_delim("data/covid_index_data_raw.csv",
 #                 col_names =TRUE, delim=',')
