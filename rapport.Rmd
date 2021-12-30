@@ -10,7 +10,15 @@ link-citations: true
 ---
 
 ```{r librairies, include=FALSE, eval=TRUE}
-#library(bookdown)
+library(XML)
+library(RCurl)
+library(magrittr)
+library(mgcv)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(weathermetrics)
+library(ranger)
 ```
 
 
@@ -59,11 +67,27 @@ A partir de données de l'Organisation Météorologique Mondiale [@meteoData], n
 
 On dispose d'un relevé tous les 3 heures environ donc on procède à une interpolation pour compléter les données. Etant donné que les mesures sont uniformément réparties, on utilise une interpolation linéaire basique à l'aide de la fonction *na.approx* de la librairie *zoo*.
 
-## Complétion du jeux de données
+## Complétion du jeux de données du comptage routier
 
+Malgré l'agragation de plusieurs capteurs de mesure pour chaque arête, le jeu de données agrégé du comptage routier est incomplet et une partie importante du travail a été de le compléter. On représente dans la figure \@ref(fig:histograms) les histogrammes des pourcentages de valeurs manquantes. Les observations brutes du jeu de données sont de 2 types : mesure du taux d'occupation seul et mesure du taux d'occupation et du nombre de voiture (selon le type de capteur implanté dans la chaussée). Ainsi, il y a moins de mesures du nombre de voitures, comme on peut le voir sur les histogrammes des données agrégées. 
 
+```{r histograms, echo=FALSE, fig.cap="Histogrammes", eval=TRUE}
+edges = readRDS("Data/data_agg69_plain/edges_dfs_allyrs.rds")
 
-<span style="color: red;">text</span>
+perctNbCar = c()
+perctRateCar = c()
+nbInd = nrow(edges[[1]])
+
+for(l in 1:69){
+  perctNbCar = c(perctNbCar, sum(is.na(edges[[l]]$q))/nbInd)
+  perctRateCar = c(perctRateCar, sum(is.na(edges[[l]]$k))/nbInd)
+}
+
+par(mfrow=c(1,2)) 
+hist(perctNbCar, breaks=seq(0,1,0.01), main = "Nombre de voitures", xlab = "% de valeurs manquantes", ylab = "Effectif")
+hist(perctRateCar, breaks=seq(0,1,0.01), main = "Taux d'occupation", xlab = "% de valeurs manquantes", ylab = "Effectif")
+```
+
 
 
 

@@ -28,7 +28,7 @@ for (i in 1:length(edges)){
 # Histogram of NA
 perct = c()
 for(l in 1:69){
-  perct = c(perct, sum(is.na(edges[[l]]$q))/nrow(edges[[i]]))
+  perct = c(perct, sum(is.na(edges[[l]]$q))/nrow(edges[[l]]))
 }
 
 hist(perct, breaks=seq(0,1,0.01))
@@ -72,9 +72,9 @@ list_median <- c()
 for (i in 1:69){
   timestamps_na <- edges[[i]]$t_1h[(is.na(edges[[i]][4]) == T)]
   
-  timestamps_na <- edges[[i]]$t_1h[(is.na(edges[[i]][4]) == T)]
+  #timestamps_na <- edges[[i]]$t_1h[(is.na(edges[[i]][4]) == T)]
   
-  print(median(diff(timestamps_na)))
+  #print(median(diff(timestamps_na)))
   
   list_median <- c(list_median, as.numeric(diff(timestamps_na)))
   
