@@ -255,7 +255,7 @@ library(ranger)
 # 
 # 
 # 
-# ### Time of year
+# ### Time of year (TOY)
 # 
 # edges = readRDS("Data/data_with_new_variables.rds")
 # 
@@ -321,7 +321,7 @@ library(ranger)
 # 
 # length = dim(edges[[1]])[1]
 # 
-# for (i in 1:length(edges)){
+# for (i in 1:length(edges)){ # Note: We just copy the first week due to lack of data before.
 #   qLaggedWeek <- c(edges[[i]]$q[1:(24*7)], edges[[i]]$q[1:(length-24*7)])
 #   qLaggedDay <- c(edges[[i]]$q[1:24], edges[[i]]$q[1:(length-24)])
 #   qLaggedHour <- c(edges[[i]]$q[1:1], edges[[i]]$q[1:(length-1)])

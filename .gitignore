@@ -1,6 +1,8 @@
 Data/data_with_new_variables.rds
 Data/edges_with_neigh.rds
 Data/data_with_new_variables_completation.rds
+Data/imputed_edges_neigh.rds
+
 data_cleaner*
 data_raw*
 find_main_streets

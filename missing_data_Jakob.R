@@ -32,3 +32,69 @@ image(
   breaks = c(seq(0, 3, length.out = 30), 100) # colour-to-value mapping
 )
 
+#-------- Filling NAs with Random Forest: EXECUTED ----------------
+
+# dfs = readRDS("Data/edges_with_neigh.rds")
+# library(missRanger)
+# library(caret)
+# library(visdat)
+# library(miceRanger)
+# 
+# imp_dfs = vector("list", length=length(dfs))
+# imp_VarImportance = vector("list", length=length(dfs))
+# missing_percent = vector("list", length=length(dfs))
+# names(imp_dfs) = names(dfs)
+# names(imp_VarImportance) = names(dfs)
+# names(missing_percent) = names(dfs)
+# 
+# 
+# 
+# start_time = Sys.time()
+# for (i in 1:length(dfs)){
+#   df = dfs[[i]]
+#   edgename = names(dfs)[i]
+#   varnames = names(df)
+#   missing_percent[[i]] = c(round(sum(is.na(df$rateCar))/length(df$rateCar), 4)*100,
+#                            round(sum(is.na(df$nbCar))/length(df$nbCar), 4)*100)
+#   vars <- list(
+#     rateCar = varnames[! varnames %in% c('iu_ac', 't_1h', 'covidIndex', 'rateCar')],
+#     nbCar = varnames[! varnames %in% c('iu_ac', 't_1h', 'covidIndex', 'nbCar')]
+#   )
+#   mice_obj <- miceRanger(
+#     df,
+#     m = 1,
+#     maxiter = 5,
+#     vars = vars,
+#     verbose=TRUE,
+#     num.trees = 100,
+#     mtry = 7
+#   )
+#   imp = completeData(mice_obj)[[1]]
+#   imp_VarImportance[[i]] = mice_obj$finalImport[[1]]
+#   imp_dfs[[i]] = imp
+# }
+# end_time = Sys.time()
+# time_elapsed = end_time - start_time
+# 
+# saveRDS(imp_dfs, "Data/imputed_edges_neigh.rds")
+# saveRDS(imp_VarImportance, "Data/imputation_VarImportance.rds")
+# saveRDS(missing_percent, "Data/imputation_missing_percent.rds")
+
+
+#### NOT YET EXECUTED:
+
+# Setting the blocked road's traffic to 0.
+for (line in 1:length(df$state)){
+  if (df$state[line] == 2){ # If blocked
+    if (is.na(df$nbCar[line])){
+      df$nbCar[line] = 0
+      print("nb")
+      print(df$t_1h[line])
+    }
+    if (is.na(df$rateCar[line])){
+      df$rateCar[line] = 0
+      print("rate")
+      print(df$t_1h[line])
+    }
+  }
+}
