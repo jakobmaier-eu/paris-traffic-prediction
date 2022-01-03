@@ -98,3 +98,37 @@ for (line in 1:length(df$state)){
     }
   }
 }
+
+
+#------ TESTING the imputation ----------#
+imp_dfs = readRDS(file = "Data/imputed_edges_neigh.rds")
+for (i in 1:69){
+  df = imp_dfs[[i]]
+  if(sum(is.na(df$nbCar)) != 0){
+    print(paste0("nbCar missing in",names(imp_dfs)[i]))
+    break
+  }
+  if(sum(is.na(df$rateCar)) != 0){
+    print(paste0("rateCar missing in",names(imp_dfs)[i]))
+    break
+  }
+}
+
+imp_percentNA = readRDS(file = "Data/imputation_missing_percent.rds")
+imp_varImpo = readRDS(file = "Data/imputation_VarImportance.rds")
+
+# q importance
+
+i = 29
+for (i in 1:69){
+  print(paste(imp_percentNA[[i]], "asdf ", i))
+}
+edge_impo = imp_varImpo[[i]]
+edge_percent = imp_percentNA[[i]] # this is really in %
+
+edge_q_impo = edge_impo[1,]
+ord = order(unlist(edge_q_impo[-(1:2)]), decreasing = TRUE)
+relevant_vars = edge_q_impo[-(1:2)]
+relevant_vars[ord]
+
+
