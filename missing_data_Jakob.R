@@ -34,20 +34,20 @@ image(
 
 #-------- Filling NAs with Random Forest: EXECUTED ----------------
 
-# dfs = readRDS("Data/edges_with_neigh.rds")
+ dfs = readRDS("Data/edges_with_neigh.rds")
 # 
-# library(missRanger)
-# library(caret)
-# library(visdat)
-# library(miceRanger)
-# library(dplyr)
+library(missRanger)
+library(caret)
+library(visdat)
+library(miceRanger)
+library(dplyr)
 # 
-# imp_edges_train = vector("list", length=length(dfs))
-# imp_VarImportance_train = vector("list", length=length(dfs))
-# missing_percent_train = vector("list", length=length(dfs))
-# names(imp_edges_train) = names(dfs)
-# names(imp_VarImportance_train) = names(dfs)
-# names(missing_percent_train) = names(dfs)
+imp_edges_train = vector("list", length=length(dfs))
+imp_VarImportance_train = vector("list", length=length(dfs))
+missing_percent_train = vector("list", length=length(dfs))
+names(imp_edges_train) = names(dfs)
+names(imp_VarImportance_train) = names(dfs)
+names(missing_percent_train) = names(dfs)
 # 
 # ### Fix some type issues:
 # for (i in 1:69){
@@ -79,7 +79,6 @@ edges_test = readRDS("Data/edges_test.rds")
 edges_train = readRDS("Data/edges_train.rds")
 edges_2020 = readRDS("Data/edges_2020.rds")
 
-
 start_time = Sys.time()
 for (i in 1:length(edges_train)){
   df = edges_train[[i]]
@@ -107,6 +106,63 @@ for (i in 1:length(edges_train)){
 end_time = Sys.time()
 time_elapsed = end_time - start_time
 
+
+
+
+########################"
+
+for(i in 1:69){
+  imp_edges_train[[i]] <- imp_edges_train[[i]][,c(1:17)]
+}
+
+#########################
+
+length = dim(imp_edges_train[[1]])[1]
+
+for (i in 1:length(imp_edges_train)){ # Note: We just copy the first week due to lack of data before.
+  nbCar_LaggedWeek <- c(imp_edges_train[[i]]$nbCar[1:(24*7)], imp_edges_train[[i]]$nbCar[1:(length-24*7)])
+  nbCar_LaggedDay <- c(imp_edges_train[[i]]$nbCar[1:24], imp_edges_train[[i]]$nbCar[1:(length-24)])
+  nbCar_LaggedHour <- c(imp_edges_train[[i]]$nbCar[1:1], imp_edges_train[[i]]$nbCar[1:(length-1)])
+
+  rateCar_LaggedWeek <- c(imp_edges_train[[i]]$rateCar[1:(24*7)], imp_edges_train[[i]]$rateCar[1:(length-24*7)])
+  rateCar_LaggedDay <- c(imp_edges_train[[i]]$rateCar[1:24], imp_edges_train[[i]]$rateCar[1:(length-24)])
+  rateCar_LaggedHour <- c(imp_edges_train[[i]]$rateCar[1:1], imp_edges_train[[i]]$rateCar[1:(length-1)])
+
+  imp_edges_train[[i]] <- mutate(imp_edges_train[[i]],
+                       nbCar_LaggedWeek, nbCar_LaggedDay, nbCar_LaggedHour,
+                       rateCar_LaggedWeek, rateCar_LaggedDay, rateCar_LaggedHour)
+}
+
+###############
+library(dplyr)
+edges_dictionnary <- names(imp_edges_train)
+neigh_after = readRDS('Data/neigh_after.rds')
+neigh_before = readRDS('Data/neigh_before.rds')
+
+for(name in edges_dictionnary){
+  for(neigh_after_name in neigh_after[[paste(name)]]){
+    imp_edges_train[[paste(name)]] <- mutate(imp_edges_train[[paste(name)]], imp_edges_train[[paste(neigh_after_name)]]$nbCar, imp_edges_train[[paste(neigh_after_name)]]$rateCar)
+    names(imp_edges_train[[paste(name)]])[(dim(imp_edges_train[[paste(name)]])[2]-1):(dim(imp_edges_train[[paste(name)]])[2])] <- c(paste("k",gsub("-", "TO", gsub(" ", "", neigh_after_name, fixed = TRUE), fixed = TRUE),sep = "_"), paste("q",gsub("-", "TO", gsub(" ", "", neigh_after_name, fixed = TRUE), fixed = TRUE),sep = "_"))
+    }
+  
+  for(neigh_before_name in neigh_before[[paste(name)]]){
+    imp_edges_train[[paste(name)]] <- mutate(imp_edges_train[[paste(name)]], imp_edges_train[[paste(neigh_before_name)]]$nbCar, imp_edges_train[[paste(neigh_before_name)]]$rateCar)
+    names(imp_edges_train[[paste(name)]])[(dim(imp_edges_train[[paste(name)]])[2]-1):(dim(imp_edges_train[[paste(name)]])[2])] <- c(paste("k",gsub("-", "TO", gsub(" ", "", neigh_before_name, fixed = TRUE), fixed = TRUE),sep = "_"), paste("q",gsub("-", "TO", gsub(" ", "", neigh_before_name, fixed = TRUE), fixed = TRUE),sep = "_"))
+  }
+}
+
+for(i in 1:69){
+  for(j in 24:(dim(imp_edges_train[[i]])[2])){
+    str = names(imp_edges_train[[i]])[j]
+    if (substring(str,1,1) == "q"){
+      names(imp_edges_train[[i]])[j] = paste0("rateCar" , substring(str,2))
+    }
+    if (substring(str,1,1) == "k"){
+      names(imp_edges_train[[i]])[j] = paste0("nbCar" , substring(str,2))
+    }
+  }
+}
+
 saveRDS(imp_edges_train, "Data/imp_edges_train.rds")
 saveRDS(imp_VarImportance_train, "Data/imp_VarImportance_train.rds")
 saveRDS(missing_percent_train, "Data/imp_missing_percent_train.rds")
@@ -132,15 +188,15 @@ for (line in 1:length(df$state)){
 
 
 #------ TESTING the imputation ----------#
-imp_dfs = readRDS(file = "Data/imputed_edges_neigh.rds")
+imp_edges_train = readRDS(file = "Data/imp_edges_train.rds")
 for (i in 1:69){
-  df = imp_dfs[[i]]
+  df = imp_edges_train[[i]]
   if(sum(is.na(df$nbCar)) != 0){
-    print(paste0("nbCar missing in",names(imp_dfs)[i]))
+    print(paste0("nbCar missing in",names(imp_edges_train)[i]))
     break
   }
   if(sum(is.na(df$rateCar)) != 0){
-    print(paste0("rateCar missing in",names(imp_dfs)[i]))
+    print(paste0("rateCar missing in",names(imp_edges_train)[i]))
     break
   }
 }
