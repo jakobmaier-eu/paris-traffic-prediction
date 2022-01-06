@@ -219,3 +219,41 @@ relevant_vars = edge_q_impo[-(1:2)]
 relevant_vars[ord]
 
 
+
+
+############ Visualization of imputation for report
+library(ggplot2)
+
+imp_percentNA = readRDS(file = "Data/imp_missing_percent_train.rds")
+imp_varImpo = readRDS(file = "Data/imp_VarImportance_train.rds")
+
+for (i in 1:5){
+  impo_rateCar_raw = transpose(imp_varImpo[[i]])[[1]][-c(1,2)]
+  impo_rateCar = do.call(rbind.data.frame, impo_rateCar_raw)
+  rm(impo_rateCar_raw)
+  colnames(impo_rateCar) = c("values")
+  impo_rateCar$variables = names(imp_varImpo[[i]])[-c(1,2)]
+  
+  impo_nbCar_raw = transpose(imp_varImpo[[i]])[[2]][-c(1,3)]
+  impo_nbCar = do.call(rbind.data.frame, impo_nbCar_raw)
+  rm(impo_nbCar_raw)
+  colnames(impo_nbCar) = c("values")
+  impo_nbCar$variables = names(imp_varImpo[[i]])[-c(1,3)]
+  
+  
+  g = ggplot(data = head(arrange(impo_rateCar, desc(values)), 6), 
+             aes(y = reorder(variables, values), x = values))  
+  plot(g + geom_bar(stat="identity")+xlab("RF imputation importance scores")
+       +ylab("variables (max. scores)") 
+       +labs(title = paste0("rateCar for ", names(imp_varImpo[i])))
+  )
+  
+  g = ggplot(data = head(arrange(impo_nbCar, desc(values)), 6), 
+             aes(y = reorder(variables, values), x = values))  
+  plot(g + geom_bar(stat="identity")+xlab("RF imputation importance scores")
+       +ylab("variables (max. scores)") 
+       +labs(title = paste0("nbCar for ", names(imp_varImpo[i])))
+  )
+}
+
+
