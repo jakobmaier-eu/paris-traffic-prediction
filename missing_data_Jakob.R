@@ -11,6 +11,11 @@ library(dplyr)
 library(lubridate)
 library(weathermetrics)
 library(ranger)
+library(missRanger)
+library(caret)
+library(visdat)
+library(miceRanger)
+library(dplyr)
 #----------- End Header ----------------#
 
 list_dfs = readRDS("Data/data_agg69_plain/edges_dfs_allyrs.rds")
@@ -256,4 +261,105 @@ for (i in 1:5){
   )
 }
 
+##############################################
+###### completion data test
+##############################################
 
+dfs = readRDS("Data/edges_with_neigh.rds")
+
+imp_edges_test = vector("list", length=length(dfs))
+imp_VarImportance_test = vector("list", length=length(dfs))
+missing_percent_test = vector("list", length=length(dfs))
+names(imp_edges_test) = names(dfs)
+names(imp_VarImportance_test) = names(dfs)
+names(missing_percent_test) = names(dfs)
+
+edges_test = readRDS("Data/edges_test.rds")
+
+start_time = Sys.time()
+for (i in 1:length(edges_test)){
+  df = edges_test[[i]]
+  edgename = names(edges_test)[i]
+  varnames = names(df)
+  missing_percent_test[[i]] = c(round(sum(is.na(df$rateCar))/length(df$rateCar), 4)*100,
+                                 round(sum(is.na(df$nbCar))/length(df$nbCar), 4)*100)
+  vars <- list(
+    rateCar = varnames[! varnames %in% c('covidIndex', 'rateCar')],
+    nbCar = varnames[! varnames %in% c('covidIndex', 'nbCar')]
+  )
+  mice_obj <- miceRanger(
+    df,
+    m = 1,
+    maxiter = 5,
+    vars = vars,
+    verbose=TRUE,
+    num.trees = 100,
+    mtry = 7
+  )
+  imp = completeData(mice_obj)[[1]]
+  imp_VarImportance_test[[i]] = mice_obj$finalImport[[1]]
+  imp_edges_test[[i]] = imp
+}
+end_time = Sys.time()
+time_elapsed = end_time - start_time
+
+
+
+
+########################"
+
+for(i in 1:69){
+  imp_edges_test[[i]] <- imp_edges_test[[i]][,c(1:17)]
+}
+
+#########################
+
+length = dim(imp_edges_test[[1]])[1]
+
+for (i in 1:length(imp_edges_test)){ # Note: We just copy the first week due to lack of data before.
+  nbCar_LaggedWeek <- c(imp_edges_test[[i]]$nbCar[1:(24*7)], imp_edges_test[[i]]$nbCar[1:(length-24*7)])
+  nbCar_LaggedDay <- c(imp_edges_test[[i]]$nbCar[1:24], imp_edges_test[[i]]$nbCar[1:(length-24)])
+  nbCar_LaggedHour <- c(imp_edges_test[[i]]$nbCar[1:1], imp_edges_test[[i]]$nbCar[1:(length-1)])
+  
+  rateCar_LaggedWeek <- c(imp_edges_test[[i]]$rateCar[1:(24*7)], imp_edges_test[[i]]$rateCar[1:(length-24*7)])
+  rateCar_LaggedDay <- c(imp_edges_test[[i]]$rateCar[1:24], imp_edges_test[[i]]$rateCar[1:(length-24)])
+  rateCar_LaggedHour <- c(imp_edges_test[[i]]$rateCar[1:1], imp_edges_test[[i]]$rateCar[1:(length-1)])
+  
+  imp_edges_test[[i]] <- mutate(imp_edges_test[[i]],
+                                 nbCar_LaggedWeek, nbCar_LaggedDay, nbCar_LaggedHour,
+                                 rateCar_LaggedWeek, rateCar_LaggedDay, rateCar_LaggedHour)
+}
+
+###############
+library(dplyr)
+edges_dictionnary <- names(imp_edges_test)
+neigh_after = readRDS('Data/neigh_after.rds')
+neigh_before = readRDS('Data/neigh_before.rds')
+
+for(name in edges_dictionnary){
+  for(neigh_after_name in neigh_after[[paste(name)]]){
+    imp_edges_test[[paste(name)]] <- mutate(imp_edges_test[[paste(name)]], imp_edges_test[[paste(neigh_after_name)]]$nbCar, imp_edges_test[[paste(neigh_after_name)]]$rateCar)
+    names(imp_edges_test[[paste(name)]])[(dim(imp_edges_test[[paste(name)]])[2]-1):(dim(imp_edges_test[[paste(name)]])[2])] <- c(paste("k",gsub("-", "TO", gsub(" ", "", neigh_after_name, fixed = TRUE), fixed = TRUE),sep = "_"), paste("q",gsub("-", "TO", gsub(" ", "", neigh_after_name, fixed = TRUE), fixed = TRUE),sep = "_"))
+  }
+  
+  for(neigh_before_name in neigh_before[[paste(name)]]){
+    imp_edges_test[[paste(name)]] <- mutate(imp_edges_test[[paste(name)]], imp_edges_test[[paste(neigh_before_name)]]$nbCar, imp_edges_test[[paste(neigh_before_name)]]$rateCar)
+    names(imp_edges_test[[paste(name)]])[(dim(imp_edges_test[[paste(name)]])[2]-1):(dim(imp_edges_test[[paste(name)]])[2])] <- c(paste("k",gsub("-", "TO", gsub(" ", "", neigh_before_name, fixed = TRUE), fixed = TRUE),sep = "_"), paste("q",gsub("-", "TO", gsub(" ", "", neigh_before_name, fixed = TRUE), fixed = TRUE),sep = "_"))
+  }
+}
+
+for(i in 1:69){
+  for(j in 24:(dim(imp_edges_test[[i]])[2])){
+    str = names(imp_edges_test[[i]])[j]
+    if (substring(str,1,1) == "q"){
+      names(imp_edges_test[[i]])[j] = paste0("rateCar" , substring(str,2))
+    }
+    if (substring(str,1,1) == "k"){
+      names(imp_edges_test[[i]])[j] = paste0("nbCar" , substring(str,2))
+    }
+  }
+}
+
+saveRDS(imp_edges_test, "Data/imp_edges_test.rds")
+saveRDS(imp_VarImportance_test, "Data/imp_VarImportance_test.rds")
+saveRDS(missing_percent_test, "Data/imp_missing_percent_test.rds")
