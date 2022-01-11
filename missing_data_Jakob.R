@@ -78,7 +78,7 @@ names(missing_percent_train) = names(dfs)
 # 
 # saveRDS(edges_test, "Data/edges_test.rds")
 # saveRDS(edges_train, "Data/edges_train.rds")
-# saveRDS(edges_test, "Data/edges_2020.rds")
+# saveRDS(edges_2020, "Data/edges_2020.rds")
 
 edges_test = readRDS("Data/edges_test.rds")
 edges_train = readRDS("Data/edges_train.rds")

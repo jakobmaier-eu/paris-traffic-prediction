@@ -8,6 +8,7 @@ library("tuneRanger")
 library("mlr")
 library("caret")
 
+set.seed(1)
 
 edges = readRDS("data/imp_edges_train.rds")
 
@@ -32,22 +33,22 @@ data$hour <- as.factor(data$hour)
 
 ptm <- proc.time()
 
-grid <-  expand.grid(mtry = c(5), 
-                     min.node.size = c(5:50),
+grid <-  expand.grid(mtry = seq(2,34,by=2), 
+                     min.node.size = seq(2,8,by=2),
                      splitrule = "variance")
 
 fitControl <- trainControl(method = "timeSlice",
                            initialWindow = 2*365*24,
                            horizon = 1,
-                           skip = 2*30*24,
+                           skip = 6*30*24,
                            fixedWindow = TRUE,
                            verboseIter = TRUE)
 
-fit = train(
+fit = caret::train(
   x = data[,-2],
   y = data$rateCar,
   method = 'ranger',
-  num.trees = 100,
+  num.trees = 50,
   tuneGrid = grid,
   trControl = fitControl)
 
