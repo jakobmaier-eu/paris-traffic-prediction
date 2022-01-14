@@ -8,6 +8,8 @@ Data/imp_edges_test2020.rds
 Data/edges_test.rds
 Data/edges_train.rds
 Data/edges_2020.rds
+data_train.RData
+data.RData
 
 
 data_cleaner*
