@@ -88,6 +88,57 @@ hist(perctNbCar, breaks=seq(0,1,0.01), main = "Nombre de voitures", xlab = "% de
 hist(perctRateCar, breaks=seq(0,1,0.01), main = "Taux d'occupation", xlab = "% de valeurs manquantes", ylab = "Effectif")
 ```
 
+## Etude descriptive des données
+
+## Stratégie de prévision
+
+**Choix des jeux de données**
+
+On décide de découper notre jeu de données en 2 : une partie apprentissage de 2014 à 2017 et une partie test de 2018 à 2019. Ainsi, on pourra évaluer les performances de nos modèles sur les différentes périodes d'une année. 
+
+**Choix de la métrique**
+
+Pour évaluer ces performanes, on choisit la métrique Root Mean Square Error (RMSE) qui représente la racine carrée du deuxième moment d'échantillonnage des différences entre les valeurs prédites et les valeurs observées. On n'utilise pas la métrique Mean Absolute Percentage Error (MAPE) car un nombre important des valeurs de **rateCar** sont nulles. 
+
+**Modèles naïfs à battre**
+
+Afin de comparer nos modèles, on construit 3 modèles témoins. Ces modèles sont dit naïfs car extrêmement simpliste :
+
+* **naiveModel1** prévoit le taux d'occupation d'une heure $t \in \{ 0, \dots, 23 \}$ d'un jour $j \in \{ 1, \dots, 7\}$ d'un mois $m \in \{ 1, \dots, 12 \}$ d'une année $a \in \{ 2018, 2019 \}$ en moyennant les taux d'occupation de l'heure $t$ du jour $j$ du mois $m$ pour toutes les années $a \in \{ 2014, \dots, 2017 \}$.
+
+* **naiveModel2** fait de même en calculant la médiane et non la moyenne.
+
+* **naiveModel3** est simplement le taux d'occupation à l'heure précédente **rateCarLaggedDay**.
+
+On calcule la moyenne des erreurs RMSE pour les 69 arêtes :
+
+```{r naiveModel table, echo=FALSE}
+df_naiveModels <- data.frame(5.844, 5.899, 3.955)
+names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
+
+knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles naïfs témoins", "latex")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
