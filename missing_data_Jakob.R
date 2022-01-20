@@ -11,6 +11,7 @@ library(dplyr)
 library(lubridate)
 library(weathermetrics)
 library(ranger)
+library(ggplot2)
 library(missRanger)
 library(caret)
 library(visdat)
@@ -227,10 +228,21 @@ relevant_vars[ord]
 
 
 ############ Visualization of imputation for report
-library(ggplot2)
 
 imp_percentNA = readRDS(file = "Data/imp_missing_percent_train.rds")
 imp_varImpo = readRDS(file = "Data/imp_VarImportance_train.rds")
+
+for(i in 1:69){ # First fix the names
+  for(j in 24:(dim(imp_varImpo[[i]])[2])){
+    str = names(imp_varImpo[[i]])[j]
+    if (substring(str,1,1) == "q"){
+      names(imp_varImpo[[i]])[j] = paste0("rateCar" , substring(str,2))
+    }
+    if (substring(str,1,1) == "k"){
+      names(imp_varImpo[[i]])[j] = paste0("nbCar" , substring(str,2))
+    }
+  }
+}
 
 for (i in 1:5){
   impo_rateCar_raw = transpose(imp_varImpo[[i]])[[1]][-c(1,2)]
