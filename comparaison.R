@@ -4,7 +4,7 @@ library(ProjetML1)
 
 data_test <- readRDS("data/imp_edges_test.rds")
 
-
+# Naive models
 pred1 <- readRDS("data/naivePrediction1.rds") #5.844
 pred2 <- readRDS("data/naivePrediction2.rds") #5.899
 pred3 <- readRDS("data/naivePrediction3.rds") #3.955
@@ -18,9 +18,12 @@ mean(rmse_list)
 df_naiveModels <- data.frame(5.844, 5.899, 3.955)
 names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 
+# RF
+predRF1 <- load("Scores/RF_with_neighbors.RData")
+predRF2 <- load("Scores/RF_without_neighbors.RData")
 
-
-
+df_RF <- data.frame(3.2671, 3.2666)
+names(df_RF) <- c("RF_with_neighbors", "RF_without_neighbors")
 
 
 

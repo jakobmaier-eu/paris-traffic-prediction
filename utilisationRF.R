@@ -137,7 +137,7 @@ for(i in 1:69){
   data$year <- as.factor(data$year)
   data$month <- as.factor(data$month)
   data$hour <- as.factor(data$hour)
-  
+
   data_test$day <- as.factor(data_test$day)
   data_test$year <- as.factor(data_test$year)
   data_test$month <- as.factor(data_test$month)

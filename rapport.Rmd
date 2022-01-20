@@ -116,7 +116,7 @@ On calcule la moyenne des erreurs RMSE pour les 69 arêtes :
 df_naiveModels <- data.frame(5.844, 5.899, 3.955)
 names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 
-knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles naïfs témoins", "latex")
+knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles naïfs témoins")
 ```
 
 

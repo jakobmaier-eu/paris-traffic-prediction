@@ -13,12 +13,14 @@ eq <- rateCar ~.
 train_control <- trainControl(method = "timeSlice",
                            initialWindow = 2*365*24,
                            horizon = 1,
-                           skip = 6*30*24,
+                           skip = 3*30*24,
                            fixedWindow = TRUE,
                            verboseIter = TRUE)
 
 train_control <- trainControl(method="repeatedcv", number=10,repeats = 10)
 cpGrid <- expand.grid(cp=seq(0,0.1,length=10))
+cpGrid <- expand.grid(cp=seq(0,0.001,length=10))
+
 set.seed(1)
 rpart.CV<-train(eq, data = data_train[[1]], method ="rpart",  
                 trControl=train_control, metric="RMSE",tuneGrid = cpGrid,minsplit=2)
