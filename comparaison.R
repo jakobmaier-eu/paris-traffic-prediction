@@ -20,17 +20,28 @@ names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 
 # RF
 predRF1 <- load("Scores/RF_with_neighbors.RData")
+rmse_list_predRF_with <- rmse_list
 predRF2 <- load("Scores/RF_without_neighbors.RData")
+rmse_list_predRF_without <- rmse_list
 
 df_RF <- data.frame(3.2671, 3.2666)
 names(df_RF) <- c("RF_with_neighbors", "RF_without_neighbors")
 
+#Moyenne des rmse Paris hors périphérique
+mean(rmse_list_predRF_with[1:51])
 
+#Moyenne des rmse périphérique
+mean(rmse_list_predRF_with[52:69])
 
+#Différences des erreurs RMSE
+y <- rmse_list_predRF_with - rmse_list_predRF_without
+plot(1:69, rmse_list_predRF_with - rmse_list_predRF_without, pch=4,
+     col = ifelse(y < -0.2,'red','black'),main = "Différences des erreurs RMSE"
+     ,xlab = "Arêtes", ylab = "Différence")
+abline(v=52,lty=2)
+abline(h=0)
+abline(h = -0.2,lty=2,col='red')
 
-
-
-
-
-
+#Erreurs RMSE
+plot(1:69,rmse_list_predRF_with)
 

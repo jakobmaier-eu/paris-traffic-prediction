@@ -9,7 +9,7 @@ data("data_train")
 
 eq <- rateCar ~.
 
-
+#Tuning
 train_control <- trainControl(method = "timeSlice",
                            initialWindow = 2*365*24,
                            horizon = 1,
@@ -37,6 +37,7 @@ rmse(data_test[[1]]$rateCar, rpart1.forecast)
 
 
 #################
+#Prediction
 
 rmse_list = c()
 mape_list = c()
@@ -48,16 +49,6 @@ for(i in 1:69){
   
   data_tr = data_train[[i]][,-1][,c(1:22)]
   data_te = data_test[[i]][,-1][,c(1:22)]
-  
-  # data_tr$day <- as.factor(data_tr$day)
-  # data_tr$year <- as.factor(data_tr$year)
-  # data_tr$month <- as.factor(data_tr$month)
-  # data_tr$hour <- as.factor(data_tr$hour)
-  # 
-  # data_te$day <- as.factor(data_te$day)
-  # data_te$year <- as.factor(data_te$year)
-  # data_te$month <- as.factor(data_te$month)
-  # data_te$hour <- as.factor(data_te$hour)
   
   model <- rpart(eq , data = data_tr, method = "anova",
                  control = rpart.control(minsplit = 2,

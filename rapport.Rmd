@@ -26,7 +26,7 @@ library(ranger)
 
 ## Présentation des données
 
-On présente maintenant les données que l'on a collectées et traitées afin de les utiliser dans la tâche de prédiction.
+On présente maintenant les données que l'on a collectées et traitées afin de les utiliser dans la tâche de prédiction. 
 
 **Données de comptage routier**
 
@@ -118,6 +118,38 @@ names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 
 knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles naïfs témoins")
 ```
+
+# Modèles
+
+## Arbres
+
+## Forêts aléatoires
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
