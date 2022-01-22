@@ -34,11 +34,11 @@ Les données de comptage routier sont disponibles sur le site **Paris Data** [@p
 
 Pour une année, il y a environ 29 millions observations réparties sur plus de 3000 points. On a donc procédé à une transformation des données afin de réduire leur nombre et les structurer. La première étape est l'agrégation des points d'observations selon les libellés **libelle** associés dans le jeu de données et à l'aide de leur identifiant **iu_ac**. Ensuite, on a déterminé les principaux axes de Paris en moyennant le nombre de voitures par heure des points d'observations partageant un même libellé puis en choisissant les 200 premières valeurs (hors périphérique). On obtient le graphique \@ref(fig:200mainstreets) et on en déduit le graphe simplifié \@ref(fig:graphe) de Paris composé de 69 arêtes, correspondant à 69 jeux de données.
 
-```{r 200mainstreets, out.width='25%', fig.align='center', fig.show='hold', fig.cap="Représentation en rouge des points d'observation associés aux 200 libellés les plus fréquentés (hors périphérique)", echo = F}
+```{r 200mainstreets, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Représentation en rouge des points d'observation associés aux 200 libellés les plus fréquentés (hors périphérique)", echo = F}
 knitr::include_graphics('figures/200mainstreets.png')
 ```
 
-```{r graphe, out.width='25%', fig.align='center', fig.show='hold', fig.cap="Graphe simplifié de Paris", echo = F}
+```{r graphe, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Graphe simplifié de Paris", echo = F}
 knitr::include_graphics('figures/graphe.png')
 ```
 
@@ -121,7 +121,7 @@ knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles
 
 **Recherche de paramètres**
 
-Afin d'optimiser les performances de nos différents modèles, nous effectuons de la recherche de paramètres à l'aide du package *caret*. Les 2 méthodes que l'on utilise sont
+Afin d'optimiser les performances de nos différents modèles, nous effectuons de la recherche de paramètres à l'aide du package *caret*. On utilise les 2 méthodes suivantes :
 
 * *cv* : validation croisée sur 16 blocs. On divise ainsi nos 4 années de données d'apprentissage en blocs de 3 mois, ce qui englobe les différentes saisonnalités de nos données.
 
@@ -129,11 +129,17 @@ Afin d'optimiser les performances de nos différents modèles, nous effectuons d
 
 L'avantage de *timeSlice* est qu'il permet d'optimiser un modèle pour la prédiction à un horizon déterminé. De plus, contrairement à la validation croisée, il n'utilise pas de données futures pour prédire le passé. Cependant, en pratique, on souhaite entraîner le modèle une unique fois sans le mettre à jour tous les 2 mois. Dans ce cas, la validation croisée est plus pertinente. 
 
-Lors de nos recherches de paramètres, nous avons observé que les 2 méthodes sélectionnent des paramètres proches. Finalement, on se base sur la validation croisée en 16 blocs pour la recherche de paramètres. Pour permettre la reproductibilité des résultats, on fixe la graine du générateur aléatoire.
+Lors de nos recherches de paramètres, nous avons observé que les 2 méthodes sélectionnent des paramètres proches. Finalement, on se base sur la validation croisée en 16 blocs pour la recherche de paramètres. 
+
+Pour permettre la reproductibilité des résultats, on fixe la graine du générateur aléatoire. De plus, on effectue la recherche de paramètre pour une seule arête sur les 69 car c'est un processus long et on fait l'hypothèse que le paramètre optimal pour la prévision sur une arête est proche de celui de toutes les autres arêtes.  
 
 # Modèles
 
 ## Arbres
+
+```{r arbreGrille1, fig.cap = "Recherche du paramètre cp optimal", out.width='100%', fig.align='center', fig.show='hold', echo = F}
+knitr::include_graphics('figures/arbre_grille.png')
+```
 
 ## Forêts aléatoires
 

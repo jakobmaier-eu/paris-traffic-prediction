@@ -1,5 +1,6 @@
 rm(list=objects()) # Clean the global environment
 
+# Librairies
 library("ranger")
 library("vip")
 library("tuneRanger")
@@ -7,20 +8,12 @@ library("mlr")
 library("caret")
 library(ProjetML1)
 
-# rmse<-function(eps)
-# {
-#   return(round(sqrt(mean(eps^2,na.rm=TRUE)),digits=2))
-# }
-# 
-# mape<-function(y,ychap)
-# {
-#   return(round(100*mean(abs(y-ychap)/abs(y)),digits=2))
-# }
-
+# Fix seed
 set.seed(1)
 
-edges = readRDS("data/imp_edges_train.rds")
-edges_test = readRDS("data/imp_edges_test.rds")
+# Data
+data("data_train")
+data("data_test")
 
 ###############################################
 ##### TEST
@@ -44,8 +37,8 @@ res$variable.importance[order(res$variable.importance)]
 ##### TUNING
 ############################################
 
-data = edges[[1]][,-1]
-data_test = edges_test[[1]][,-1]
+data = edges[[1]]
+data_test = edges_test[[1]]
 
 data$day <- as.factor(data$day)
 data$year <- as.factor(data$year)

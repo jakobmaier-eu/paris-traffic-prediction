@@ -4,6 +4,7 @@ rm(list=objects())
 library(ProjetML1)
 library(rpart)
 library(caret)
+library(UsingR)
 
 # Data
 data("data_test")
@@ -37,16 +38,16 @@ cpGrid1 <- expand.grid(cp=seq(0,0.1,length=10))
 cpGrid2 <- expand.grid(cp=seq(0,0.01,length=10))
 
 # Training
-rpart.CV <- train(eq, data = data_train[[1]], method ="rpart",  
+rpart.CV.1 <- train(eq, data = data_train[[1]], method ="rpart",  
                 trControl=train_control, metric="RMSE",tuneGrid = cpGrid1,minsplit=2)
 
-# Plotting results
-plot(rpart.CV, main = "Recherche du paramètre cp")
+rpart.CV.2 <- train(eq, data = data_train[[1]], method ="rpart",  
+                  trControl=train_control, metric="RMSE",tuneGrid = cpGrid2,minsplit=2)
 
 # Fitting the tree with optimal cp value
 rpart1 <- rpart(eq , data = data_train[[1]], method = "anova",
                control = rpart.control(minsplit = 2,
-                                       cp = cpGrid[which.min(rpart.CV$results$RMSE),]))
+                                       cp = cpGrid1[which.min(rpart.CV.2$results$RMSE),]))
 
 # Prediction
 rpart1.forecast <- predict(rpart1,newdata=data_test[[1]])
@@ -54,7 +55,14 @@ rpart1.forecast <- predict(rpart1,newdata=data_test[[1]])
 # Rmse error
 rmse(data_test[[1]]$rateCar, rpart1.forecast)
 
+# Plotting results
+par(mfrow=c(1,2))
 
+p1 <- plot(rpart.CV.1, main = "Grille : de 0.0 à 0.1", xlab = "Paramètre cp", ylab="RMSE")
+p2 <- plot(rpart.CV.2, main = "Grille : de 0.00 à 0.01", xlab = "Paramètre cp", ylab="RMSE")
+
+print(p1, position = c(0, 0, 0.5, 1), more = TRUE)
+print(p2, position = c(0.5, 0, 1, 1))
 
 #################
 # Prediction of the 69 edges without neighbors
