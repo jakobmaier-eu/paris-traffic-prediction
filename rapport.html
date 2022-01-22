@@ -197,7 +197,7 @@ pre code {
 <h1><span class="header-section-number">1</span> Le jeu de données</h1>
 <div id="présentation-des-données" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> Présentation des données</h2>
-<p>On présente maintenant les données que l’on a collectées et traitées afin de les utiliser dans la tâche de prédiction. <span class="citation">(<a href="#ref-paris" role="doc-biblioref"><strong>paris?</strong></a>)</span></p>
+<p>On présente maintenant les données que l’on a collectées et traitées afin de les utiliser dans la tâche de prédiction.</p>
 <p><strong>Données de comptage routier</strong></p>
 <p>Les données de comptage routier sont disponibles sur le site <strong>Paris Data</strong> <span class="citation">(<a href="#ref-parisData" role="doc-biblioref"><span>“Paris Data”</span> visité le 26.12.2021</a>)</span>, regroupant les jeux de données de la Ville de Paris, disponibles sur le site <span class="citation">(<a href="#ref-donneesComptage" role="doc-biblioref"><span>“Données Du Comptage Routier”</span> visité le 26.12.2021</a>)</span>. Elles sont collectées grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. L’historique des données s’étend de 2014 à ???? au pas horaire, selon la variable <strong>t_1h</strong>. Chaque boucle électromagnétique mesure le traffic sur un arc entre un noeud amont et un noeud aval. Deux données principales sont fournies : le <strong>taux d’occupation</strong>, <strong>k</strong>, qui correspond au temps de présence de véhicules sur la boucle en pourcentage d’une heure et le <strong>débit</strong>, <strong>q</strong> qui est le nombre de véhicules ayant passé le point de comptage pendant une heure. Nous gardons également d’autres variables : l’identifiant de l’arc, <strong>iu_ac</strong>, le libellé de la voie correspondante, <strong>libelle</strong> et l’état de l’arc, <strong>state</strong>. Ce dernier vaut 0 si l’état est inconnu, 1 si l’arc est ouvert à la circulation, 2 l’arc est fermé à la circulation et 3 si l’arc est invalide. Il n’est malheureusement pas expliqué la différence entre arc fermé et arc invalide dans la documentation.</p>
 <p>Pour une année, il y a environ 29 millions observations réparties sur plus de 3000 points. On a donc procédé à une transformation des données afin de réduire leur nombre et les structurer. La première étape est l’agrégation des points d’observations selon les libellés <strong>libelle</strong> associés dans le jeu de données et à l’aide de leur identifiant <strong>iu_ac</strong>. Ensuite, on a déterminé les principaux axes de Paris en moyennant le nombre de voitures par heure des points d’observations partageant un même libellé puis en choisissant les 200 premières valeurs (hors périphérique). On obtient le graphique <a href="#fig:200mainstreets">1.1</a> et on en déduit le graphe simplifié <a href="#fig:graphe">1.2</a> de Paris composé de 69 arêtes, correspondant à 69 jeux de données.</p>
@@ -247,7 +247,7 @@ Figure 1.3: Histogrammes
 <div id="stratégie-de-prévision" class="section level2" number="1.4">
 <h2><span class="header-section-number">1.4</span> Stratégie de prévision</h2>
 <p><strong>Choix des jeux de données</strong></p>
-<p>On décide de découper notre jeu de données en 2 : une partie apprentissage de 2014 à 2017 et une partie test de 2018 à 2019. Ainsi, on pourra évaluer les performances de nos modèles sur les différentes périodes d’une année.</p>
+<p>On découpe notre jeu de données en 2 parties de proportion 2/3 et 1/3 : une partie apprentissage de 2014 à 2017 et une partie test de 2018 à 2019. Ainsi, on pourra évaluer les performances de nos modèles sur les différentes périodes d’une année.</p>
 <p><strong>Choix de la métrique</strong></p>
 <p>Pour évaluer ces performanes, on choisit la métrique Root Mean Square Error (RMSE) qui représente la racine carrée du deuxième moment d’échantillonnage des différences entre les valeurs prédites et les valeurs observées. On n’utilise pas la métrique Mean Absolute Percentage Error (MAPE) car un nombre important des valeurs de <strong>rateCar</strong> sont nulles.</p>
 <p><strong>Modèles naïfs à battre</strong></p>
@@ -275,6 +275,14 @@ Figure 1.3: Histogrammes
 </tr>
 </tbody>
 </table>
+<p><strong>Recherche de paramètres</strong></p>
+<p>Afin d’optimiser les performances de nos différents modèles, nous effectuons de la recherche de paramètres à l’aide du package <em>caret</em>. Les 2 méthodes que l’on utilise sont</p>
+<ul>
+<li><p><em>cv</em> : validation croisée sur 16 blocs. On divise ainsi nos 4 années de données d’apprentissage en blocs de 3 mois, ce qui englobe les différentes saisonnalités de nos données.</p></li>
+<li><p><em>timeSlice</em> : où on fixe une fenêtre initiale d’apprentissage de 2 ans, que l’on incrémente dans l’ordre chronologique de 2 mois à chaque itération, pour entraîner le modèle et mesurer sa performance à l’horizon 1 (c’est-à-dire prédire le taux d’occupation de l’heure suivante).</p></li>
+</ul>
+<p>L’avantage de <em>timeSlice</em> est qu’il permet d’optimiser un modèle pour la prédiction à un horizon déterminé. De plus, contrairement à la validation croisée, il n’utilise pas de données futures pour prédire le passé. Cependant, en pratique, on souhaite entraîner le modèle une unique fois sans le mettre à jour tous les 2 mois. Dans ce cas, la validation croisée est plus pertinente.</p>
+<p>Lors de nos recherches de paramètres, nous avons observé que les 2 méthodes sélectionnent des paramètres proches. Finalement, on se base sur la validation croisée en 16 blocs pour la recherche de paramètres. Pour permettre la reproductibilité des résultats, on fixe la graine du générateur aléatoire.</p>
 </div>
 </div>
 <div id="modèles" class="section level1" number="2">
