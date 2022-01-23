@@ -20,7 +20,7 @@ data("data_test")
 ###############################################
 
 res <- ranger(rateCar ~ ., 
-                   data=edges[[1]], 
+                   data=data_train[[1]], 
                    importance='impurity')
 
 vip(res)
@@ -37,38 +37,51 @@ res$variable.importance[order(res$variable.importance)]
 ##### TUNING
 ############################################
 
-data = edges[[1]]
-data_test = edges_test[[1]]
+# Data
+data_train = data_train[[1]]
+data_test = data_test[[1]]
 
-data$day <- as.factor(data$day)
-data$year <- as.factor(data$year)
-data$month <- as.factor(data$month)
-data$hour <- as.factor(data$hour)
+# Convert categorical variables into numeric
+data_train$day <- as.factor(data_train$day)
+data_train$year <- as.factor(data_train$year)
+data_train$month <- as.factor(data_train$month)
+data_train$hour <- as.factor(data_train$hour)
 
 data_test$day <- as.factor(data_test$day)
 data_test$year <- as.factor(data_test$year)
 data_test$month <- as.factor(data_test$month)
 data_test$hour <- as.factor(data_test$hour)
 
-ptm <- proc.time()
-
-grid <-  expand.grid(mtry = 5, 
-                     min.node.size = seq(1,50,by=1),
+# Grids
+grid_mtry <-  expand.grid(mtry = seq(6,33,by=4), 
+                     min.node.size = 5,
                      splitrule = "variance")
 
+grid_minnode <-  expand.grid(mtry = 6, 
+                          min.node.size = seq(5, 50, by = 5),
+                          splitrule = "variance")
+
+# timeSlice method
 fitControl <- trainControl(method = "timeSlice",
                            initialWindow = 2*365*24,
                            horizon = 1,
-                           skip = 6*30*24,
+                           skip = 2*30*24,
                            fixedWindow = TRUE,
                            verboseIter = TRUE)
 
+# cv method
+fitControl <- trainControl(method="cv", number=16,
+                           verboseIter = TRUE)
+
+# Training
+ptm <- proc.time()
+
 fit = caret::train(
-  x = data[,-2],
-  y = data$rateCar,
+  x = data_train,
+  y = data_train$rateCar,
   method = 'ranger',
   num.trees = 100,
-  tuneGrid = grid,
+  tuneGrid = grid_mtry, # change the grid here
   trControl = fitControl)
 
 print(fit)
