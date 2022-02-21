@@ -22,8 +22,6 @@ library(weathermetrics)
 library(ranger)
 ```
 
-# Présentation du rapport
-
 # Introduction : La circulation à Paris
 La ville de Paris rend publiquement accessible de vastes données sur la circulation routière dans la ville. La découverte du site web *Paris Data* [@parisData] nous a motivé pour utiliser cette ressource dans notre projet de prédiction. Ce qui nous a surtout intrigué est la possibilité de relier les différents capteurs dans une structure de graphe. D'un côté, cela motive des études globales du réseau entier : Est-ce qu'on trouve un algorithme global, qui apprend les interactions dans le réseau entier ? De l'autre côté, l'examination de rues individuelles mène à des questions sur la corrélation locale de la circulation. Un grand boulevard se comporte-t-il comme ses avenues voisines ? Enfin, dans tout cela, nous nous poserons la question à quel horizon temporel nous réussirons à prédire la présence de voitures dans les rues de Paris.
 
@@ -34,11 +32,6 @@ Cela fait, nous formulons plusieurs problèmes de prédiction, à différents ho
 # Préparer le jeu de données
 
 ## Les données et leurs attribus
-
-<<<<<<< HEAD
-Les données de comptage routier sont disponibles sur le site **Paris Data** [@parisData], regroupant les jeux de données de la Ville de Paris, disponibles sur le site [@donneesComptage]. Elles sont collectées grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. L'historique des données s'étend de 2014 à ???? au pas horaire, selon la variable **t_1h**. Chaque boucle électromagnétique mesure le traffic sur un arc entre un noeud amont et un noeud aval. Deux données principales sont fournies : le taux d'occupation, **k**, qui correspond au temps de présence de véhicules sur la boucle en pourcentage d’une heure et le débit, **q**, le nombre de véhicules ayant passé le point de comptage pendant une heure. Nous gardons également d'autres variables : l'identifiant de l'arc, **iu_ac**, le libellé de la voie correspondante, **libelle**, et l'état de l'arc, **state**. Ce dernier vaut 0 si l'état est inconnu, 1 si l'arc est ouvert à la circulation, 2 l'arc est fermé à la circulation et 3 si l'arc est invalide. Il n'est malheureusement pas expliqué la différence entre arc fermé et arc invalide dans la documentation. 
-
-Pour une année, il y a environ 29 millions observations réparties sur plus de 3000 points. On a donc procédé à une transformation des données afin de réduire leur nombre et les structurer. La première étape est l'agrégation des points d'observation selon les libellés **libelle** associés dans le jeu de données et à l'aide de leur identifiant **iu_ac**. Ensuite, on a déterminé les principaux axes de Paris en moyennant le nombre de voitures par heure des points d'observations partageant un même libellé puis en choisissant les 200 premières valeurs (hors périphérique). On obtient le graphique \@ref(fig:200mainstreets) et on en déduit le graphe simplifié \@ref(fig:graphe) de Paris composé de 69 arêtes, correspondant à 69 jeux de données.
 
 Sur le site *Paris Data*, on trouve énormité de jeux de données issus des activités de la ville, notamment sur le de comptage routier [@donneesComptage]. Ces données sont collectées en continu grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. Ces boucles et bornes de comptage mesurent principalement deux choses: Le nombre de voitures qui passent et l'occupation du tronçon de route. Disponibles de 2014 jusqu'aujourd'hui, ces deux chiffres sont mesurés au pas horaire, résultant en environ 
 $$
@@ -64,6 +57,7 @@ Ayant réduit la dimension de chaque point dans les données, le deuxième point
 Pour identifier où passent le plus de voitures, nous calculons des moyennes sur **nbCar** pour chaque libellé, c'est à dire la moyenne à travers le temps et toutes les bornes associées à chaque libellé. En prenant les 200 libellés les plus utilisées en termes de nombre de voitures (en excluant le périphérique), nous obtenons le graphique \@ref(fig:200mainstreets) qui représente très bien les axes routières auxquelles on s'attendrait.  
 Ensuite, nous ignorons les noms des libellés et regardons exclusivement ce graphique. De manière arbitraire nous en déduisons le graphe dans figure \@ref(fig:graphe) qui représente alors un schéma très simplifié de la circulation à Paris. Grâce à notre démarche d'utiliser les rues les plus fréquentés, cette abstraction nous permet d'avoir un modèle représentatif de la circulation parisienne.
 
+
 ```{r 200mainstreets, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Représentation en rouge des bornes d'observation associés aux 200 libellés les plus fréquentés (hors périphérique)", echo = F}
 knitr::include_graphics('figures/200mainstreets.png')
 ```
@@ -72,8 +66,6 @@ knitr::include_graphics('figures/200mainstreets.png')
 knitr::include_graphics('figures/plan_abstrait_notre_modele.jpg')
 ```
 
-On obtient finalement 2 variables au pas horaire : **nbCar** le nombre de voitures et **rateCar** le taux d'occupation. A partir de ces 2 variables, on en construit des autres en les retardant, d'une semaine (**nbCarLaggedWeek**, **rateCarLaggedWeek**), d'un jour (**nbCarLaggedDay**, **rateCarLaggedDay**) et d'une heure (**nbCarLaggedHour**, **rateCarLaggedHour**). En effet, il semble pertinent d'observer l'état du traffic routier à des temps antérieurs : historique à très court terme de l'heure précédente et historique au même instant du cycle journalier et hebdomadaire précédent. Cela est confirmé dans la partie ????.
-
 Chaque arête dans le graphe \@ref(fig:graphe) regroupe plusieurs senseurs dont nous agrégeons les données : Après une collecte minutieuse et laborieuse des identifiants de toutes les bornes sur chacune des arêtes, nous associons pour chaque heure la moyenne de **nbCar** et **rateCar** des bornes à l'arête dont ils font partie. Cela a surtout trois avantages: 
 
 1. Prendre la moyenne élimine directement des données manquantes, issus entre autres de capteurs dysfonctionnels pendant une certaine période.
@@ -81,13 +73,6 @@ Chaque arête dans le graphe \@ref(fig:graphe) regroupe plusieurs senseurs dont 
 3. Le problème est réduit à 69 arêtes représentés par 69 dataframes. 
 
 Ayant suffisamment réduit les données pour qu'ils rentrent dans le RAM d'un PC, il reste pourtant un problème: La présence de données manquantes. 
-
-- **year**, **month**, **day**, **hour** en décomposant la variable **t_1h**
-- **time** le numéro de l'observation
-- **toy** de 0 à 1 selon la position de l'observation dans l'année en cours
-- **weekdays** le jour de la semaine et **weekendsIndicator** l'indicatrice si le jour est un jour du weekend
-- **winterHolidaysIndicator** et **summerHolidaysIndicator** les indicatrices des vacances d'hiver et d'été définies à partir de [@calendrierScolaire]
-- **bankHolidaysIndicator** l'indicatrice des jours fériés définie à partir de [@joursFeries]
 
 ## Complétion de valeurs manquantes
 

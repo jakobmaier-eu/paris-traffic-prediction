@@ -15,7 +15,7 @@ CV_blocks = function(yourData, no_folds, model, params){
     testIndexes <- which(folds==i,arr.ind=TRUE)
     testData <- data[testIndexes, ]
     trainData <- data[-testIndexes, ]
-    model.train(formula, testData, params)
+    model.train(formula, trainData, params)
     Y_test = testData$Y
     Y_predict = model.predict(subset(testData, select = -c(Y)))
     fold_scores = c(fold_scores, rmse(Y_test, Y_predict))
