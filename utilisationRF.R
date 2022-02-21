@@ -53,19 +53,19 @@ data_test$month <- as.factor(data_test$month)
 data_test$hour <- as.factor(data_test$hour)
 
 # Grids
-grid_mtry <-  expand.grid(mtry = seq(6,33,by=4), 
+grid_mtry <-  expand.grid(mtry = seq(1,34,by=1), 
                      min.node.size = 5,
                      splitrule = "variance")
 
 grid_minnode <-  expand.grid(mtry = 6, 
-                          min.node.size = seq(5, 50, by = 5),
+                          min.node.size = seq(1, 50, by = 5),
                           splitrule = "variance")
 
 # timeSlice method
 fitControl <- trainControl(method = "timeSlice",
                            initialWindow = 2*365*24,
                            horizon = 1,
-                           skip = 2*30*24,
+                           skip = 3*30*24,
                            fixedWindow = TRUE,
                            verboseIter = TRUE)
 
@@ -80,7 +80,7 @@ fit = caret::train(
   x = data_train,
   y = data_train$rateCar,
   method = 'ranger',
-  num.trees = 100,
+  num.trees = 50,
   tuneGrid = grid_mtry, # change the grid here
   trControl = fitControl)
 
@@ -136,31 +136,60 @@ ptm <- proc.time()
 for(i in 1:69){
   print(i)
   
-  data = edges[[i]][,-1][,c(1:22)]
-  data_test = edges_test[[i]][,-1][,c(1:22)]
+  data_tr = data_train[[i]][,c(1:22)]
+  data_te = data_test[[i]][,c(1:22)]
   
-  data$day <- as.factor(data$day)
-  data$year <- as.factor(data$year)
-  data$month <- as.factor(data$month)
-  data$hour <- as.factor(data$hour)
-
-  data_test$day <- as.factor(data_test$day)
-  data_test$year <- as.factor(data_test$year)
-  data_test$month <- as.factor(data_test$month)
-  data_test$hour <- as.factor(data_test$hour)
+  # data$day <- as.factor(data$day)
+  # data$year <- as.factor(data$year)
+  # data$month <- as.factor(data$month)
+  # data$hour <- as.factor(data$hour)
+  # 
+  # data_test$day <- as.factor(data_test$day)
+  # data_test$year <- as.factor(data_test$year)
+  # data_test$month <- as.factor(data_test$month)
+  # data_test$hour <- as.factor(data_test$hour)
   
   model <- ranger(rateCar ~ ., 
-                   data=data, 
-                  num.trees = 300,
+                   data=data_tr, 
+                  num.trees = 100, 
+                  mtry = 10,
                    importance='impurity')
   
-  prediction <- predict(model, data=data_test)
+  prediction <- predict(model, data=data_te)
   
-  rmse_list <- c(rmse_list, rmse(prediction$predictions, data_test$rateCar))
-  mape_list <- c(mape_list, mape(prediction$predictions, data_test$rateCar))
+  rmse_list <- c(rmse_list, rmse(prediction$predictions, data_te$rateCar))
+  mape_list <- c(mape_list, mape(prediction$predictions, data_te$rateCar))
 }
 
 print(proc.time() - ptm) 
+
+#######
+
+K = 16
+nb_tree = 50
+params = 1:10
+data = data_train[[1]]
+folds <- cut(seq(from=1,to=nrow(data)),breaks=K,labels=FALSE)
+scores = rep(x = 0, length(params))
+start_time = Sys.time()
+for(i in 1:K){
+  print(paste("fold:", i))
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  testData <- data[testIndexes, ]
+  trainData <- data[-testIndexes, ]
+  
+  for(j in 1:length(params)){
+    model <- ranger(rateCar ~ ., 
+                    data=data, 
+                    num.trees = nb_tree, 
+                    mtry = params[j],
+                    importance='impurity')
+    Y_test = testData$rateCar
+    Y_predict = predict(model, data=subset(testData, select = -c(1)))
+    scores[j] <- scores[j] + ProjetML1::rmse(Y_test, Y_predict$predictions)
+  }
+}
+CV_exec_time = Sys.time()-start_time
 
 #######
 
@@ -191,7 +220,9 @@ print(proc.time() - ptm)
 
 error_list <- c()
 
-ntree_list <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
+ntree_list <- c(5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120,
+                130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230,
+                240, 250, 260, 270, 280, 290, 300)
 
 time_list <- c()
 
@@ -200,9 +231,10 @@ for(n in ntree_list){
   
   ptm <- proc.time()
   
-  res <- ranger(rateCar ~ ., 
-                data=edges[[1]], 
+  res <- ranger(rateCar ~., 
+                data=data_train[[1]], 
                 num.trees = n,
+                mtry=10,
                 importance='impurity')
   
   temp <- proc.time() - ptm

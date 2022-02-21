@@ -21,6 +21,7 @@ library(weathermetrics)
 library(ranger)
 ```
 
+# Présentation du rapport
 
 # Le jeu de données
 
@@ -30,9 +31,9 @@ On présente maintenant les données que l'on a collectées et traitées afin de
 
 **Données de comptage routier**
 
-Les données de comptage routier sont disponibles sur le site **Paris Data** [@parisData], regroupant les jeux de données de la Ville de Paris, disponibles sur le site [@donneesComptage]. Elles sont collectées grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. L'historique des données s'étend de 2014 à ???? au pas horaire, selon la variable **t_1h**. Chaque boucle électromagnétique mesure le traffic sur un arc entre un noeud amont et un noeud aval. Deux données principales sont fournies : le **taux d'occupation**, **k**, qui correspond au temps de présence de véhicules sur la boucle en pourcentage d’une heure et le **débit**, **q** qui est  le nombre de véhicules ayant passé le point de comptage pendant une heure. Nous gardons également d'autres variables : l'identifiant de l'arc, **iu_ac**, le libellé de la voie correspondante, **libelle** et l'état de l'arc, **state**. Ce dernier vaut 0 si l'état est inconnu, 1 si l'arc est ouvert à la circulation, 2 l'arc est fermé à la circulation et 3 si l'arc est invalide. Il n'est malheureusement pas expliqué la différence entre arc fermé et arc invalide dans la documentation. 
+Les données de comptage routier sont disponibles sur le site **Paris Data** [@parisData], regroupant les jeux de données de la Ville de Paris, disponibles sur le site [@donneesComptage]. Elles sont collectées grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. L'historique des données s'étend de 2014 à ???? au pas horaire, selon la variable **t_1h**. Chaque boucle électromagnétique mesure le traffic sur un arc entre un noeud amont et un noeud aval. Deux données principales sont fournies : le taux d'occupation, **k**, qui correspond au temps de présence de véhicules sur la boucle en pourcentage d’une heure et le débit, **q**, le nombre de véhicules ayant passé le point de comptage pendant une heure. Nous gardons également d'autres variables : l'identifiant de l'arc, **iu_ac**, le libellé de la voie correspondante, **libelle**, et l'état de l'arc, **state**. Ce dernier vaut 0 si l'état est inconnu, 1 si l'arc est ouvert à la circulation, 2 l'arc est fermé à la circulation et 3 si l'arc est invalide. Il n'est malheureusement pas expliqué la différence entre arc fermé et arc invalide dans la documentation. 
 
-Pour une année, il y a environ 29 millions observations réparties sur plus de 3000 points. On a donc procédé à une transformation des données afin de réduire leur nombre et les structurer. La première étape est l'agrégation des points d'observations selon les libellés **libelle** associés dans le jeu de données et à l'aide de leur identifiant **iu_ac**. Ensuite, on a déterminé les principaux axes de Paris en moyennant le nombre de voitures par heure des points d'observations partageant un même libellé puis en choisissant les 200 premières valeurs (hors périphérique). On obtient le graphique \@ref(fig:200mainstreets) et on en déduit le graphe simplifié \@ref(fig:graphe) de Paris composé de 69 arêtes, correspondant à 69 jeux de données.
+Pour une année, il y a environ 29 millions observations réparties sur plus de 3000 points. On a donc procédé à une transformation des données afin de réduire leur nombre et les structurer. La première étape est l'agrégation des points d'observation selon les libellés **libelle** associés dans le jeu de données et à l'aide de leur identifiant **iu_ac**. Ensuite, on a déterminé les principaux axes de Paris en moyennant le nombre de voitures par heure des points d'observations partageant un même libellé puis en choisissant les 200 premières valeurs (hors périphérique). On obtient le graphique \@ref(fig:200mainstreets) et on en déduit le graphe simplifié \@ref(fig:graphe) de Paris composé de 69 arêtes, correspondant à 69 jeux de données.
 
 ```{r 200mainstreets, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Représentation en rouge des points d'observation associés aux 200 libellés les plus fréquentés (hors périphérique)", echo = F}
 knitr::include_graphics('figures/200mainstreets.png')
@@ -42,7 +43,7 @@ knitr::include_graphics('figures/200mainstreets.png')
 knitr::include_graphics('figures/graphe.png')
 ```
 
-On obtient finalement 2 variables au pas horaire : **nbCar** (nom des variables) le nombre de voitures et **rateCar** le taux d'occupation. A partir de ces 2 variables, on en construit des autres en les retardant, d'une semaine (**nbCarLaggedWeek**, **rateCarLaggedWeek**), d'un jour (**nbCarLaggedDay**, **rateCarLaggedDay**) et d'une heure (**nbCarLaggedHour**, **rateCarLaggedHour**). En effet, il semble pertinent d'observer l'état du traffic routier à des temps antérieurs : historique à très court terme de l'eure précédente et historique au même instant du cycle journalier et hebdomadaire précédent. Cela est confirmé dans la partie ????.
+On obtient finalement 2 variables au pas horaire : **nbCar** le nombre de voitures et **rateCar** le taux d'occupation. A partir de ces 2 variables, on en construit des autres en les retardant, d'une semaine (**nbCarLaggedWeek**, **rateCarLaggedWeek**), d'un jour (**nbCarLaggedDay**, **rateCarLaggedDay**) et d'une heure (**nbCarLaggedHour**, **rateCarLaggedHour**). En effet, il semble pertinent d'observer l'état du traffic routier à des temps antérieurs : historique à très court terme de l'heure précédente et historique au même instant du cycle journalier et hebdomadaire précédent. Cela est confirmé dans la partie ????.
 
 Enfin, il est très important de noter que ces données sont incomplètes. Une étude approfondie de cette incomplétude et de la complétion est faite dans la partie ????.
 
@@ -55,7 +56,7 @@ Le traffic routier étant relié à l'activité humaine, nous avons ajouté de n
 - **toy** de 0 à 1 selon la position de l'observation dans l'année en cours
 - **weekdays** le jour de la semaine et **weekendsIndicator** l'indicatrice si le jour est un jour du weekend
 - **winterHolidaysIndicator** et **summerHolidaysIndicator** les indicatrices des vacances d'hiver et d'été définies à partir de [@calendrierScolaire]
-- **bankHolidaysIndicator** l'indicatrice des jours fériés défini à partir de [@joursFeries]
+- **bankHolidaysIndicator** l'indicatrice des jours fériés définie à partir de [@joursFeries]
 
 **Index de la situation sanitaire en rapport avec le Covid-19**
 
@@ -121,13 +122,17 @@ knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles
 
 **Recherche de paramètres**
 
-Afin d'optimiser les performances de nos différents modèles, nous effectuons de la recherche de paramètres à l'aide du package *caret*. On utilise les 2 méthodes suivantes :
+Afin d'optimiser les performances de nos différents modèles, nous effectuons de la recherche de paramètres. On utilise les 2 méthodes suivantes :
 
-* *cv* : validation croisée sur 16 blocs. On divise ainsi nos 4 années de données d'apprentissage en blocs de 3 mois, ce qui englobe les différentes saisonnalités de nos données.
+* Validation croisée sur 16 blocs. On divise ainsi nos 4 années de données d'apprentissage en blocs de 3 mois, ce qui englobe les différentes saisonnalités de nos données. On a codé cette méthode à la main dans la fonction ....
 
-* *timeSlice* : où on fixe une fenêtre initiale d'apprentissage de 2 ans, que l'on incrémente dans l'ordre chronologique de 2 mois à chaque itération, pour entraîner le modèle et mesurer sa performance à l'horizon 1 (c'est-à-dire prédire le taux d'occupation de l'heure suivante).  
+* Validation croisée progressive, où on fixe une fenêtre initiale d'apprentissage de 2 ans, que l'on incrémente dans l'ordre chronologique de 2 mois à chaque itération, pour entraîner le modèle et mesurer sa performance à l'horizon 1 (c'est-à-dire prédire le taux d'occupation de l'heure suivante). Pour utiliser cette méthode, on utilise le package **caret** avec le paramètre *timeSlice*.
 
-L'avantage de *timeSlice* est qu'il permet d'optimiser un modèle pour la prédiction à un horizon déterminé. De plus, contrairement à la validation croisée, il n'utilise pas de données futures pour prédire le passé. Cependant, en pratique, on souhaite entraîner le modèle une unique fois sans le mettre à jour tous les 2 mois. Dans ce cas, la validation croisée est plus pertinente. 
+```{r CVprogressive, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Validation croisée progressive [@CVprogressive]", echo = F}
+knitr::include_graphics('figures/CVprogressive.png')
+```
+
+La caractéristique des données de type série temporelle est qu'elles sont ordonnées et possèdent une dépendance temporelle. C'est pourquoi il semble pertinent de ne pas mélanger les observations avant de découper le jeu de données en données apprentissage et données test. De plus, il semble aussi important de ne pas utiliser des données futures pour prédire le passé. Dans la validation croisée, il est donc naturel de retirer les blocs d'apprentissage ultérieurs au bloc test. C'est la validation croisée progressive. Cependant, en pratique, on souhaite entraîner le modèle une unique fois sans le mettre à jour tous les 2 mois. Dans ce cas, la validation croisée est plus pertinente. 
 
 Lors de nos recherches de paramètres, nous avons observé que les 2 méthodes sélectionnent des paramètres proches. Finalement, on se base sur la validation croisée en 16 blocs pour la recherche de paramètres. 
 
@@ -137,16 +142,20 @@ Pour permettre la reproductibilité des résultats, on fixe la graine du génér
 
 ## Arbres
 
+Le premier modèle construit est un arbre aléatoire à l'aide du package *rpart*. On optimise le paramètre **cp** (complexity parameter) sur 2 grilles : la première de 0.0 à 0.1 et la seconde, plus fine, de 0.0 à 0.01. 
+
 ```{r arbreGrille1, fig.cap = "Recherche du paramètre cp optimal", out.width='100%', fig.align='center', fig.show='hold', echo = F}
 knitr::include_graphics('figures/arbre_grille.png')
 ```
+
+Le paramètre **cp** est le paramètre le plus important à optimiser. Dans la construction de l'arbre, si le gain de performance après une découpe n'est pas meilleur d'un facteur de **cp**, alors la découpe n'est pas réalisée. Dans notre cas, la valeur optimale est **cp=0**, c'est-à-dire que l'on accepte toutes les découpes et que notre arbre est un arbre profond. 
 
 ## Forêts aléatoires
 
 
 
 
-
+# Conclusion
 
 
 

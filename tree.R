@@ -80,8 +80,8 @@ for(i in 1:69){
   data_te = data_test[[i]][,c(1:22)]
   
   model <- rpart(eq , data = data_tr, method = "anova",
-                 control = rpart.control(minsplit = 2,
-                                         cp = cpGrid[which.min(rpart.CV$results$RMSE),]))
+                 control = rpart.control(minsplit = 20,
+                                         cp = cpGrid2[which.min(rpart.CV.2$results$RMSE),]))
   
   prediction <- predict(model, newdata=data_te)
   
@@ -108,8 +108,8 @@ for(i in 1:69){
   data_te = data_test[[i]]
   
   model <- rpart(eq , data = data_tr, method = "anova",
-                 control = rpart.control(minsplit = 2,
-                                         cp = cpGrid[which.min(rpart.CV$results$RMSE),]))
+                 control = rpart.control(minsplit = 20,
+                                         cp = cpGrid2[which.min(rpart.CV.2$results$RMSE),]))
   
   prediction <- predict(model, newdata=data_te)
   
