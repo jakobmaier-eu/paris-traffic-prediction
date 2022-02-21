@@ -10,7 +10,7 @@ library(lubridate)
 library(weathermetrics)
 library(ranger)
 
-edges = readRDS("Data/data_agg69_plain/edges_dfs_allyrs.rds")
+edges = readRDS("../Data/data_agg69_plain/edges_dfs_allyrs.rds")
 
 
 # Counting NAs. Some q-counters (number of cars passing) have 100% missing data. Need to find the counting points with capteurs. 
@@ -64,6 +64,18 @@ sum(edges$`saint michel - concorde`[5] == 3)
 sum(is.na(edges$`saint michel - concorde`[4]) & edges$`saint michel - concorde`[5] == 3)
 
 plot(edges$`porte maillot - porte asnieres`[10000:10500,4],type='l')
+for (i in c(6)){
+  labase = 50*24 + 48*i
+  df = data.frame(taux = edges$`porte maillot - porte asnieres`[labase:(labase+47),5],
+                  heures = c(0:47))
+  g = ggplot(data=df, aes(y = taux, x = heures))  
+  plot(g + geom_line()
+       +xlab("heures passées à partir de minuit du premier jour")
+       +ylab("taux d'occupation en %") 
+       +labs(title = "Occupation de l'arête 'porte maillot - porte asnieres' sur deux jours")
+  )
+}
+
 
 ####
 

@@ -19,7 +19,7 @@ library(miceRanger)
 library(dplyr)
 #----------- End Header ----------------#
 
-list_dfs = readRDS("Data/data_agg69_plain/edges_dfs_allyrs.rds")
+list_dfs = readRDS("../Data/data_agg69_plain/edges_dfs_allyrs.rds")
 # Representing missing data:
 missing_points = matrix(nrow=length(list_dfs), ncol = dim(list_dfs[[1]])[1])
 #names(missing_points) = names(list_dfs)
@@ -28,11 +28,24 @@ for (j in 1:length(list_dfs)){
   missing_points[j,] = as.numeric(is.na(list_dfs[[j]]$q))
 }
 
-library(purrr)
 
-oldpar <- par(mar = rep(0.2, 4)) # reducing plot margins
+# Alternative: Only 25 edges.
+edgechoice = c(15:25, 50:69)
+missing_points = matrix(nrow=length(edgechoice), ncol = dim(list_dfs[[1]])[1])
+#names(missing_points) = names(list_dfs)
+j1 = 1
+for (j in edgechoice){
+  missing_points[j1,] = as.numeric(is.na(list_dfs[[j]]$q))
+  j1 = j1+1
+}
+
+
+library(purrr)
+oldpar <- par(mar = rep(15, 5)) # reducing plot margins
+par(mar = c(3,3,0.7,0.7))
+halfayear = 4380
 image(
-  t(missing_points[, 61361-8760:61361]), # image() has some weird opinions about how your matrix will be plotted
+  t(missing_points[, (5*halfayear):(6*halfayear)]), # image() has some weird opinions about how your matrix will be plotted
   axes = FALSE,
   col = colorRampPalette(c("white", "black"))(30), # our colour palette
   breaks = c(seq(0, 3, length.out = 30), 100) # colour-to-value mapping
@@ -229,22 +242,22 @@ relevant_vars[ord]
 
 ############ Visualization of imputation for report
 
-imp_percentNA = readRDS(file = "Data/imp_missing_percent_train.rds")
-imp_varImpo = readRDS(file = "Data/imp_VarImportance_train.rds")
+imp_percentNA = readRDS(file = "../Data/imp_missing_percent_train.rds")
+imp_varImpo = readRDS(file = "../Data/imp_VarImportance_train.rds")
 
 for(i in 1:69){ # First fix the names
   for(j in 24:(dim(imp_varImpo[[i]])[2])){
     str = names(imp_varImpo[[i]])[j]
     if (substring(str,1,1) == "q"){
-      names(imp_varImpo[[i]])[j] = paste0("rateCar" , substring(str,2))
+      names(imp_varImpo[[i]])[j] = paste0("nbCar" , substring(str,2))
     }
     if (substring(str,1,1) == "k"){
-      names(imp_varImpo[[i]])[j] = paste0("nbCar" , substring(str,2))
+      names(imp_varImpo[[i]])[j] = paste0("rateCar" , substring(str,2))
     }
   }
 }
 
-for (i in 1:5){
+for (i in 20:29){
   impo_rateCar_raw = transpose(imp_varImpo[[i]])[[1]][-c(1,2)]
   impo_rateCar = do.call(rbind.data.frame, impo_rateCar_raw)
   rm(impo_rateCar_raw)
@@ -260,14 +273,16 @@ for (i in 1:5){
   
   g = ggplot(data = head(arrange(impo_rateCar, desc(values)), 6), 
              aes(y = reorder(variables, values), x = values))  
-  plot(g + geom_bar(stat="identity")+xlab("RF imputation importance scores")
-       +ylab("variables (max. scores)") 
+  plot(g + geom_bar(stat="identity")
+       +xlab(paste0("RF importance scores (", imp_percentNA[[i]][1], "% NA imputed)"))
+       +ylab("variables with highest scores") 
        +labs(title = paste0("rateCar for ", names(imp_varImpo[i])))
   )
   
   g = ggplot(data = head(arrange(impo_nbCar, desc(values)), 6), 
              aes(y = reorder(variables, values), x = values))  
-  plot(g + geom_bar(stat="identity")+xlab("RF imputation importance scores")
+  plot(g + geom_bar(stat="identity")
+       +xlab(paste0("RF importance scores (", imp_percentNA[[i]][2], "% NA imputed)"))
        +ylab("variables (max. scores)") 
        +labs(title = paste0("nbCar for ", names(imp_varImpo[i])))
   )
