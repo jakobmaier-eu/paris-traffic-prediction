@@ -91,7 +91,6 @@ for(i in 1:69){
 
 print(proc.time() - ptm) 
 
-
 #################
 # Prediction of the 69 edges with neighbors
 #################

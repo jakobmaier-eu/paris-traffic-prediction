@@ -18,6 +18,15 @@ mean(rmse_list)
 df_naiveModels <- data.frame(5.844, 5.899, 3.955)
 names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 
+#Tree
+predTree1 <- load("Scores/treeWithNeighbors.RData")
+rmse_list_predTree_with <- rmse_list
+predTree2 <- load("Scores/treeWithoutNeighbors.RData")
+rmse_list_predTree_without <- rmse_list
+
+df_tree <- data.frame(mean(rmse_list_predTree_with), mean(rmse_list_predTree_without))
+names(df_tree) <- c("tree_with_neighbors", "tree_without_neighbors")
+
 # RF
 predRF1 <- load("Scores/RF_with_neighbors.RData")
 rmse_list_predRF_with <- rmse_list
