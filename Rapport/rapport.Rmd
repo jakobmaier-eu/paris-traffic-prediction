@@ -25,6 +25,7 @@ library(dplyr)
 library(lubridate)
 library(weathermetrics)
 library(ranger)
+library(ProjetML1)
 ```
 
 # Introduction : la circulation à Paris
@@ -173,17 +174,34 @@ Un phénomène similaire peut s'observer dans les autres arêtes.(TODO Guillaume
 Après l'imputation arête par arête, nous pouvons enfin compléter toutes les données grâce au fait que les variables reliées aux voisins ont été imputées dans les dataframes qui correspondent à ces voisins. Il est important de noter ici que nous allons dans la suite couper le jeu de données en deux (train - test) et que cette imputation sera effectuée individuellement sur chacune des deux parties. Faire ceci deux fois séparément est nécessaire pour préserver l'indépendance et permet ensuite d'estimer les erreurs de nos modèles.  
 Dans la suite, nous supposons que les données sont complètes. Il faut pourtant remarquer que ces forêts aléatoires font indirectement partie des modèles de prédiction que nous allons utiliser. De plus, nous gardons à l'esprit que nous avons introduit un biais dans nos données d'apprentissage comme de test.
 
-## Etude descriptive des données
 
-## Stratégie de prévision
+# Modèles de prévision
 
-**Choix des jeux de données**
+## Définition des problèmes
 
-On découpe notre jeu de données en 2 parties de proportion 2/3 et 1/3 : une partie apprentissage de 2014 à 2017 et une partie test de 2018 à 2019. Ainsi, on pourra évaluer les performances de nos modèles sur les différentes périodes d'une année. 
+Avec un jeu de données complet, nous pouvons enfin utiliser des algorithmes de Machine Learning pour faire de la prévision. Vu la complexité du jeu de données, il n'est même pas évident quelles questions se poser. Il y a deux dimensions principales du problème que nous allons examiner dans la suite, en utilisant de différents modèles d'apprentissage: 
 
-**Choix de la métrique**
+1. La première dimension du problème est temporelle : Quel moment dans le futur voulons-nous prédire ? Autrement dit, jusqu'à quel horizon temporel est-ce que nous nous permettons d'utiliser le passé pour prédire le présent ?
+    a. Le cas *une heure* correspond à un problème du genre "Google Maps" : si nous prenons la voiture maintenant, quelle sera la circulation dans les prochaines 60 minutes ?
+    b. Etant donnée la circulation du *jour* précédent, la tâche devient intéressante pour les régulateurs des feux de circulation ou pour la police qui pourront ainsi éviter des bouchons.
+    c. Si nous voulons prédire *une semaine* voire *un mois* en avance, le modèle devra comprendre davantage le comportement habituelle de la circulation routière. Ce sera plutôt un pari basé sur des fluctuations habituelles
+2. La deuxième dimension est reliée au réseau routier : Pouvons-nous profiter de la structure du graphe pour améliorer la prédiction ?
+    a. La question de base sera si on réussit à battre des benchmarks sur une seule arête.
+    b. Puis nous pourrons reutiliser les "voisins" introduits pendant l'imputation.
+    c. Finalement, une question est si nous réusissons à trouver un seul modèle décrivant toutes les arêtes en même temps, une sorte de prédiction multivariée.
+    
+Avant de nous lancer, nous précisons comment nous évaluons nos modèles et quels sont les benchmarks, les modèles naïfs, que nous voulons battre.
 
-Pour évaluer ces performanes, on choisit la métrique Root Mean Square Error (RMSE) qui représente la racine carrée du deuxième moment d'échantillonnage des différences entre les valeurs prédites et les valeurs observées. On n'utilise pas la métrique Mean Absolute Percentage Error (MAPE) car un nombre important des valeurs de **rateCar** sont nulles. 
+
+### Evaluation des modèles
+
+**Train - test - split**
+
+On découpe notre jeu de données en 2 parties de proportion 2/3 et 1/3 : une partie apprentissage de 2014 à 2017 et une partie test de 2018 à 2019. Faire le découpage de cette manière assure qu'on est évalué sur les prédictions du futur plutôt que du passé. L'année 2020 est omise à cause du Covid, mais elle pourrait faire partie d'un autre projet sur le jeu de données en relation avec la pandemie !
+
+**Mesurer la performance**
+
+Pour évaluer les performances des modèles, nous considérerons le Root Mean Square Error (RMSE) qui représente la racine carrée du deuxième moment d'échantillonnage des différences entre les valeurs prédites et les valeurs observées. Une autre métrique souvent utilisée est le Mean Absolute Percentage Error (MAPE) qui n'est pas applicable à notre situation car un nombre important des valeurs de **rateCar** sont nulles et on ne peut pas diviser par elles.
 
 **Modèles naïfs à battre**
 
@@ -204,7 +222,7 @@ names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 knitr::kable(df_naiveModels, align = "ccc", caption = "Performances des modèles naïfs témoins")
 ```
 
-Les 2 premiers modèles naïfs ont des scores similaires. Le troisième modèle naïf, qui consiste à prendre la variable **rateCar** *lagged*, est meilleur. On interprète cette bonne performance par la très forte corrélation du taux de circulation d'une heure avec la suivante. Il est donc intéressant de comparer ce modèle naïf avec des modèles plus complexes pour justifier leur utilisation.
+Les 2 premiers modèles naïfs ont des scores similaires. Le troisième modèle naïf, qui consiste à prendre la variable **rateCar** *lagged*, est meilleur. On interprète cette bonne performance par la très forte corrélation du taux de circulation d'une heure avec la suivante. Dans la suite, il sera intéressant de comparer ce modèle naïf avec des modèles plus complexes pour justifier leur utilisation.
 
 **Recherche de paramètres**
 
@@ -223,6 +241,55 @@ La caractéristique des données de type série temporelle est qu'elles sont ord
 Lors de nos recherches de paramètres, nous avons observé que les 2 méthodes sélectionnent des paramètres proches. Finalement, on se base sur la validation croisée en 16 blocs pour la recherche de paramètres. 
 
 Pour permettre la reproductibilité des résultats, on fixe la graine du générateur aléatoire. De plus, on effectue la recherche de paramètre pour une seule arête sur les 69 car c'est un processus long et on fait l'hypothèse que le paramètre optimal pour la prévision sur une arête est proche de celui de toutes les autres arêtes.  
+
+
+## Google Maps : Prédire la prochaine heure
+
+Commençons par la tâche qui est censée être la plus simple : Prédire la circulation dans les prochaines 60 minutes.
+
+### GAM pour une arête
+Pour l'instant, nous nous restreignons à une arête isolée dans le sens que nous ne prenons pas en compte la circulation sur ces voisins. Notre objectif initial était de faire une simple régression linéaire, mais il y a quelques relations pas linéaires du tout. Si on essaie par exemple, d'écrire le taux d'occupation d'une avenue en fonction de l'heure, le graphique suivant montre bien que les heures de pointe seraient mieux décrites par un polynôme que pour une droite :
+
+```{r rushhours, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Une journée typique sur l'arête ", echo = F}
+knitr::include_graphics('figures/rushhours.png')
+```
+
+Pas conséquent nous travaillons plutôt sur des GAM que sur de simples régression. Constituer un modèle additif et en sélectionner le meilleur est une tâche sans fin. C'est pourquoi nous adapterons une approche greedy pour la sélection de modèles où nous rajoutons une variable explicative à la fois. Idéalement ce sera celle qui apporte le plus de puissance prédictive supplémentaire (forward search).
+
+Pour prédire une heure dans le futur, il est incontestable que l'heure présente contient le plus d'informations. La variable **rateCar_LaggedHour** sera donc la première à considérer. Nous aimerions bien inclure TODO
+
+```{r linReg_heureclustering, echo = F}
+edge_index = "concorde - saint michel" # We study an arbitrary edge
+df_train = data_train[[paste(edge_index)]]
+df_test = data_test[[paste(edge_index)]]
+
+daysToNumber <- function(day){
+  if(day == "lundi"){return(1)}
+  if(day == "mardi"){return(2)}
+  if(day == "mercredi"){return(3)}
+  if(day == "jeudi"){return(4)}
+  if(day == "vendredi"){return(5)}
+  if(day == "samedi"){return(6)}
+  if(day == "dimanche"){return(7)}
+}
+
+df_train$weekdays <- unlist(lapply(X = df_train$weekdays, FUN = daysToNumber))
+df_test$weekdays <- unlist(lapply(X = df_test$weekdays, FUN = daysToNumber))
+df_train$weekendsIndicator = as.factor(df_train$weekendsIndicator)
+df_test$weekendsIndicator = as.factor(df_test$weekendsIndicator)
+
+hours_linregs = data.frame(hour = 0:23)
+for (h in 0:23){
+  hour_idxs = df_train$hour == h
+  hour_data = subset(df_train[hour_idxs,], select=c(rateCar, rateCar_LaggedHour))
+  mod = lm(rateCar ~ rateCar_LaggedHour, data = hour_data)
+  hours_linregs$intercept[h + 1] = round(mod$coefficients[1],3)
+  hours_linregs$coeff[h + 1] = round(mod$coefficients[2],3)
+}
+print(hours_linregs, row.names=F)
+```
+
+
 
 # Modèles
 
