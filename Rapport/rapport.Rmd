@@ -38,30 +38,28 @@ Cela fait, nous formulons plusieurs problèmes de prédiction, à différents ho
 
 ## Les données et leurs attribus
 
-Sur le site *Paris Data*, on trouve énormément de jeux de données issus des activités de la ville, notamment sur le comptage routier [@donneesComptage]. Ces données sont collectées en continu grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. Ces boucles et bornes de comptage mesurent principalement deux choses: le nombre de voitures qui passent et l'occupation du tronçon de route. Disponibles de 2014 jusqu'à aujourd'hui, ces deux chiffres sont mesurés au pas horaire, résultant en environ 
+Sur le site *Paris Data*, on trouve énormément de jeux de données issus des activités de la ville, notamment sur le comptage routier [@donneesComptage]. Ces données sont collectées en continu grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. Ces boucles et bornes de comptage mesurent principalement deux choses: le nombre de voitures qui passent et l'occupation du tronçon de route. Disponibles de 2014 jusqu'à aujourd'hui, ces deux données sont mesurées au pas horaire, résultant en environ 
 $$
 8 \text{ ans } \times 365 \text{ jours } \times 24 \text{ heures } \times 3000 \text{ capteurs } = 2.1\times10^8 \text{ observations dans le data set.}
 $$
 
-Chacune de ces lignes contient les informations suivantes, qui serons nos variables explicatives $X_i$. Les noms des variables que nous utilisons dans notre analyse sont écrits **gras** tout au long de cet exposé.
+Chacune de ces lignes contient les informations suivantes, qui serons nos variables explicatives $X_i$. Les noms des variables que nous utilisons dans notre analyse sont écrits en **gras** tout au long de cet exposé.
 
 - Un timestamp **t_1h** indiquant date et heure de la mesure.
 - Le nombre de voitures ayant passé le point de comptage pendant une heure, noté **q** et renommé par **nbCar**.
 - Le taux d'occupation, correspondant au temps de présence de véhicules sur la boucle en pourcentage d’une heure, noté **k** et renommé par **rateCar**.
-- La variable *etat_barre* indique si la route où se trouve la borne de comptage est "barée" (*etat_barre*=2) ou "ouverte" (=1). Nous la renommons **state**. Malheureusement, cette variable a souvent la valeur "inconnu" (**state**=0) ou "invalide" (=4). La différence de 3 et 4 nous est un mystère et par conséquence nous nous servons peu de cette variable.
-- L'identifiant **iu_ac** pour chaque borne. Chaque ligne contient aussi de informations sur les compteurs adjacents.
+- La variable **etat_barre** indique si la route où se trouve la borne de comptage est "barée", **etat_barre**=2, ou "ouverte", 1. Nous la renommons **state**. Malheureusement, cette variable a souvent la valeur "inconnu", 0, ou "invalide", 4. La différence entre 3 et 4 est un mystère et par conséquence nous nous servons peu de cette variable.
+- L'identifiant **iu_ac** de chaque borne. Chaque ligne contient de informations sur les compteurs adjacents.
 - Le libellé (**libelle**) du tronçon de rue où est placé le capteur, par exemple "Champs Elysées partie B".
 
-Les données historiques de circulation sont enregistrées sur le site web sous le format *.txt*. Chaque fichier couvre toutes les bornes pour une semaine. Pour commencer, il faut donc tout télécharger et convertir de manière automatisée ces fichiers en dataframes. En ce faisans, nous effectuons également un triage par identifiant de borne **iu_ac**.
+Les données historiques de circulation sont enregistrées sur le site web *Paris Data* sous le format *.txt*. Chaque fichier couvre toutes les bornes pour une semaine. Pour commencer, il faut donc télécharger les fichiers de toutes les semaines et les convertir en dataframes. Ce faisant, nous effectuons également un tri par identifiant de borne **iu_ac**.
 
 ## Simplification et aggrégation
 
-En vue de la quantité énorme de 200 millions d'observations, nous sommes obligés à réduire la taille du dataset. La première démarche consiste à retirer toutes les variables inintéressantes, laissant **t_1h**, **nbCar**, **rateCar** et *iu_ac*. 
+Au vue de la quantité énorme de 200 millions d'observations, nous sommes obligés de réduire la taille du dataset. La première démarche consiste à garder les variables intéressantes: **t_1h**, **nbCar**, **rateCar** et **iu_ac**. 
 
-Ayant réduit la dimension de chaque point dans les données, le deuxième point qu'on peut attaquer est le nombre gigantesque de senseurs de comptage. Pour ce faire, nous utilisons un modèle simplifié des rues de Paris. Comme le dataset couvre la plupart des grandes axes routières, y inclus le périphérique, notre objectif était d'*agréger* les données au long de ces rues :   
-Pour identifier où passent le plus de voitures, nous calculons des moyennes sur **nbCar** pour chaque libellé, c'est à dire la moyenne à travers le temps et toutes les bornes associées à chaque libellé. En prenant les 200 libellés les plus utilisées en termes de nombre de voitures (en excluant le périphérique), nous obtenons le graphique \@ref(fig:200mainstreets) qui représente très bien les axes routières auxquelles on s'attendrait.  
-Ensuite, nous ignorons les noms des libellés et regardons exclusivement ce graphique. De manière arbitraire nous en déduisons le graphe dans figure \@ref(fig:graphe) qui représente alors un schéma très simplifié de la circulation à Paris. Grâce à notre démarche d'utiliser les rues les plus fréquentés, cette abstraction nous permet d'avoir un modèle représentatif de la circulation parisienne.
-
+Ayant réduit la dimension de chaque observation, la deuxième étape est la réduction du nombre de capteurs de comptage. Pour ce faire, nous utilisons un modèle simplifié des rues de Paris. Etant donné que les capteurs couvrent les grandes axes routiers, dont le périphérique, notre objectif était d'*agréger* les données selon ces grands axes. Afin d'identifier où passent le plus de voitures, nous calculons les moyennes de **nbCar** pour chaque libellé, c'est-à-dire les moyennes à travers le temps et pour toutes les bornes associées à chaque libellé. En prenant les 200 libellés dont le nombre de voitures est le plus grand (hors périphérique), nous obtenons le graphique \@ref(fig:200mainstreets) qui représente très bien les axes routiers auxquels on s'attendait.  
+Ensuite, nous ignorons les libellés et regardons exclusivement ce graphique. De manière arbitraire, nous en déduisons le graphe de la figure \@ref(fig:graphe), un schéma très simplifié de la circulation à Paris. Grâce à notre démarche d'utiliser les rues les plus fréquentées, cette abstraction nous permet d'avoir un modèle représentatif de la circulation parisienne.
 
 ```{r 200mainstreets, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Représentation en rouge des bornes d'observation associés aux 200 libellés les plus fréquentés (hors périphérique)", echo = F}
 knitr::include_graphics('figures/200mainstreets.png')
@@ -71,17 +69,17 @@ knitr::include_graphics('figures/200mainstreets.png')
 knitr::include_graphics('figures/plan_abstrait_notre_modele.jpg')
 ```
 
-Chaque arête dans le graphe \@ref(fig:graphe) regroupe plusieurs senseurs dont nous agrégeons les données : Après une collecte minutieuse et laborieuse des identifiants de toutes les bornes sur chacune des arêtes, nous associons pour chaque heure la moyenne de **nbCar** et **rateCar** des bornes à l'arête dont ils font partie. Cela a surtout trois avantages: 
+Chaque arête dans le graphe \@ref(fig:graphe) regroupe plusieurs capteurs dont nous agrégeons les données : après une collecte minutieuse et laborieuse des identifiants de toutes les bornes sur chacune des arêtes, nous associons pour chaque heure la moyenne de **nbCar** et **rateCar** des bornes de l'arête dont ils font partie. Cela a trois avantages: 
 
-1. Prendre la moyenne élimine directement des données manquantes, issus entre autres de capteurs dysfonctionnels pendant une certaine période.
+1. Prendre la moyenne évite d'avoir des données manquantes, issues entre autres de capteurs dysfonctionnels sur une certaine période. Ce n'est pas toujours le cas, comme on le verra dans la section suivante.
 2. S'il y a des capteurs où les données fluctuent beaucoup en raison de mauvais positionnement ou des perturbations indésirées, la moyenne réduit cette variance.
-3. Le problème est réduit à 69 arêtes représentés par 69 dataframes. 
+3. Le problème est réduit à 69 arêtes représentées par 69 dataframes. 
 
-Ayant suffisamment réduit les données pour qu'ils rentrent dans le RAM d'un PC, il reste pourtant un problème: La présence de données manquantes. 
+Cette réduction des données résulte en la construction des jeux de données que l'on va manipuler et en la concrétisation du problème que l'on souhaite résoudre. Elle permet également d'obtenir des objets que nos ordinateurs sont capables de stocker efficacement. Il reste pourtant un problème: la présence de données manquantes. 
 
 ## Complétion de valeurs manquantes
 
-En examinant des plots basiques des taux d'occupation, nous voyons souvent une image comme dans le graphique TODO. Malgré l'agrégation au long des arêtes, il reste un nombre considérable de *NA* dans le dataset. Afin d'executer des tâches de prédiction, il nous faut pourtant des données complètes et une partie importante de notre travail était de remplir les trous.
+En examinant des figures basiques des taux d'occupation, nous observons régulièrement une image comme dans le graphique TODO. Malgré l'agrégation le long des arêtes, il reste un nombre considérable de valeurs manquantes, *NA*, dans le dataset. Afin d'exécuter des tâches de prédiction, il nous faut cependant des données complètes. Une partie conséquente de notre travail a donc été de compléter les valeurs manquantes.
 
 ```{r plotjourNA, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Taux d'occupation pour une journée ouvrière avec une valeur manquante", echo = F}
 knitr::include_graphics('figures/impDeuxJours1NA.png')
@@ -91,14 +89,14 @@ knitr::include_graphics('figures/impDeuxJours1NA.png')
 knitr::include_graphics('figures/impMissing25_ready.png')
 ```
 
-En regardant le graphique \@ref(fig:NAdistribution) qu'il y a deux types de "trous" dans le data set:
+En regardant le graphique \@ref(fig:NAdistribution), on considère qu'il y a deux types de "trous" dans le data set:
 
-1. Des valeurs manquantes *ponctuels* comme on a pu observer dans figure \@ref(fig:plotjourNA) ou ceux marquées en bleu dans le graphique à côté. On peut deviner qu'il s'agit de coupures électriques dans les bornes ou bien de simples erreurs dans la collection des données.
-2. Des trous plus grande, couvrant parfois plusieurs mois, comme ceux marqués en rouge dans le graphique \@ref(fig:NAdistribution). Il peut s'agir d'une absence étendue de plusieurs bornes, une clôture de la route en raison d'une construction, etc. Savoir si une route est effectivement inaccessible pendant de longues période serait une tâche de recherche en soi : Comme mentionné plus tôt, la variable **state** ne contient presque aucune information. Nous remplissons alors les grands trous sans respecter d'éventuelles fermetures, rajoutant une autre simplification.
+1. Des valeurs manquantes *ponctuelles* comme on a pu observer dans la figure \@ref(fig:plotjourNA) ou celles marquées en bleu dans le graphique ci-dessus. On peut deviner qu'il s'agit de simples erreurs dans la collection des données ou des travaux d maintenance par exemple.
+2. Des trous plus grands, couvrant parfois plusieurs mois, comme ceux marqués en rouge dans le graphique \@ref(fig:NAdistribution). Il peut s'agir d'une absence étendue de plusieurs bornes, une clôture de la route en raison d'une construction, etc. Savoir si une route est effectivement inaccessible pendant de longues période serait une tâche de recherche en soi : comme mentionné plus tôt, la variable **state** ne contient presque aucune information. Nous remplissons alors les grands trous sans respecter d'éventuelles fermetures, ajoutant une autre simplification.
 
-Le fait que les arêtes ont de différentes structures de valeurs manquantes peut aussi être observé en regardant la répartition du pourcentage de *NA*'s à travers les dataframes dans figure \@ref(fig:histograms).
+Le fait que les arêtes ont de différentes structures de valeurs manquantes peut aussi être observé en regardant la répartition du pourcentage de *NA*'s à travers les dataframes dans la figure \@ref(fig:histograms).
 
-```{r histograms, echo=FALSE, fig.cap="Distribution des valeurs manquantes", eval=TRUE}
+```{r histograms, echo=FALSE, fig.align='center', fig.cap="Distribution des valeurs manquantes", eval=TRUE}
 edges = readRDS("../Data/data_agg69_plain/edges_dfs_allyrs.rds")
 
 perctNbCar = c()
@@ -115,20 +113,20 @@ hist(perctNbCar, breaks=seq(0,1,0.01), main = "Nombre de voitures", xlab = "% de
 hist(perctRateCar, breaks=seq(0,1,0.01), main = "Taux d'occupation", xlab = "% de valeurs manquantes", ylab = "Effectif")
 ```
 
-Nous observons que les données de taux d'occupation sont généralement plus complètes : Ceci est dû au fait qu'il y a plus de capteurs de ce type. Par ailleurs, nous avons vérifié qu'une valeur manquante de **nbCar** implique toujours un *NA* dans **rateCar**.
+Nous observons que les données de taux d'occupation sont généralement plus complètes : ceci est dû au fait qu'il y a plus de capteurs de ce type. Par ailleurs, nous avons vérifié qu'une valeur manquante de **nbCar** implique toujours un *NA* dans **rateCar**.
 
-Pour remplir les trous, la première étape consiste à rajouter des variables explicatives supplémentaires. En fonction du type de trou, nous verrons qu'ils auront un impact important sur la complétion.
+Pour remplir les trous, la première étape consiste à ajouter des variables explicatives supplémentaires. En fonction du type de trou, nous verrons qu'ils auront un impact important sur la complétion.
 
 ###  Variables supplémentaires : Proximité temporelle et locale
 
-A l'instant, nous disposons des variables **nbCar** et **rateCar** pour chaque arête et chaque heure entre 2014 et 2020. Nous exploitons deux propriétés structurelles des données pour obtenir de l'information supplémentaire:
+Pour l'instant, nous disposons des variables **nbCar** et **rateCar** pour chaque arête et chaque heure entre 2014 et 2020. Nous exploitons deux propriétés structurelles des données pour obtenir de l'information supplémentaire:
 
-D'abord, il s'agit de séries temporelles, donc nous rajoutons valeurs historiques de **nbCar** et **rateCar** décalés d'une heure, d'un jour et d'une semaine (**nbCarLaggedHour**, **nbCarLaggedDay**, et **nbCarLaggedWeek**) comme variables explicatives. L'espoir étant que la circulation se ressemble à travers des semaines consécutives par exemple. Avec le pure objectif de compléter les données manquantes, il est aussi pertinent de rajouter des valeurs du futur (**rateCarFuturHour** etc.), vu que le modèle d'imputation a pour but d'interpoler au lieu d'extrapoler. On a l'hypothèse que toutes ces variables décalées serviront surtout à remplir des trous *locaux* : Une heure ou une journée qui manque devrait facilement se laisser inférer en utilisant des données qui sont proches temporairement.
+D'abord, il s'agit de séries temporelles, donc nous rajoutons les valeurs historiques de **nbCar** et **rateCar** décalées d'une heure, d'un jour et d'une semaine (**nbCarLaggedHour**, **nbCarLaggedDay**, et **nbCarLaggedWeek**) comme variables explicatives. L'espoir étant que la circulation reste identique à travers ces cycles. Avec l'objectif spécifique de compléter les données manquantes, il est aussi pertinent d'ajouter ces valeurs du futur (**rateCarFuturHour** etc.), étant donné que le modèle d'imputation a pour but d'interpoler au lieu d'extrapoler. On fait l'hypothèse que toutes ces variables décalées seront efficaces pour remplir les trous *locaux* : une heure ou une journée manquante devrait facilement être inférée en utilisant des données qui sont proches dans le temps.
 
-Pour les grands trous, nous n'avons souvent pas accès aux heures et jours d'avant. Cependant, grâce à l'interconnexion de nos données à travers le graphe présenté en haut, les mesures de circulation d'une arête peuvent bien être expliquées en fonction de celle de ces voisines. Dans un effort manuel, nous avons pour chaque arête $A$ collectionné des voisins $V_i$, dans le sens que les voitures dans $A$ passent ensuite à l'un des $V_i$ ou bien l'inverse. Nous faisons ici encore des choix arbitraires qui est voisin de qui, pour deux raisons. Premièrement, inférer statistiquement quelle arête influence quelle autre nécessiterait des données déjà complètes pour une régression par exemple. Deuxièmement, utiliser toutes les autres 68 arêtes au lieu de juste 2-6 voisins augmenterait trop le temps d’exécution de la complétion.  
-Donnons un exemple illustrant le choix de voisins ainsi que la dénomination des nouvelles variables : Parmi les voitures qui entrent dans Paris sur l'arête "pont amont - pont austerlitz" il y a une partie considérable qui continuent tout droit sur l'arête "pont austerlitz - chatelet". Par conséquent, nous rajoutons la variable **rateCar_pontausterlitzTOchatelet** au dataframe de "pont amont - pont austerlitz".
+Pour les valeurs manquantes au milieu des grands trous, nous n'avons pas accès aux heures et jours d'avant car elles sont aussi manquantes. Cependant, grâce à l'interconnexion de nos données à travers le graphe présenté plus haut, les mesures de circulation d'une arête peuvent bien être expliquées en fonction de celle de ces voisines. Dans un effort manuel, nous avons pour chaque arête $A$ collectionné des voisins $V_i$, dans le sens que les voitures dans $A$ passent ensuite par l'un des $V_i$ ou bien l'inverse. Nous faisons ici encore des choix arbitraires de qui est voisin de qui pour deux raisons. Premièrement, inférer statistiquement quelle arête influence quelle autre nécessiterait des données déjà complètes pour une régression par exemple. Deuxièmement, utiliser toutes les autres 68 arêtes au lieu de juste 2 à 6 voisins augmenterait trop le temps d’exécution de la complétion.  
+Donnons un exemple illustrant le choix de voisins ainsi que la dénomination des nouvelles variables. Parmi les voitures qui entrent dans Paris par l'arête "pont amont - pont austerlitz", il y a une partie considérable qui continue tout droit sur l'arête "pont austerlitz - chatelet". Par conséquent, nous ajoutons la variable **rateCar_pontausterlitzTOchatelet** au dataframe de "pont amont - pont austerlitz".
 
-Jusqu'ici, nous n'avons utilisé que des informations déjà présentes dans le jeu de données. Dans la suite, nous rajoutons des variables extérieures qui pourraient également expliquer la circulation routière.
+Jusqu'ici, nous n'avons utilisé que des informations déjà présentes dans le jeu de données. Dans la suite, nous ajoutons des variables extérieures qui pourraient également expliquer la circulation routière.
 
 ### Variables supplémentaires : Facteurs externes
 
@@ -138,10 +136,10 @@ Le traffic routier étant relié à l'activité humaine, nous avons ajouté de n
 
 - **year**, **month**, **day**, **hour** résultent d'une simple décomposition des timestamps **t_1h**,
 - **time** est un simple compteur de journées, commençant à $1$ le 1er janvier 2014,
-- **toy** veut dire "time of year" et il s'agit d'un numéro entre 0 et 1 indiquant la position de l'observation dans l'année en cours,
-- **weekdays** le numéro du jour de la semaine (lundi = 1) et **weekendsIndicator** l'indicatrice si le jour est un jour du weekend,
+- **toy** (time of year), il s'agit d'un numéro entre 0 et 1 indiquant la position de l'observation dans l'année en cours,
+- **weekdays** le numéro du jour de la semaine et **weekendsIndicator** l'indicatrice si le jour est un jour du weekend,
 - **winterHolidaysIndicator** et **summerHolidaysIndicator** les indicatrices des vacances d'hiver et d'été définies à partir de [@calendrierScolaire],
-- **bankHolidaysIndicator** l'indicatrice des jours fériés défini à partir de [@joursFeries].
+- **bankHolidaysIndicator** l'indicatrice des jours fériés définie à partir de [@joursFeries].
 
 **Index de la situation sanitaire en rapport avec le Covid-19**
 
@@ -155,25 +153,25 @@ On dispose d'un relevé tous les 3 heures environ donc on procède à une interp
 
 ## Complétion via Random Forest
 
-Avec un dataframe enrichi à notre disposition pour chacune des arêtes du graphe de circulation, nous pouvons passer au remplissage des valeurs manquantes. Nous sommes pourtant restreint dans notre recherche d'un algorithme d'imputation car plusieurs variables explicatives contiennent également des *NA*: D'un côté, nous voulons remplir deux variables en même temps (**nbCar** et **rateCar**). De l'autre côté, les "voisins" n'ont pas moins de valeurs manquantes, laissant de grands trous dans le dataframe.  
-Heureusement, il y a un modèle qui peut être entraîné en dépit de valeurs manquantes parmi les covariates : Les forêts aléatoires constituées d'arbres CART. Une règle de décision dans un tel arbre peut juste être ignorée si la valeur de la variable nécessaire n'est pas renseignée. Le package `miceRanger` profite de ce fait en utilisant un algorithme dit d'imputation multiple : En commençant par la variable une variable $V_1$, une forêt aléatoire est entraînée sur les lignes où $V_1$ n'est pas manquant. Puis, les autres lignes sont "prédites" par la forêt. Avec le nouveau dataset déjà moins vide, le processus est recommence et ainsi de suite [@miceRanger]. Nous nous arêtons pourtant à la deuxième itération vu qu'il n'y a pas d'intérêt à compléter les données des voisins à plusieurs reprises.
+Avec un dataframe enrichi à notre disposition pour chacune des arêtes du graphe de circulation, nous pouvons passer au remplissage des valeurs manquantes. Nous sommes pourtant restreint dans notre recherche d'un algorithme d'imputation car plusieurs variables explicatives contiennent également des *NA*. D'une part, nous voulons remplir deux variables en même temps (**nbCar** et **rateCar**). D'autre part, les voisins n'ont pas moins de valeurs manquantes, laissant de grands trous dans le dataframe.  
+Heureusement, il y a un modèle qui peut être entraîné en dépit de valeurs manquantes parmi les variables : les forêts aléatoires constituées d'arbres CART. Une règle de décision dans un tel arbre peut être ignorée si la valeur de la variable nécessaire n'est pas renseignée. Le package `miceRanger` profite de ce fait en utilisant un algorithme dit d'imputation multiple : en commençant par la variable $V_1$, une forêt aléatoire est entraînée sur les lignes où $V_1$ n'est pas manquant. Puis, les autres lignes sont "prédites" par la forêt. Avec le nouveau dataset moins vide, le processus est reproduit et ainsi de suite [@miceRanger]. Nous nous arêtons pourtant à la deuxième itération vu qu'il n'y a pas d'intérêt à compléter les données des voisins.
 
-Comme nous répétons le processus de complétion 69 fois, le temps d’exécution est de quelques heures sur mon laptop. Nous n'avons donc pas le luxe d'optimiser des hyperparamètres comme nous ferons plus tard pour la tâche de prédiction. Le choix de 100 arbres par forêt et 7 variables considérées à chaque split semble un bon compromis. *TODO Guillaume: Voulons-nous mettre du code ici?*  
+Comme nous répétons le processus de complétion 69 fois, le temps d’exécution est de quelques heures sur nos ordinateurs. Nous n'avons donc pas le luxe d'optimiser des hyperparamètres comme nous ferons plus tard pour la tâche de prédiction. Le choix de 100 arbres par forêt et 7 variables considérées à chaque split semble un bon compromis. *TODO Guillaume: Voulons-nous mettre du code ici?*  
 Au délà des capacités de complétion, les forêts aléatoires permettent de calculer des scores d'importance pour chaque variable explicatives. Ces scores peuvent aider à identifier lesquelles des variables ont le plus contribué à l'estimation de la cible (le score est calculé comme la réduction de variance à chaque split). Pour une arête du graphe, *jussieu - saint michel*, nous illustrons les variables qui ont le plus contribué à l'imputation :
 
-```{r rateCarImpute, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Variables with highest importance scores for **nbCar** of the edge jussieu - saint michel", echo = F}
+```{r rateCarImpute, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Variables avec le score d'importance le plus haut pour **rateCar** de l'arête ''jussieu - saint michel''", echo = F}
 knitr::include_graphics('figures/impute_rateCar_lagged.png')
 ```
 
-```{r nbCarImpute, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Variables with highest importance scores for **nbCar** of the edge jussieu - saint michel", echo = F}
+```{r nbCarImpute, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Variables avec le score d'importance le plus haut pour  **nbCar** de l'arête ''jussieu - saint michel''", echo = F}
 knitr::include_graphics('figures/impute_nbCar_neighs.png')
 ```
 
-Sur l'arête dont traitent les deux plots, on observe que **rateCar** et **nbCar** exhibent deux comportement assez différents : Pour le taux d'occupation, ce sont presque exclusivement les valeurs temporellement décalées qui contribuent à l'imputaion. Comme il y seulement 0.8% de valeurs à compléter, ceci confirme notre hypothèse que les petits trous d'une ou plusieurs heures sont au mieux prédites par les valeurs des heures juste avant ou après. Si nous regardons le nombre de voitures où la proportion de *NA* était plus importante, les deux variables ayant le plus réduit les variances aux split sont des **nbCar** issus d'arêtes voisines. Les trous importants en **nbCar** entre Jussieu et Saint Michel semblent être le mieux expliqué par ce qui se passe autour.  
+Sur l'arête dont traitent les deux plots, on observe que **rateCar** et **nbCar** exhibent deux comportement assez différents. Pour le taux d'occupation, ce sont presque exclusivement les valeurs temporellement décalées qui contribuent à l'imputaion. Comme il y seulement 0.8% de valeurs à compléter, ceci confirme notre hypothèse que les petits trous d'une ou plusieurs heures sont très bien complétés par les valeurs des heures juste avant ou après. Pour le nombre de voitures, où la proportion de *NA* était plus importante, les deux variables ayant le plus réduit les variances aux splits sont des variables **nbCar** issues d'arêtes voisines. Les trous importants en **nbCar** entre Jussieu et Saint Michel semblent être le mieux expliqué par ce qui se passe autour. Cela confirme notre choix de variables pour combler les 2 types de trous.
 Un phénomène similaire peut s'observer dans les autres arêtes.(TODO Guillaume: Quoi d'autre écrire sur ceci ? Y a des scores intéressants dans RF (genre error Out of Bag) que j'aurais dû retenir de l'imputation ?)
 
-Après l'imputation arête par arête, nous pouvons enfin compléter toutes les données grâce au fait que les variables reliés aux voisins ont été imputés dans les dataframes qui correspondent à ces voisins. Il est important de noter ici que nous allons dans la suite couper le jeu de données en deux (train - test) et que cette imputation sera effectuée individuellement sur chacune des deux parties. Faire ceci deux fois séparément est nécessaire pour préserver de l'indépendance, permettant plus tard d'estimer les erreurs de nos modèles.  
-Dans la suite, nous supposons que les données sont complètes. Il faut pourtant remarquer que ces forêts aléatoires font indirectement partie des modèles de prédiction que nous allons utiliser.
+Après l'imputation arête par arête, nous pouvons enfin compléter toutes les données grâce au fait que les variables reliées aux voisins ont été imputées dans les dataframes qui correspondent à ces voisins. Il est important de noter ici que nous allons dans la suite couper le jeu de données en deux (train - test) et que cette imputation sera effectuée individuellement sur chacune des deux parties. Faire ceci deux fois séparément est nécessaire pour préserver l'indépendance et permet ensuite d'estimer les erreurs de nos modèles.  
+Dans la suite, nous supposons que les données sont complètes. Il faut pourtant remarquer que ces forêts aléatoires font indirectement partie des modèles de prédiction que nous allons utiliser. De plus, nous gardons à l'esprit que nous avons introduit un biais dans nos données d'apprentissage comme de test.
 
 ## Etude descriptive des données
 
