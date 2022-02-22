@@ -10,6 +10,11 @@ bibliography: references.bib
 link-citations: true
 ---
 
+<style>
+body {
+text-align: justify}
+</style>
+
 ```{r librairies, include=FALSE, eval=TRUE}
 library(XML)
 library(RCurl)
@@ -22,8 +27,8 @@ library(weathermetrics)
 library(ranger)
 ```
 
-# Introduction : La circulation à Paris
-La ville de Paris rend publiquement accessible de vastes données sur la circulation routière dans la ville. La découverte du site web *Paris Data* [@parisData] nous a motivé pour utiliser cette ressource dans notre projet de prédiction. Ce qui nous a surtout intrigué est la possibilité de relier les différents capteurs dans une structure de graphe. D'un côté, cela motive des études globales du réseau entier : Est-ce qu'on trouve un algorithme global, qui apprend les interactions dans le réseau entier ? De l'autre côté, l'examination de rues individuelles mène à des questions sur la corrélation locale de la circulation. Un grand boulevard se comporte-t-il comme ses avenues voisines ? Enfin, dans tout cela, nous nous poserons la question à quel horizon temporel nous réussirons à prédire la présence de voitures dans les rues de Paris.
+# Introduction : la circulation à Paris
+La ville de Paris rend publiquement accès à de nombreux jeux de données sur la circulation routière de la ville. La découverte du site web *Paris Data* [@parisData] nous a motivé à utiliser cette ressource dans notre projet de prédiction. La possibilité de relier les différents capteurs dans une structure de graphe nous a intéressé. D'une part, cela motive des études du réseau entier : peut-on construire un algorithme global, qui apprend les interactions dans le réseau entier ? D'e l'autre côté'autre part, l'examination de rues individuelles mène à des questions sur la corrélation locale de la circulation. Un grand boulevard se comporte-t-il comme ses avenues voisines ? Enfin, dans tout cela, nous nous poserons la question à quel horizon temporel nous réussirons à prédire la présence de voitures dans les rues de Paris.
 
 Avant de nous lancer, nous présentons d'abord le jeu de données en détail, sa richesse mais aussi les difficultés qu'il apporte : Sa taille et les valeurs manquantes. Ayant passé une grande partie du projet sur cet aspect, nous présentons nos stratégies pour résumer et compléter ce data set.
 
@@ -33,21 +38,21 @@ Cela fait, nous formulons plusieurs problèmes de prédiction, à différents ho
 
 ## Les données et leurs attribus
 
-Sur le site *Paris Data*, on trouve énormité de jeux de données issus des activités de la ville, notamment sur le de comptage routier [@donneesComptage]. Ces données sont collectées en continu grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. Ces boucles et bornes de comptage mesurent principalement deux choses: Le nombre de voitures qui passent et l'occupation du tronçon de route. Disponibles de 2014 jusqu'aujourd'hui, ces deux chiffres sont mesurés au pas horaire, résultant en environ 
+Sur le site *Paris Data*, on trouve énormément de jeux de données issus des activités de la ville, notamment sur le comptage routier [@donneesComptage]. Ces données sont collectées en continu grâce à des boucles électromagnétiques implantées dans la chaussée sur plus de 3000 tronçons de voies. Ces boucles et bornes de comptage mesurent principalement deux choses: le nombre de voitures qui passent et l'occupation du tronçon de route. Disponibles de 2014 jusqu'à aujourd'hui, ces deux chiffres sont mesurés au pas horaire, résultant en environ 
 $$
-8 \text{ ans } \times 365 \text{ jours } \times 24 \text{ heures } \times 3000 \text{ capteurs } = 2.1\times10^8 \text{ lignes dans le data set.}
+8 \text{ ans } \times 365 \text{ jours } \times 24 \text{ heures } \times 3000 \text{ capteurs } = 2.1\times10^8 \text{ observations dans le data set.}
 $$
 
-Chacune de ces lignes contient les informations suivantes qui serons plus tard nos variables explicatives $X_i$. Les noms des variables que nous utilisons dans notre analyse plus tard sont toujours notés **gras** tout au long de cet exposé.
+Chacune de ces lignes contient les informations suivantes, qui serons nos variables explicatives $X_i$. Les noms des variables que nous utilisons dans notre analyse sont écrits **gras** tout au long de cet exposé.
 
-- Un timestamp **t_1h** indiquant date et heure de l'évaluation.
-- Le nombre de voitures ayant passé le point de comptage pendant cette heure. Les auteurs l'appellent *q*, le débit horaire, mais nous changeons le nom en **nbCar**.
-- Le taux d'occupation, correspondant au temps de présence de véhicules sur la boucle en pourcentage d’une heure. Nommée *k* dans les données originales, nous appelons cette variable **rateCar**
-- La variable *etat_barre* indique si la route où se trouve la borne de comptage est "barée" (*etat_barre*=2) ou "ouverte" (=1). Nous la renommons **state**. Malheureusement cette variable à souvent la valeur "inconnu" (**state**=0) ou "invalide" (=4). La différence de 3 et 4 nous est un mystère et par conséquence nous nous servons peu de cette variable.
-- L'identifiant *iu_ac* de la borne, un numéro unique. Chaque ligne contient aussi de informations sur les compteurs adjacents.
-- Le libellé (*libelle*) du tronçon de rue où est placé le senseur, par exemple "Champs Elysées partie B".
+- Un timestamp **t_1h** indiquant date et heure de la mesure.
+- Le nombre de voitures ayant passé le point de comptage pendant une heure, noté **q** et renommé par **nbCar**.
+- Le taux d'occupation, correspondant au temps de présence de véhicules sur la boucle en pourcentage d’une heure, noté **k** et renommé par **rateCar**.
+- La variable *etat_barre* indique si la route où se trouve la borne de comptage est "barée" (*etat_barre*=2) ou "ouverte" (=1). Nous la renommons **state**. Malheureusement, cette variable a souvent la valeur "inconnu" (**state**=0) ou "invalide" (=4). La différence de 3 et 4 nous est un mystère et par conséquence nous nous servons peu de cette variable.
+- L'identifiant **iu_ac** pour chaque borne. Chaque ligne contient aussi de informations sur les compteurs adjacents.
+- Le libellé (**libelle**) du tronçon de rue où est placé le capteur, par exemple "Champs Elysées partie B".
 
-Les données historiques de circulation sont enregistrés sur le site web sous le format *.txt*. Chaque fichier couvre toutes les bornes pour une semaine. Pour commencer, il faut donc tout télécharger et convertir de manière automatisée ces fichiers en dataframes. En ce faisans, nous effectuons également un triage par identifiant de borne *iu_ac*.
+Les données historiques de circulation sont enregistrées sur le site web sous le format *.txt*. Chaque fichier couvre toutes les bornes pour une semaine. Pour commencer, il faut donc tout télécharger et convertir de manière automatisée ces fichiers en dataframes. En ce faisans, nous effectuons également un triage par identifiant de borne **iu_ac**.
 
 ## Simplification et aggrégation
 
@@ -194,7 +199,7 @@ Afin de comparer nos modèles, on construit 3 modèles témoins. Ces modèles so
 
 On calcule la moyenne des erreurs RMSE pour les 69 arêtes :
 
-```{r naiveModel table, echo=FALSE}
+```{r naiveModeltable, echo=FALSE}
 df_naiveModels <- data.frame(5.844, 5.899, 3.955)
 names(df_naiveModels) <- c("naiveModel1", "naiveModel2", "naiveModel3")
 
@@ -229,25 +234,67 @@ On présente maintenant les différents types de modèle construits. Pour chacun
 
 Le premier modèle construit est un arbre aléatoire à l'aide du package *rpart*. On optimise le paramètre **cp** (complexity parameter) sur 2 grilles : la première de 0.0 à 0.1 et la seconde, plus fine, de 0.0 à 0.01. 
 
-```{r arbreGrille1, fig.cap = "Recherche du paramètre cp optimal", out.width='100%', fig.align='center', fig.show='hold', echo = F}
+```{r arbreGrille1, fig.cap = "Recherche du paramètre cp optimal", out.width='80%', fig.align='center', fig.show='hold', echo = F}
 knitr::include_graphics('figures/arbre_grille.png')
 ```
 
 Le paramètre **cp** est le paramètre le plus important à optimiser. Dans la construction de l'arbre, si le gain de performance après une découpe n'est pas meilleur d'un facteur de **cp**, alors la découpe n'est pas réalisée. Dans notre cas, la valeur optimale est **cp = 0**, c'est-à-dire que l'on accepte toutes les découpes et que notre arbre est un arbre profond. On n'optimise pas les autres paramètres que l'on maintient à leur valeur par défaut car **cp** contrôle déjà la profondeur de l'arbre et on ne cherche pas à optimiser au maximum les arbres. On obtient les erreurs de test suivantes:
 
-```{r treeModel table, echo=FALSE}
+```{r treeModeltable, echo=FALSE}
 df_treeModels <- data.frame(3.783, 3.582)
 names(df_treeModels) <- c("Arbre avec voisins", "Arbre sans voisins")
 
 knitr::kable(df_treeModels, align = "cc", caption = "Performances des arbres aléatoires")
 ```
 
-Premièrement, on note une performance significativement meilleure que les modèles naïfs. Ces arbres, bien que très simples, sont donc pertinents. Ensuite, on remarque que si on ajoute les arêtes voisines, le score est légèrement moins bon. 
+Premièrement, on note une performance significativement meilleure que les modèles naïfs. Ces arbres, bien que très simples, sont donc pertinents. Ensuite, on remarque que si on ajoute les arêtes voisines, le score est légèrement moins bon.
 
 ## Forêts aléatoires
 
+On construit maintenant des forêts aléatoires, une méthode d'ensemble à base d'arbres de décision. On utilise le package *ranger* pour les construire et le package *vip* pour visualiser l'importance des variables. On optimise 2 paramètres : 
 
+* **min.node.size** (minimal node size) : l'algorithme ne découpe pas une feuille dont le nombre d'éléments est inférieur ou égal. Ce paramètre contrôle la taille des arbres.
 
+```{r tuningminnodesize, fig.cap = "Recherche du paramètre min.node.size optimal", out.width='80%', fig.align='center', fig.show='hold', echo = F}
+knitr::include_graphics('figures/tuning_minnodesize.png')
+```
+On remarque que l'erreur décroît jusque la valeur 0 (en omettant la valeur au point 9). Pour ne pas que les arbres soient trop profonds, on garde la valeur par défaut $\textbf{min.node.size} = 5$.
+
+* **mtry** (randomly selected predictors) : nombre de variables, tirées au hasard, que l'algorithme peut découper. Ce paramètre contrôle la corrélation entre les arbres.
+
+```{r tuningmtry, fig.cap = "Recherche du paramètre mtry optimal", out.width='80%', fig.align='center', fig.show='hold', echo = F}
+knitr::include_graphics('figures/tuning_mtry.png')
+```
+Exceptionnellement, on affiche ici la recherche du paramètre optimal par la méthode *timeslice*. On remarque que l'allure globale des courbes sont identiques mais que le coude est plus prononcé avec *timeslice*. On choisit de poser $\textbf{mtry} = 10$.
+
+Le dernier paramètre à déterminer est **ntree**, le nombre d'arbres dans la forêts. Ce n'est pas un paramètre à optimiser comme les 2 précédents car le surapprentissage dans les forêts aléatoires n'est pas lié au nombre d'arbres. On optimise **ntree** afin de déterminer à partir de quel nombre d'arbre on gaspille du temps d'exécution pour un faible gain de performance. 
+
+```{r tuningntree, fig.cap = "Recherche du paramètre ntree ''optimal''", out.width='80%', fig.align='center', fig.show='hold', echo = F}
+knitr::include_graphics('figures/ntreeTuning.png')
+```
+
+On voit que le temps d'exécution est linéaire selon le nombre d'arbres et que la courbe de l'erreur marque un coude à partir de $150$, valeur que l'on choisit pour **ntree*. On crée les forêts aléatoires et on obtient
+
+```{r rfModeltable, echo=FALSE}
+df_rfModels <- data.frame(3.092, 3.129)
+names(df_rfModels) <- c("Forêt aléatoire avec voisins", "Forêt aléatoire sans voisins")
+
+knitr::kable(df_rfModels, align = "cc", caption = "Performances des forêts aléatoires")
+```
+
+Les performances des forêts aléatoires sont meilleures que celles des arbres aléatoires. Contrairement à ces derniers, les performances des forêts sont meilleures lorsque les arêtes voisines sont disponibles. De plus, on voit sur les scores d'importance qu'elles sont déterminantes dans les forêts. Par exemple, pour l'arête *pont amont - pont austerlitz*,
+
+```{r importance, fig.cap = "Scores d'importance dans l'ordre décroissante (15 premières arêtes) pour l'arête ''pont amont - pont austerlitz''", out.width='80%', fig.align='center', fig.show='hold', echo = F}
+knitr::include_graphics('figures/importance.png')
+```
+
+Dans la suite, on souhaite construire des modèles nécessitant une sélection de paramètres. On la réalise grâce notamment grâce à ces scores d'importance. On souhaite également savoir quelles prédictions sont meilleures selon qu'on ajoute ou non les voisins. On représente sur le graphique suivant les différences entre les erreurs RMSE avec voisins et sans voisins. Le trait vertical noir point-tillé est la séparation entre Paris et le périphérique. Le trait horizontal rouge point-tillé est un seuil arbitraire (fixé à 0.2) à partir duquel on considère qu'ajouter les voisins améliore la performance de la forêt. Les arêtes respectant le seuil sont représentées par une croix rouge, sinon par une croix noire.
+
+```{r analyseRF, out.width='80%', fig.align='center', fig.show='hold', echo = F}
+knitr::include_graphics('figures/analyseRF.png')
+```
+
+Seules 12 forêts sur 69 ont une performance ''significativement'' meilleure lorsqu'on ajoute les voisins. De plus, pour les arêtes du périphérique, on remarque que les différences sont plus importantes que pour Paris, qu'inclure les voisins est néfastes (à 2 exceptions près) et qu'en général, la circulation sur ces arêtes est moins bien prédite. En effet, les scores pour Paris sont 2.747 (avec voisins) et 2.898 (sans voisins), et les scores du périphérique sont 4.069 (avec voisins) et 3.787 (sans voisins).
 
 # Conclusion
 

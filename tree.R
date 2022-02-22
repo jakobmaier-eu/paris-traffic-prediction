@@ -29,7 +29,7 @@ train_control <- trainControl(method = "timeSlice",
                            verboseIter = TRUE)
 
 # cv method
-train_control <- trainControl(method="cv", number=16)
+train_control <- trainControl(method="cv", number=16,verboseIter = TRUE)
 
 # First grid : from 0.0 to 0.1
 cpGrid1 <- expand.grid(cp=seq(0,0.1,length=10))
@@ -38,15 +38,15 @@ cpGrid1 <- expand.grid(cp=seq(0,0.1,length=10))
 cpGrid2 <- expand.grid(cp=seq(0,0.01,length=10))
 
 # Training
-rpart.CV.1 <- train(eq, data = data_train[[1]], method ="rpart",  
-                trControl=train_control, metric="RMSE",tuneGrid = cpGrid1,minsplit=2)
+rpart.CV.1 <- caret::train(eq, data = data_train[[1]], method ="rpart",  
+                trControl=train_control, metric="RMSE",tuneGrid = cpGrid1,minsplit=20)
 
-rpart.CV.2 <- train(eq, data = data_train[[1]], method ="rpart",  
-                  trControl=train_control, metric="RMSE",tuneGrid = cpGrid2,minsplit=2)
+rpart.CV.2 <- caret::train(eq, data = data_train[[1]], method ="rpart",  
+                  trControl=train_control, metric="RMSE",tuneGrid = cpGrid2,minsplit=20)
 
 # Fitting the tree with optimal cp value
 rpart1 <- rpart(eq , data = data_train[[1]], method = "anova",
-               control = rpart.control(minsplit = 2,
+               control = rpart.control(minsplit = 20,
                                        cp = cpGrid1[which.min(rpart.CV.2$results$RMSE),]))
 
 # Prediction
