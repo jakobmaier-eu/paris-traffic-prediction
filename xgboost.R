@@ -44,11 +44,11 @@ xgb_trcontrol = trainControl(method = "cv", number = 5, allowParallel = TRUE,
 
 xgbGrid <- expand.grid(nrounds = 100,  
                        max_depth = c(3, 5, 7, 10),
-                       colsample_bytree = seq(0.5, 0.9, length.out = 5),
-                       eta = 0.1,
-                       gamma=c(0,0.1,0.2,0.3),
-                       min_child_weight = 1,
-                       subsample = seq(0.5, 0.9, length.out = 5)
+                       colsample_bytree = seq(0.7, 0.9, length.out = 5),
+                       eta = c(0.3,0.1,0.05,0.01),
+                       gamma = c(0,0.1,0.2,0.3),
+                       min_child_weight = seq(1,10,2),
+                       subsample = seq(0.7, 0.9, length.out = 5)
 )
 
 ptm <- proc.time()
@@ -77,6 +77,7 @@ model <- xgboost(data = as.matrix(data_train[[1]] %>% select(-rateCar)),
                  label = data_train[[1]]$rateCar,
                  nrounds = 133,
                  booster = "gbtree",
+                 metrics = "rmse",
                  eta=0.1, gamma=0.2, max_depth=7, 
                  min_child_weight=1, subsample=0.9, 
                  colsample_bytree=0.9,
@@ -85,4 +86,99 @@ model <- xgboost(data = as.matrix(data_train[[1]] %>% select(-rateCar)),
 pred <- predict(model, as.matrix(data_test[[1]] %>% select(-rateCar)))
 
 rmse(pred,data_test[[1]]$rateCar)
+
+#################
+# Prediction of the 69 edges without neighbors
+#################
+
+rmse_list = c()
+mape_list = c()
+
+ptm <- proc.time()
+
+for(i in 1:69){
+  print(i)
+  
+  data_tr = data_train[[i]][,c(1:22)]
+  data_te = data_test[[i]][,c(1:22)]
+  
+  data_tr$weekdays <- unlist(lapply(X = data_tr$weekdays, FUN = daysToNumber))
+  data_te$weekdays <- unlist(lapply(X = data_te$weekdays, FUN = daysToNumber))
+  
+  
+  model <- xgboost(data = as.matrix(data_tr %>% select(-rateCar)), 
+                   label = data_tr$rateCar,
+                   nrounds = 133,
+                   booster = "gbtree",
+                   eta=0.1, gamma=0.2, max_depth=7, 
+                   min_child_weight=1, subsample=0.9, 
+                   colsample_bytree=0.9,
+                   verbose = 0)
+  
+  prediction <- predict(model, as.matrix(data_te %>% select(-rateCar)))
+  
+  rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
+  mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
+}
+
+print(proc.time() - ptm)
+
+#################
+# Prediction of the 69 edges with neighbors
+#################
+
+rmse_list = c()
+mape_list = c()
+
+ptm <- proc.time()
+
+for(i in 1:69){
+  print(i)
+  
+  data_tr = data_train[[i]]
+  data_te = data_test[[i]]
+  
+  data_tr$weekdays <- unlist(lapply(X = data_tr$weekdays, FUN = daysToNumber))
+  data_te$weekdays <- unlist(lapply(X = data_te$weekdays, FUN = daysToNumber))
+  
+  
+  model <- xgboost(data = as.matrix(data_tr %>% select(-rateCar)), 
+                   label = data_tr$rateCar,
+                   nrounds = 133,
+                   booster = "gbtree",
+                   eta=0.1, gamma=0.2, max_depth=7, 
+                   min_child_weight=1, subsample=0.9, 
+                   colsample_bytree=0.9,
+                   verbose = 0)
+  
+  prediction <- predict(model, as.matrix(data_te %>% select(-rateCar)))
+  
+  rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
+  mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
+}
+
+print(proc.time() - ptm)
+
+#################
+# Prediction of huge dataframe
+#################
+
+data_train <- readRDS("C:/Users/lambe/Documents/Projet_ML/données/train_one_model.rds")
+data_test <- readRDS("C:/Users/lambe/Documents/Projet_ML/données/test_one_model.rds")
+
+model <- xgboost(data = as.matrix(data_train %>% select(-nexthour_rateCar)), 
+                 label = data_train$nexthour_rateCar,
+                 nrounds = 133,
+                 booster = "gbtree",
+                 metrics = "rmse",
+                 eta=0.1, gamma=0.2, max_depth=7, 
+                 min_child_weight=1, subsample=0.9, 
+                 colsample_bytree=0.9,
+                 verbose = 2)
+)
+
+
+
+
+
 
