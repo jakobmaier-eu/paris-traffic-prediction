@@ -4,7 +4,8 @@ subtitle: "Projet ML, M2 Statistiques et Machine Learning"
 author: "Jakob Maier, Guillaume Lambert"
 date: "25/02/2021"
 output:
-  bookdown::html_document2: default
+  bookdown::html_document2:
+    code_folding: hide
   bookdown::pdf_document2: default
 bibliography: references.bib
 link-citations: true
@@ -378,7 +379,7 @@ Afin de choisir la prochaine variable à rajouter pour expliquer **rateCar**, no
 
 1. **hour** :
 
-```{r CV_mod1}
+```{r CV_mod1_hour}
 form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + 
   s(hour, bs="cc", by=weekendsIndicator)
 # mod1_hour = gam(form1_hour, data=df_train)
@@ -387,7 +388,7 @@ CV_gam(form1_hour, df_train, no_folds = 8)
 ```
 
 2. **weekdays** : 
-```{r CV_mod1}
+```{r CV_mod1_wd}
 form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(hour, by=weekendsIndicator)
 # mod1_hour = gam(form1_hour, data=df_train)
 # summary(mod1_hour)
