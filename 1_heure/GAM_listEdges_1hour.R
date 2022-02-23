@@ -15,11 +15,6 @@ library(ranger)
 library(GGally)
 #----------- End Header ----------------#
 
-# Prepare data first: 
-edge_index = "concorde - saint michel" # We study an arbitrary edge
-df_train = data_train[[paste(edge_index)]]
-df_test = data_test[[paste(edge_index)]]
-
 daysToNumber <- function(day){
   if(day == "lundi"){return(1)}
   if(day == "mardi"){return(2)}
@@ -29,11 +24,6 @@ daysToNumber <- function(day){
   if(day == "samedi"){return(6)}
   if(day == "dimanche"){return(7)}
 }
-
-df_train$weekdays <- unlist(lapply(X = df_train$weekdays, FUN = daysToNumber))
-df_test$weekdays <- unlist(lapply(X = df_test$weekdays, FUN = daysToNumber))
-df_train$weekendsIndicator = as.factor(df_train$weekendsIndicator)
-df_test$weekendsIndicator = as.factor(df_test$weekendsIndicator)
 
 #### Assumptions:
 # 1. Do not use the variables
@@ -48,6 +38,31 @@ df_test$weekendsIndicator = as.factor(df_test$weekendsIndicator)
 # - Keep adding variables to the GAM (do a forward backwar search)
 # - For each added variable tweak the k. Check out TP4_gam to generate the graphs.
 # - When motivation < eps, do XGboost on the huge dataframe.
+
+edge_index = "concorde - saint michel" # We study an arbitrary edge
+df_train = data_train[[paste(edge_index)]]
+df_test = data_test[[paste(edge_index)]]
+
+df_train$weekdays <- unlist(lapply(X = df_train$weekdays, FUN = daysToNumber))
+df_test$weekdays <- unlist(lapply(X = df_test$weekdays, FUN = daysToNumber))
+df_train$weekendsIndicator = as.factor(df_train$weekendsIndicator)
+df_test$weekendsIndicator = as.factor(df_test$weekendsIndicator)
+
+hours_linregs = data.frame(
+  hour = rep(0,24), 
+  intercept = rep(0,24),
+  slope = rep(0,24))
+for (h in 0:23){
+  hour_idxs = df_train$hour == h
+  hour_data = subset(df_train[hour_idxs,], select=c(rateCar, rateCar_LaggedHour))
+  mod = lm(rateCar ~ rateCar_LaggedHour, data = hour_data)
+  hours_linregs$hour[h + 1] = h
+  hours_linregs$intercept[h + 1] = round(mod$coefficients[1],3)
+  hours_linregs$slope[h + 1] = round(mod$coefficients[2],3)
+}
+print(hours_linregs, row.names=F)
+
+
 
 cluster_hours = function(h){
   if (h %in% c(22,23,0,1,2,3,4,5,6)){return("night")}
@@ -72,20 +87,9 @@ for (group in unique(df_train$hour_groups)){
 }
 
 
+
 ### LinRegs and compare coefficients (ANOVA??)
-hours_linregs = data.frame(
-  hour = rep(0,24), 
-  intercept = rep(0,24),
-  slope = rep(0,24))
-for (h in 0:23){
-  hour_idxs = df_train$hour == h
-  hour_data = subset(df_train[hour_idxs,], select=c(rateCar, rateCar_LaggedHour))
-  mod = lm(rateCar ~ rateCar_LaggedHour, data = hour_data)
-  hours_linregs$hour[h + 1] = h
-  hours_linregs$intercept[h + 1] = round(mod$coefficients[1],3)
-  hours_linregs$coeff[h + 1] = round(mod$coefficients[2],3)
-}
-print(hours_linregs, row.names=F)
+
 
 
 ggpairs(subset(df_train[1:1000,], select= c(hour, rateCar_LaggedHour, rateCar))) 

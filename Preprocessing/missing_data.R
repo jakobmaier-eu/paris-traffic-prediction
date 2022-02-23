@@ -53,7 +53,7 @@ vis_miss(edges$`porte maillot - porte asnieres`[3:4]) + theme(axis.text.x = elem
 vis_miss(edges$`bastille - chatelet`[3:4]) + theme(axis.text.x = element_text(angle=80))
 
 
-####
+####  Plot some rushhours
 
 View(edges$`saint michel - concorde`)
 
@@ -73,6 +73,19 @@ for (i in c(6)){
        +xlab("heures passées à partir de minuit du premier jour")
        +ylab("taux d'occupation en %") 
        +labs(title = "Occupation de l'arête 'porte maillot - porte asnieres' sur deux jours")
+  )
+}
+
+plot(edges$`ch`[10000:10500,4],type='l')
+for (i in c(8,9,10,11,12,14)){
+  labase = 50*24 + 48*i
+  df = data.frame(taux = edges$`porte italie - place italie`[labase:(labase+23),5],
+                  heures = c(0:23))
+  g = ggplot(data=df, aes(y = taux, x = heures))  
+  plot(g + geom_line()
+       +xlab("heures passées à partir de minuit")
+       +ylab("taux d'occupation en %") 
+       +labs(title = "Occupation de l'arête 'porte italie - place italie' à une journée ouvrière")
   )
 }
 
