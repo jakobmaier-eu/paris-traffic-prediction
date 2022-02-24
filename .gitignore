@@ -12,6 +12,8 @@ Data/test_one_model.rds
 Data/train_one_model.rds
 Data/test_one_small.rds
 Data/train_one_small.rds
+Data/data_train_day.rds
+Data/data_test_day.rds
 data_train.RData
 data.RData
 
