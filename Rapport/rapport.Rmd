@@ -178,7 +178,8 @@ Après l'imputation arête par arête, nous pouvons enfin compléter toutes les 
 Dans la suite, nous supposons que les données sont complètes. Il faut pourtant remarquer que ces forêts aléatoires font indirectement partie des modèles de prédiction que nous allons utiliser. De plus, nous gardons à l'esprit que nous avons introduit un biais dans nos données d'apprentissage comme de test.
 
 
-# Modèles de prévision
+# Problèmes et modèles
+de prévision
 
 ## Définition des problèmes
 
@@ -376,12 +377,12 @@ knitr::kable(CV_gam(form1, df_train, no_folds = 8), align = "llll", caption = "M
 
 Afin de choisir la prochaine variable à rajouter pour expliquer **rateCar**, nous les explorons une par une :
 
-1. **hour** :
+1. **hour** : Circulaire, essayons différents k.
 
 ```{r CV_mod1_hour}
-form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(hour, bs="cc", by=weekendsIndicator)
+form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(hour, bs="cc", k = 24, by=weekendsIndicator)
 mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
+summary(mod1_hour)
 knitr::kable(CV_gam(form1_hour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
 #test_score = rmse(predict(mod1_hour, newdata = df_test),  df_test$rateCar)
 #print(test_score)

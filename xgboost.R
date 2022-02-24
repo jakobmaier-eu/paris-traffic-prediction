@@ -10,6 +10,8 @@ require(xgboost)
 library(tidyverse)
 library(caret)
 library(readxl)
+library(catboost)
+library(caret)
 
 # data
 data("data_test")
@@ -163,50 +165,109 @@ print(proc.time() - ptm)
 # Prediction of huge dataframe
 #################
 
-# onedf_train <- readRDS("Data/train_one_model.rds")
-onedf_train_small = subset(readRDS("Data/train_one_model.rds"), 
-    select=c(-year, -month, -hour, -day, -covidIndex, -precipitation, -temperature))[1:1e6,]
+onedf_train <- subset(readRDS("Data/train_one_model.rds"), 
+                      select=c(-year, -month, -hour, -day, -covidIndex, -precipitation, -temperature))
+names(onedf_train)
+garder = c()
+for (i in 1:69){
+  if(i%%3 != 0){
+    next
+  }
+  garder = c(garder, unique(onedf_train$edgename)[i])
+}
+onedf_train_small = onedf_train %>% filter(edgename %in% garder)
+saveRDS(onedf_train_small, file="Data/train_one_small.rds")
 
-
-
-
-onedf_test_small <- subset(readRDS("Data/test_one_model.rds"), 
+onedf_test <- subset(readRDS("Data/test_one_model.rds"), 
     select=c(-year, -month, -hour, -day, -covidIndex, -precipitation, -temperature))
+garder = unique(onesmall_train$edgename)
+onedf_test_small = onedf_test %>% filter(edgename %in% garder)
+saveRDS(onedf_test_small, file="Data/test_one_small.rds")
 
 
-library(lightgbm)
-lgbm_rounds = 50
-lightgbm(data = as.matrix(onedf_train_small %>% select(-nexthour_rateCar)),
-         label = onedf_train_small$nexthour_rateCar,
-         nrounds = lgbm_rounds,
-         verbose =  0,
-         params = list(
-           early_stopping_round = lgbm_rounds/10,
-           lambda_l1 = 0.1,
-           lambda_l2 = 0.1,
-           num_leaves = 31,
-           max_depth = -1,
-           bagging_fraction = 1,
-           feature_fraction = 1,
-           max_bin = 255
-           ),
-         obj = regression
-         )
+onesmall_train = readRDS("Data/train_one_small.rds")
+onesmall_test = readRDS("Data/test_one_small.rds")
+
+
+for (catvar in c('edgename', 'position', 'weekdays')){
+    onesmall_train[[catvar]] = as.factor(onesmall_train[[catvar]])
+}
+for (catvar in c('edgename', 'position', 'weekdays')){
+  onesmall_test[[catvar]] = as.factor(onesmall_test[[catvar]])
+}
+
+train_pool <- catboost.load_pool(
+  (onesmall_train %>% select(-nexthour_rateCar)), 
+  label = onesmall_train$nexthour_rateCar
+  )
+test_pool <- catboost.load_pool(
+  onesmall_test %>% select(-nexthour_rateCar), 
+  label = onesmall_test$nexthour_rateCar
+)
+fit_params <- list(
+  iterations = 10000,
+  loss_function = 'RMSE',
+  border_count = 256,
+  depth = 2,
+  learning_rate = 0.001,
+  l2_leaf_reg = 0,
+  train_dir = 'train_dir')
+
+model <- catboost.train(train_pool, params=fit_params)
+Ypredict <- catboost.predict(model, pool=test_pool)
+
+install.packages("C:/Users/jakob/Dropbox/Uni/1_ProjetML/package/ProjetML1_0.0.tar.gz", repos = NULL, type="source")
+edge_scores = data.frame(edge_name=unique(onesmall_test$edgename))
+i = 1
+for (edge in unique(onesmall_test$edgename)){
+  testdata_edge = onesmall_test%>% filter(edgename==edge)
+  test_pool_edge <- catboost.load_pool(
+    testdata_edge%>% select(-nexthour_rateCar), 
+    label = testdata_edge$nexthour_rateCar
+  )
+  Ypred_edge = catboost.predict(model, pool = test_pool_edge)
+  edge_scores$test_score[i] = rmse(Ypred_edge, testdata_edge$nexthour_rateCar)
+  i = i + 1
+}
+
+
+saveRDS(model, file="1_heure/catboost_model.rds")
+modalt = readRDS("1_heure/catboost_model.rds")
+# Ypred_edge = catboost.predict(modalt, pool = test_pool_edge)
+# rmse(Ypred_edge, testdata_edge$nexthour_rateCar)
 
 
 
+# ###### LGBM doesn't work because it needs too much RAM.
+# library(lightgbm)
+# lgbm_rounds = 50
+# lightgbm(data = as.matrix(onesmall_train %>% select(-nexthour_rateCar)),
+#          label = onesmall_train$nexthour_rateCar,
+#          nrounds = lgbm_rounds,
+#          verbose =  0,
+#          params = list(
+#            early_stopping_round = lgbm_rounds/10,
+#            lambda_l1 = 0.1,
+#            lambda_l2 = 0.1,
+#            num_leaves = 31,
+#            max_depth = -1,
+#            bagging_fraction = 1,
+#            feature_fraction = 1,
+#            max_bin = 255
+#            ),
+#          obj = regression
+#          )
 
-
-### XGBoost doesn't work with categorical variables !
-xgb_mod1 <- xgboost(data = as.matrix(onedf_train_small %>% select(-nexthour_rateCar)), 
-                 label = onedf_train_small$nexthour_rateCar,
-                 nrounds = 133,
-                 booster = "gbtree",
-                 metrics = "rmse",
-                 eta=0.1, gamma=0.2, max_depth=7, 
-                 min_child_weight=1, subsample=0.9, 
-                 colsample_bytree=0.9,
-                 verbose = 2)
+# ### XGBoost doesn't work with categorical variables !
+# xgb_mod1 <- xgboost(data = as.matrix(onedf_train_small %>% select(-nexthour_rateCar)), 
+#                  label = onedf_train_small$nexthour_rateCar,
+#                  nrounds = 133,
+#                  booster = "gbtree",
+#                  metrics = "rmse",
+#                  eta=0.1, gamma=0.2, max_depth=7, 
+#                  min_child_weight=1, subsample=0.9, 
+#                  colsample_bytree=0.9,
+#                  verbose = 2)
 
 
 
