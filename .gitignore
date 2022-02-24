@@ -10,6 +10,8 @@ Data/edges_train.rds
 Data/edges_2020.rds
 Data/test_one_model.rds
 Data/train_one_model.rds
+Data/test_one_small.rds
+Data/train_one_small.rds
 data_train.RData
 data.RData
 

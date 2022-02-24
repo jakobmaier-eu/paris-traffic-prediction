@@ -17,6 +17,7 @@ text-align: justify}
 </style>
 
 ```{r librairies, include=FALSE, eval=TRUE}
+library(gratia)
 library(XML)
 library(RCurl)
 library(magrittr)
@@ -325,7 +326,8 @@ Les résultats sont congruents avec le graphique \@ref(fig:rushhours), par exemp
 
 ```{r groupes}
 cluster_hours = function(h){
-  if (h %in% c(0,1,2,3,4,5,6,7)){return("night")}
+  if (h %in% c(0,1,2,3,4,5,6)){return("night")}
+  if (h %in% c(7)){return("7heures")}
   if (h %in% c(8)){return("8heures")}
   if (h %in% c(9)){return("9heures")}
   if (h %in% c(10,11,12,13,14,15)){return("noon")}
@@ -334,8 +336,8 @@ cluster_hours = function(h){
   if (h %in% c(21,22,23)){return("evening")}
   else{return("asfd")}
 }
-df_train$hour_groups = sapply(as.factor(df_train$hour), cluster_hours)
-df_test$hour_groups = sapply(as.factor(df_test$hour), cluster_hours)
+df_train$hour_groups = as.factor(sapply(as.factor(df_train$hour), cluster_hours))
+df_test$hour_groups = as.factor(sapply(as.factor(df_test$hour), cluster_hours))
 # for (group in unique(df_train$hour_groups)){
 #   indices = df_train$hour_groups == group
 #   plot(df_train[indices,]$rateCar_LaggedHour, df_train[indices,]$rateCar,
@@ -358,7 +360,7 @@ CV_gam = function(formula, df_train, no_folds){
     testIndexes <- which(folds==i,arr.ind=TRUE)
     testData <- data[testIndexes, ]
     trainData <- data[-testIndexes, ]
-    g = gam(data=testData, formula=formula)
+    g = gam(data=trainData, formula=formula)
     Y_test = testData$rateCar
     Y_predict = predict(g, newdata=subset(testData, select = -c(rateCar)))
     fold_scores = c(fold_scores, rmse(Y_test, Y_predict))
@@ -378,20 +380,69 @@ Afin de choisir la prochaine variable à rajouter pour expliquer **rateCar**, no
 
 ```{r CV_mod1_hour}
 form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(hour, bs="cc", by=weekendsIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
+mod1_hour = gam(form1_hour, data=df_train)
 # summary(mod1_hour)
 knitr::kable(CV_gam(form1_hour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+#test_score = rmse(predict(mod1_hour, newdata = df_test),  df_test$rateCar)
+#print(test_score)
 ```
 
 2. **weekdays** : 
 ```{r CV_mod1_wd}
-form1_weekdays = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(weekdays, bs="cc", k = 4, by=winterHolidaysIndicator) 
+form1_weekdays = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(weekdays, bs="cc", k = 4,                                  by=as.factor(winterHolidaysIndicator)) 
 # + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
 # mod1_hour = gam(form1_hour, data=df_train)
 # summary(mod1_hour)
 mod1_weekdays = gam(form1_weekdays, data=df_train)
-plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+summary(mod1_weekdays)
+#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
 knitr::kable(CV_gam(form1_weekdays, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+3. **state** : 
+```{r CV_mod1_state}
+form1_state = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(state, bs="cr", k = 5)
+# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
+# mod1_hour = gam(form1_hour, data=df_train)
+# summary(mod1_hour)
+mod1_state = gam(form1_state, data=df_train)
+#summary(mod1_state)
+#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+knitr::kable(CV_gam(form1_state, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+3. **toy** (time of year):
+```{r CV_mod1_toy}
+form1_toy = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(toy, bs="cr", k = 6)
+# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
+# mod1_hour = gam(form1_hour, data=df_train)
+# summary(mod1_hour)
+mod1_toy = gam(form1_toy, data=df_train)
+summary(mod1_toy)
+#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+knitr::kable(CV_gam(form1_toy, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+3. **nbCar_LaggedHour**:
+
+```{r expl_mod1_nbCarHour}
+for (h in 0:23){
+  g = ggplot(data=df_train[(df_train$hour == h),], aes(y = rateCar, x = nbCar_LaggedHour))+ 
+  geom_point() + xlab("nbCar_laggedHour") +
+  ylab("rateCar (présent)") + 
+  labs(title = paste0("Heure ", h))
+plot(g)
+}
+```
+
+
+```{r CV_mod1_nbCarHour}
+form1_nbCarHour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(nbCar_LaggedHour, bs="cr", k = 6, by=hour_groups)
+mod1_nbCarHour = gam(form1_nbCarHour, data=df_train)
+summary(mod1_nbCarHour)
+#plot(mod1_nbCarHour, residuals=T, rug=T, se=T, pch=20)
+#draw(mod1_nbCarHour, residuals=T)
+knitr::kable(CV_gam(form1_nbCarHour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
 ```
 
 # Modèles - TODO Jakob: Relire et intégrer à partir d'ici

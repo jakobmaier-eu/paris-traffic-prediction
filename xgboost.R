@@ -163,11 +163,43 @@ print(proc.time() - ptm)
 # Prediction of huge dataframe
 #################
 
-data_train <- readRDS("C:/Users/lambe/Documents/Projet_ML/données/train_one_model.rds")
-data_test <- readRDS("C:/Users/lambe/Documents/Projet_ML/données/test_one_model.rds")
+# onedf_train <- readRDS("Data/train_one_model.rds")
+onedf_train_small = subset(readRDS("Data/train_one_model.rds"), 
+    select=c(-year, -month, -hour, -day, -covidIndex, -precipitation, -temperature))[1:1e6,]
 
-model <- xgboost(data = as.matrix(data_train %>% select(-nexthour_rateCar)), 
-                 label = data_train$nexthour_rateCar,
+
+
+
+onedf_test_small <- subset(readRDS("Data/test_one_model.rds"), 
+    select=c(-year, -month, -hour, -day, -covidIndex, -precipitation, -temperature))
+
+
+library(lightgbm)
+lgbm_rounds = 50
+lightgbm(data = as.matrix(onedf_train_small %>% select(-nexthour_rateCar)),
+         label = onedf_train_small$nexthour_rateCar,
+         nrounds = lgbm_rounds,
+         verbose =  0,
+         params = list(
+           early_stopping_round = lgbm_rounds/10,
+           lambda_l1 = 0.1,
+           lambda_l2 = 0.1,
+           num_leaves = 31,
+           max_depth = -1,
+           bagging_fraction = 1,
+           feature_fraction = 1,
+           max_bin = 255
+           ),
+         obj = regression
+         )
+
+
+
+
+
+### XGBoost doesn't work with categorical variables !
+xgb_mod1 <- xgboost(data = as.matrix(onedf_train_small %>% select(-nexthour_rateCar)), 
+                 label = onedf_train_small$nexthour_rateCar,
                  nrounds = 133,
                  booster = "gbtree",
                  metrics = "rmse",
@@ -175,7 +207,7 @@ model <- xgboost(data = as.matrix(data_train %>% select(-nexthour_rateCar)),
                  min_child_weight=1, subsample=0.9, 
                  colsample_bytree=0.9,
                  verbose = 2)
-)
+
 
 
 
