@@ -89,7 +89,7 @@ rmse(pred,data_test[[1]]$rateCar)
 
 rmse_list = c()
 mape_list = c()
-
+predictionTestData <- matrix(nrow = 17516, ncol = 69)
 ptm <- proc.time()
 
 for(i in 1:69){
@@ -112,10 +112,11 @@ for(i in 1:69){
                    verbose = 0)
   
   prediction <- predict(model, as.matrix(data_te %>% select(-rateCar)))
-  
+  predictionTestData[,i] <- prediction
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
 }
+save(predictionTestData, file="XGBoost_without_predictionTestData.RData")
 
 print(proc.time() - ptm)
 
@@ -125,6 +126,8 @@ print(proc.time() - ptm)
 
 rmse_list = c()
 mape_list = c()
+predictionTestData <- matrix(nrow = 17516, ncol = 69)
+
 
 ptm <- proc.time()
 
@@ -148,10 +151,12 @@ for(i in 1:69){
                    verbose = 0)
   
   prediction <- predict(model, as.matrix(data_te %>% select(-rateCar)))
-  
+  predictionTestData[,i] <- prediction
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
 }
+
+save(predictionTestData, file="XGBoost_with_predictionTestData.RData")
 
 print(proc.time() - ptm)
 

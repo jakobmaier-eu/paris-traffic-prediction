@@ -353,7 +353,8 @@ mod1 = lm(data = df_train, formula = form1)
 summary(mod1)
 ```
 
-Toutes les variables ont une contribution significative d'après les tests de student. Nous calculons le score de validation croisée pour ce modèle en utilisant la stratégie *sur blocs regroupant des mois successifs*, ce qui est facile à implémenter ici.
+Nous n'avons gardé que les effets croisés dans notre formule : notons que toutes les variables ont une contribution significative d'après les tests de student. Nous calculons le score de validation croisée pour ce modèle en utilisant la stratégie *sur blocs regroupant des mois successifs*, ce qui est facile à implémenter ici.
+
 ```{r CV_mod1, cache=TRUE}
 CV_gam = function(formula, df_train, no_folds){
   K = no_folds 
@@ -383,75 +384,101 @@ Ce premier modèle simple bat alors largement le meilleur modèle naïf.
 
 Afin de choisir la prochaine variable à rajouter pour expliquer **rateCar**, nous les explorons une par une :
 
-1. **hour** : Comme vu dans le graphique \@ref(fig:rushhours), la relation entre l'heure et le taux d'occupation n'est pas du tout linéaire. Pour trouver une fonction lisse adéquate, nous utilisons une base de splines cycliques car les heures 0 et 24 coïncident. Pour les nœuds, nous pouvons augmenter le paramètre *k* jusqu'au plus la valeur 24. En augmentant ce *k* et en regardant *edf*, les degrés de liberté estimés, nous nous rendons compte que *k* = 24 donn
+1. **hour** : Comme vu dans le graphique \@ref(fig:rushhours), la relation entre l'heure et le taux d'occupation n'est pas du tout linéaire. Pour trouver une fonction lisse adéquate, nous utilisons une base de splines cycliques car les heures 0 et 24 coïncident. Pour les nœuds, nous pouvons augmenter le paramètre *k* jusqu'au plus la valeur 24. En augmentant ce *k* et en regardant *edf*, les degrés de liberté estimés, nous nous rendons compte que *k* = 24 donne toujours un *edf* de presque 22, ce qui nous laisse choisir ce *k* :
 
 ```{r CV_mod1_hour, cache=TRUE}
 form1_hour = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(hour, bs="cc", k = 24, by=weekendsIndicator)
 mod1_hour = gam(form1_hour, data=df_train)
 summary(mod1_hour)
 knitr::kable(CV_gam(form1_hour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-#test_score = rmse(predict(mod1_hour, newdata = df_test),  df_test$rateCar)
-#print(test_score)
 ```
 
-2. **weekdays** : 
+Nous venons de voir la summary de ce modèle GAM ainsi que son score de validation croisée qui a clairement amélioré. N'oublions pas de mentionner que nous avons aussi rajouté un effet croisée de **hour** avec **weekendsIndicator**. Ceci est dû au simple fait que la circulation a des courbes différentes le week-end, ce qui est confirmé par les p-valeurs des deux variables. Dans le graphique ci-dessous, nous visualisons les fonctions lisses obtenus par GAM, à gause pendant la semaine et à droite le week-end :
+
+```{r draw_mod1_hour, cache=TRUE}
+draw(mod1_hour)
+```
+
+D'après ce graphique, la variable **hour** agit comme terme correctif pour le modèle initial des regréssions par **GRPS**.
+
+Pour les variables suivantes, nous donnerons moins de commentaires et n'afficherons plus les summary ou des plots de fonctions. L'approche reste pourtant la même.
+
+
+2. **weekdays** : numérotés de 1 à 7, nous utilisons encore une fois une base de splines cycliques. Le choix de *k* s'effectue comme avant et nous essayons d'ajouter un effet croisée avec l'une des variables **HolidaysIndicator**, i.e. **summerHolidaysIndicator** etc. Les indicateurs de vacances n'ont jamais des effets significatifs, raison pour laquelle nous rejetons cette approche. Au final, nous obtenons le score de CV suivant, qui n'améliore qu'à peine le premier modèle.
 ```{r CV_mod1_wd, cache=TRUE}
-form1_weekdays = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(weekdays, bs="cc", k = 4,                                  by=as.factor(winterHolidaysIndicator)) 
-# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
-mod1_weekdays = gam(form1_weekdays, data=df_train)
-summary(mod1_weekdays)
+form1_weekdays = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(weekdays, bs="cc", k = 7) 
+#mod1_weekdays = gam(form1_weekdays, data=df_train)
+#summary(mod1_weekdays)
 #plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
 knitr::kable(CV_gam(form1_weekdays, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
 ```
 
-3. **state** : 
+3. **state** : Cette variable catégorielle indiquant l'état de la rue a été partiellement détruite pendant la simplification du dataset où nous avons pris des moyennes, résultant en **state** $\not \in \{1,2,3,4\}$ dans notre data set. Comme attendu, le score de validation croisée ne s'améliore pas et nous allons ignorer cette variable dans la suite.
+
 ```{r CV_mod1_state, cache=TRUE}
 form1_state = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(state, bs="cr", k = 5)
-# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
-mod1_state = gam(form1_state, data=df_train)
+#mod1_state = gam(form1_state, data=df_train)
 #summary(mod1_state)
-#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
 knitr::kable(CV_gam(form1_state, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
 ```
 
-3. **toy** (time of year):
+4. **toy** (time of year): Y a-t-il des tendances dans la circulation à travers l'année ? **toy** et une autre variable exigeant des splines cycliques, mais comme nous voyons après tuning, la rajouter n'améliore pas le score de validation croisée :
+
 ```{r CV_mod1_toy, cache=TRUE}
-form1_toy = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(toy, bs="cr", k = 6)
-# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
-mod1_toy = gam(form1_toy, data=df_train)
-summary(mod1_toy)
-#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+form1_toy = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(toy, bs="cc", k = 20)
+#mod1_toy = gam(form1_toy, data=df_train)
+#summary(mod1_toy)
 knitr::kable(CV_gam(form1_toy, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
 ```
 
-3. **nbCar_LaggedHour**:
+4. **nbCar_LaggedHour**: cette variable pose la question intéressante si le nombre de voitures peut nous aider à prédire le taux d'occupation. Comme avec **rateCar_LaggedHour**, nous pouvons observer un effet hétérogène de **nbCar_LaggedHour** sur **rateCar** à travers la journée. Voici, par exemple, les nuages de points à 8 et à 14 heures :
 
 ```{r expl_mod1_nbCarHour, cache=TRUE}
-for (h in 0:23){
+g_tuple = list(); i=1 
+for (h in c(8,14)){
   g = ggplot(data=df_train[(df_train$hour == h),], aes(y = rateCar, x = nbCar_LaggedHour))+ 
   geom_point() + xlab("nbCar_laggedHour") +
   ylab("rateCar (présent)") + 
   labs(title = paste0("Heure ", h))
-plot(g)
+  g_tuple[[i]] = g
+  i = 2
 }
+plot_grid(g_tuple[[1]], g_tuple[[2]], nrow = 1, ncol = 2)
 ```
 
+Contrairement à l'effet linéaire que nous avons observé avec **rateCar_LaggedHour**, il semble y avoir des non-linéarités dans les nuages de points. Par conséquent, nous utiliserons une fonction à base de splines cubiques Nous avons testé par CV que des *thin plate splines* ou des *P-splines* ont la mêmes performance. Pour considérer un effet différent à travers les heures de la journée, nous réutilisons les groupes d'heures définies avant en ajoutant le paramètre *by* = **GRPS** dans gam. La validation croisée nous donne le score
 
 ```{r CV_mod1_nbCarHour, cache=TRUE}
-form1_nbCarHour = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(nbCar_LaggedHour, bs="cr", k = 6, by=GRPS)
-mod1_nbCarHour = gam(form1_nbCarHour, data=df_train)
-summary(mod1_nbCarHour)
+# Have tried bs \in c('cr', 'tp', 'ps', 'ad')
+form1_nbCarHour = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(nbCar_LaggedHour, bs="cr", k = 15, by=GRPS)
+#mod1_nbCarHour = gam(form1_nbCarHour, data=df_train)
+#summary(mod1_nbCarHour)
 #plot(mod1_nbCarHour, residuals=T, rug=T, se=T, pch=20)
 #draw(mod1_nbCarHour, residuals=T)
 knitr::kable(CV_gam(form1_nbCarHour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
 ```
 
+C'est une amélioration significative du premier modèle, même si **heure** a rajouté encore plus de performance.
+
+Nous ne détaillons pas ici la suite de nos reflexions. Les variables **heure** et **nbCar_LaggedHour** continuent d'avoir la contribution la plus forte. Dans le fichier *1_heure/GAM_listEdges_1hour.R*, le lecteur peut avoir un aperçu du feature engineering sur **precipitation**, les scores de chaque modèle, etc. Tout ceci nous mène finalement au modèle final dont nous affichons la formule et le score de validation croisée :
+
+```{r CV_modfinal, cache=TRUE}
+form_final = rateCar ~ GRPS * rateCar_LaggedHour - GRPS - rateCar_LaggedHour + s(hour, bs="cc", k = 24, by=weekendsIndicator) + s(nbCar_LaggedHour, bs="cr", k = 15, by=GRPS)
+knitr::kable(CV_gam(form_final, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+Malgré le fait d'avoir travaillé sur une seule arête, nous sommes curieux si l'efficacité de ce modèle se généralise aux autres rues de Paris. Par ailleurs, nous avons jusqu'à maintenant seulement calculé les erreurs de validation croisée. Comme la sélection de modèles est finie, nous voulons bien tester la capacité de généralisation du modèle final sur le test set.
+
+Pour l'arête arbitraire que nous avons choisie pour cette analyse, *concorde - saint michel*, nous obtenons un RMSE de 2.24, pas loin du score de validation croisée. Sur cette arête, le test set ne semble alors pas se comporter très différemment du train set. Pourtant, la capacité de généralisation sur les autres arêtes est limitée comme montre l'histogramme de la répartition des erreurs quadratiques sur le test set à travers les 69 arêtes :
+
+```{r edge_test_scores, cache=T}
+scores_edges_final = readRDS("../1_heure/scores_edges_GAM_final.rds")
+hist(scores_edges_final, breaks = 30, main = "Histogram of test scores across 69 edges")
+```
+
+Il existent des arêtes où le score est meilleur que sur *concorde - saint michel*, mais plusieurs arêtes font exploser la moyenne de ces erreurs à 3.89, à peine meilleur que les modèles naïfs. 
+
+Avant de conclure que GAM généralise mal à travers le graphe, nous revenons brièvement sur le premier modèle qui n'utilisait que **rateCar_LaggedHour** comme variable explicative. Si nous faisons pareil en calculant le RMSE sur le test set, l'erreur à travers des arêtes est 3.35, donc significativement meilleure. Le groupement des heures, le rôle de **nbCar**, semble causer de l'overfitting. Un bon GAM doit alors être bricolé pour chaque arête individuellement.
 
 ## Arbres aléatoires
 
@@ -484,6 +511,7 @@ Pour cette méthode d'ensemble basé sur les arbres de Breimann, le package *ran
 ```{r tuningminnodesize, fig.cap = "Recherche du paramètre min.node.size optimal", out.width='80%', fig.align='center', fig.show='hold', echo = F}
 knitr::include_graphics('figures/tuning_minnodesize.png')
 ```
+
 On remarque que l'erreur décroît jusque la valeur 1 avec un pic négatif à 9. Choisir `min.node.size`=1 donnerait des arbres de profondeur maximale, rendant le modèle susceptible à sur-apprendre. Par conséquent nous nous contentons de choisir 9, malgré les fluctuations importantes des CV-scores dans le graphique à droite. Ces flucuations pourraient être dues au fait qu'ici on a fait une validation croisée *habituelle* (voir nos explications sur CV en haut) qui mélange les lignes corrélées avant de les séparer en blocs. Dans un cadre iid, nous nous attendrions à la forme typique d'un "coude" par exemple.
 
 * Le deuxième paramètre est **mtry** : le nombre de variables, tirées au hasard, qui sont considérées pour la construction de chaque arbre. Rendre ce paramètre plus petit réduit alors la corrélation entre les arbres de la forêt. Pour l'optimiser, nous utilisons deux de nos approches CV :
@@ -491,6 +519,7 @@ On remarque que l'erreur décroît jusque la valeur 1 avec un pic négatif à 9.
 ```{r tuningmtry, fig.cap = "Recherche du paramètre mtry optimal", out.width='80%', fig.align='center', fig.show='hold', echo = F}
 knitr::include_graphics('figures/tuning_mtry.png')
 ```
+
 Celle-ci est l'unique fois où nous affichons la méthode de validation croisée par *timeslice*. On remarque que l'allure globale des courbes sont identiques mais que le coude est plus lisse avec *timeslice*. On choisit de poser $\textbf{mtry} = 10$, qui semble être un bon choix d'après les deux graphiques.
 
 Le dernier paramètre à déterminer est **ntree**, le nombre d'arbres dans la forêts. Ce n'est pas un paramètre à optimiser comme les 2 précédents car le sur-apprentissage dans les forêts aléatoires n'est pas lié au nombre d'arbres. On optimise **ntree** afin de déterminer à partir de quel nombre d'arbre on gaspille du temps d'exécution pour un faible gain de performance. 
@@ -515,18 +544,16 @@ Comme attendu, les performances des forêts aléatoires sont généralement meil
 ```{r importance, fig.cap = "Scores d'importance dans l'ordre décroissante (15 premières arêtes) pour l'arête ''pont amont - pont austerlitz''", out.width='80%', fig.align='center', fig.show='hold', echo = F}
 knitr::include_graphics('figures/importance.png')
 ```
+
 Sur cette arête, les voisins dominent même les scores d'importance. Ceci nous donne une motivation pour davantage explorer le rôle des voisins et ainsi le rôle de la dimension spatiale du problème de prédiction de la circulation :
 
-Une question immédiate est quelles arêtes profitent le plus des données de leurs voisins. Nous essayons de visualiser ça sur le graphique suivant où pour chaque arête du graphe routier, nous visualisons la différence des erreurs test *avec* et *sans* voisins. Le trait vertical noir pointillé marque la séparation entre les rues à l'intérieur Paris et les parties du périphérique. Ces dernières se trouvent à droite de la ligne. Le trait horizontal rouge pointillé est un seuil arbitraire à partir duquel nous interprétons que l'ajout des voisins impacte la performance de la forêt significativement. Les arêtes qui dépassent le seuil en bas (et souffrent donc de l'inclusion de leurs voisins) sont représentées par une croix rouge, les autres par une croix noire.
+Une question immédiate est quelles arêtes profitent le plus des données de leurs voisins. Nous essayons de visualiser ça sur le graphique suivant où pour chaque arête du graphe routier, nous visualisons la différence des erreurs (sur test set) *avec* et *sans* voisins. Le trait vertical noir pointillé marque la séparation entre les rues à l'intérieur Paris et les parties du périphérique. Ces dernières se trouvent à droite de la ligne. Le trait horizontal rouge pointillé est un seuil arbitraire à partir duquel nous interprétons que l'ajout des voisins a un impact significativement positif sur la performance de la forêt. Les arêtes qui ont une valeur sous ce seuil (et qui profitent donc de l'inclusion de leurs voisins) sont représentées par une croix rouge, les autres par une croix noire.
 
 ```{r analyseRF, out.width='80%', fig.align='center', fig.show='hold', echo = F}
 knitr::include_graphics('figures/analyseRF.png')
 ```
 
-TODO Jakob discuter avec Guillaume.
-Seules 12 forêts sur 69 ont une performance ''significativement'' meilleure lorsqu'on ajoute les voisins. De plus, pour les arêtes du périphérique, on remarque que les différences sont plus importantes que pour Paris, qu'inclure les voisins est néfastes (à 2 exceptions près) et qu'en général, la circulation sur ces arêtes est moins bien prédite. En effet, les scores pour Paris sont 2.747 (avec voisins) et 2.898 (sans voisins), et les scores du périphérique sont 4.069 (avec voisins) et 3.787 (sans voisins).
-
-
+Seules 12 arêtes sur 69 ont une performance "significativement" meilleure lorsqu'on ajoute les voisins. De plus, pour les arêtes du périphérique, on remarque qu'inclure les voisins a, à 2 exceptions près, un effet néfaste sur la performance. Même en général, la performance sur le périphérique est moins bonne que dans Paris. En effet, les scores pour Paris sont 2.747 (avec voisins) et 2.898 (sans voisins), et les scores du périphérique sont 4.069 (avec voisins) et 3.787 (sans voisins).
 
 
 # Conclusion
@@ -539,42 +566,4 @@ Seules 12 forêts sur 69 ont une performance ''significativement'' meilleure lor
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Références

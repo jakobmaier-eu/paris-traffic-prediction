@@ -97,6 +97,9 @@ for(i in 1:69){
 
 print(proc.time() - ptm) 
 
+save(predictionTestData, file="CART_without_predictionTestData.RData")
+
+
 #################
 # Prediction of the 69 edges with neighbors
 #################
@@ -127,6 +130,8 @@ for(i in 1:69){
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
 }
+save(predictionTestData, file="CART_with_predictionTestData.RData")
+
 
 print(proc.time() - ptm) 
 
