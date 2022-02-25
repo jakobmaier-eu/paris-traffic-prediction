@@ -566,26 +566,30 @@ knitr::kable(CV_gam(form1_nbCarHour, df_train, no_folds = 8), align = "llll", ca
 A partir des résidus de la prévision d'un des modèles précédents, nous avons entraîné des modèles SARIMA, lissage exponentiel et de lissage exponentiel Holt-Winters. L'idée est que s'il reste de l'information dans les résidus du premier modèle (ici forêts aléatoires), on l'exploite pour améliorer la prédiction. On intègre la prédiction des nouveaux modèles de manière additive à la prédiction du premier modèle. Nous travaillons sur la première arête uniquement car le temps d'exécution est très important.
 
 Afin de déterminer les paramètres des modèles SARIMA, nous avons utilisé l'approche de Box-Jenkins pour déterminer les valeurs maximales de **p**, **q**, **P** et **Q**. On utilise ensuite ces bornes dans la fonction *auto.arima* pour trouver les paramètres optimaux. Commençons par l'approche de Box-Jenkins. Parmi les saisonnalités (journalières, hebdomadaires, annuelles), on choisit de traiter la saisonnalité journalière. On pose donc **s**=24, **D**=1 et on différentie la série temporelle avec **lag**=24. Affichons les autocorrélogrammes et autocorrélogrammes partiels:
-...
+
+```{r analyseACF, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Analyse de la série temporelle de la première arête", echo = F}
+knitr::include_graphics('figures/sarima.png')
+```
 
 Premièrement, on observe une décroissance exponentielle dans l'autocorrélogramme (haut gauche), on choisit donc **d**=0. Ensuite, on déduit les valeurs **p.max**=9 et **q.max**=15 des 2 figures du haut et **P.max**=15 et **Q.max**=1 des 2 figures du bas. La fonction *auto.arima* choisit le modèle $SARIMA(9,0,0)(4,1,0)[24]$. On analyse ensuite les résidus avec un test de Box-Pierce:
 
 ```{r boxpierce, echo=FALSE}
-df_box <- data.frame("100", "3, 5, 7, 10",
-                               "0.70, 0.75, 0.80, 0.85, 0.90",
-                               "0.1","0.2","1,3,5,7,9",
-                               "0.70, 0.75, 0.80, 0.85, 0.90")
-names(df_xgboostTuning) <- c("nrounds", "max_depth",
-                             "colsample_bytree","eta",
-                             "gamma","min_child_weight",
-                             "subsample")
+df_box <- data.frame(lags = c(1,24),
+                     statistics = c(0.01290686, 781.01125109),
+                     pvalue = c(0.9095483, 0.0000000))
 
-knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Grille de recherche des paramètres optimaux")
+knitr::kable(df_box, align = "ccc", caption = "Test de Box-Pierce")
 ```
 
+L'autocorrélation a bien été éliminée mais pas l'autocorrélation journalière. On peut retrouver ce résultat en observant les résidus de ce modèle SARIMA. La saisonnalité hebdomadaire n'a aussi pas été éliminée. 
 
+Nous avons essayé de modifier les paramètres à la main et en utilisant les critères AIC/BIC pour trouver un meilleur modèle SARIMA. Malheureusement, augmenter la valeur des paramètres est impossible car cela a un coût en mémoire vide trop important. Optimiser ces paramètres est aussi très chronophage et nous avons manqué de temps pour le faire. Concernant l'optimisation des paramètres, elle devrait être appliquée pour chaque arête, ce qui augmenterait d'autent plus le temps d'exécution.
 
+Concernant l'idée d'améliorer les performances de nos forêts aléatoires en appliquant ce modèle SARIMA, nous avons échoué. En effet, en reprenant la méthode vue en cours de prédiction séquentielle, on ne fait que dégrader la prévision. 
 
+Au lieu d'utiliser un modèle SARIMA sur les résidus, on utilise également des méthodes de lissage exponentiel, fonctions *ets* et *HoltWinters*. Comme précédemment pour SARIMA, on reprend le code du cours et on observe une dégradation des performances.
+
+Pour conclure sur l'idée d'analyser les résidus des forêts aléatoires, on ne parvient pas à un résultat satisfaisant. Nous pensons que l'on pourrait obtenir de meilleurs résultats en reprenant et en poursuivant le travail réalisé.
 
 
 
