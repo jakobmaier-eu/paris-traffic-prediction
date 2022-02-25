@@ -34,21 +34,15 @@ data_test[[1]]$weekdays <- unlist(lapply(X = data_test[[1]]$weekdays, FUN = days
 # fix seed
 set.seed(1)
 
-# convert dataframes to xgb.DMatrix
-data_train_ = xgb.DMatrix(as.matrix(data_train[[1]] %>% select(-rateCar)))
-rateCar_train = data_train[[1]]$rateCar
-data_test_ = xgb.DMatrix(as.matrix(data_test[[1]] %>% select(-rateCar)))
-rateCar_test = data_test[[1]]$rateCar
-
 # tuning parameters exclude nrounds
-xgb_trcontrol = trainControl(method = "cv", number = 5, allowParallel = TRUE, 
+xgb_trcontrol = trainControl(method = "cv", number = 16, allowParallel = TRUE, 
                              verboseIter = TRUE, returnData = FALSE)
 
 xgbGrid <- expand.grid(nrounds = 100,  
                        max_depth = c(3, 5, 7, 10),
                        colsample_bytree = seq(0.7, 0.9, length.out = 5),
-                       eta = c(0.3,0.1,0.05,0.01),
-                       gamma = c(0,0.1,0.2,0.3),
+                       eta = 0.1,
+                       gamma = 0.1,
                        min_child_weight = seq(1,10,2),
                        subsample = seq(0.7, 0.9, length.out = 5)
 )

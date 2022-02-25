@@ -75,8 +75,8 @@ rmse_list_naivePrediction3 = c()
 mape_list_naivePrediction3 = c()
 
 for(i in 1:69){
-  rmse_list_naivePrediction3 <- c(rmse_list_naivePrediction3, rmse(pred3[[i]], data_test[[i]]$rateCar))
-  mape_list_naivePrediction3 <- c(mape_list_naivePrediction3, mape(pred3[[i]], data_test[[i]]$rateCar))
+  rmse_list_naivePrediction3 <- c(rmse_list_naivePrediction3, rmse(pred3[[i]], data_test_day[[i]]$rateCar))
+  mape_list_naivePrediction3 <- c(mape_list_naivePrediction3, mape(pred3[[i]], data_test_day[[i]]$rateCar))
 }
 
 # save(rmse_list_naivePrediction2, mape_list_naivePrediction2, file = "naivePrediction2_day.RData")

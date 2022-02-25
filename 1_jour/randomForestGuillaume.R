@@ -34,7 +34,7 @@ data_test_day$month <- as.factor(data_test_day$month)
 data_test_day$hour <- as.factor(data_test_day$hour)
 
 # Grids
-grid_mtry <-  expand.grid(mtry = seq(1,34,by=1), 
+grid_mtry <-  expand.grid(mtry = seq(1,29,by=1), 
                           min.node.size = 5,
                           splitrule = "variance")
 
@@ -62,7 +62,7 @@ fit = caret::train(
   y = data_train_day$rateCar,
   method = 'ranger',
   num.trees = 50,
-  tuneGrid = grid_minnode, # change the grid here
+  tuneGrid = grid_mtry, # change the grid here
   trControl = fitControl)
 
 print(fit)
@@ -71,8 +71,8 @@ print(proc.time() - ptm)
 # Plotting results
 par(mfrow=c(1,2))
 
-p1 <- plot(fit1, main = "Grille : de 1 à 34, de pas 1 \n Temps d'exécution : 22 minutes \n Méthode : validation croisé", xlab = "Paramètre mtry", ylab="RMSE")
-p2 <- plot(fit2, main = "Grille : de 1 à 34, de pas 1 \n Temps d'exécution : 80 minutes \n Méthode : timeslice", xlab = "Paramètre mtry", ylab="RMSE")
+p1 <- plot(fit1, main = "Grille : de 1 à 29, de pas 1 \n Temps d'exécution : 22 minutes \n Méthode : validation croisé", xlab = "Paramètre mtry", ylab="RMSE")
+p2 <- plot(fit2, main = "Grille : de 1 à 29, de pas 1 \n Temps d'exécution : 80 minutes \n Méthode : timeslice", xlab = "Paramètre mtry", ylab="RMSE")
 
 print(p1, position = c(0, 0, 0.5, 1), more = TRUE)
 print(p2, position = c(0.5, 0, 1, 1))

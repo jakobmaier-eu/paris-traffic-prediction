@@ -188,7 +188,6 @@ Avec un jeu de données complet, nous pouvons enfin utiliser des algorithmes de 
 1. La première dimension du problème est temporelle : Quel moment dans le futur voulons-nous prédire ? Autrement dit, jusqu'à quel horizon temporel est-ce que nous nous permettons d'utiliser le passé pour prédire le présent ?
     a. Le cas *une heure* correspond à un problème du genre "Google Maps" : si nous prenons la voiture maintenant, quelle sera la circulation dans les prochaines 60 minutes ?
     b. Etant donnée la circulation du *jour* précédent, la tâche devient intéressante pour les régulateurs des feux de circulation ou pour la police qui pourront ainsi éviter des bouchons.
-    c. Si nous voulons prédire *une semaine* voire *un mois* en avance, le modèle devra comprendre davantage le comportement habituelle de la circulation routière. Ce sera plutôt un pari basé sur des fluctuations habituelles
 2. La deuxième dimension est reliée au réseau routier : Pouvons-nous profiter de la structure du graphe pour améliorer la prédiction ?
     a. La question de base sera si on réussit à battre des benchmarks sur une seule arête.
     b. Puis nous pourrons reutiliser les "voisins" introduits pendant l'imputation.
@@ -249,206 +248,7 @@ Pour permettre la reproductibilité des résultats, on fixe la graine du génér
 
 ## Google Maps : Prédire la prochaine heure
 
-Commençons par la tâche qui est censée être la plus simple : Prédire la circulation dans les prochaines 60 minutes.
-
-### GAM pour une arête
-Pour l'instant, nous nous restreignons à une arête isolée dans le sens que nous ne prenons pas en compte la circulation sur ces voisins. Notre objectif initial était de faire une simple régression linéaire, mais il y a quelques relations pas linéaires du tout. Si on essaie par exemple, d'écrire le taux d'occupation d'une avenue en fonction de l'heure, le graphique suivant montre bien que les heures de pointe seraient mieux décrites par un polynôme que pour une droite :
-
-```{r rushhours, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Une journée typique sur l'arête ", echo = F}
-knitr::include_graphics('figures/rushhours.png')
-```
-
-Pas conséquent nous travaillons plutôt sur des GAM que sur de simples régression. Constituer un modèle additif et en sélectionner le meilleur est une tâche sans fin. C'est pourquoi nous adapterons une approche greedy pour la sélection de modèles où nous rajoutons une variable explicative à la fois. Idéalement ce sera celle qui apporte le plus de puissance prédictive supplémentaire (forward search).
-
-Pour prédire une heure dans le futur, il est incontestable que l'heure présente contient le plus d'informations. La variable **rateCar_LaggedHour** sera donc la première à considérer. L'effet de l'occupation d'une heure à l'autre n'est pourtant pas homogène à travers les heures de la journée. En plus, comme nous voyons dans le plot supérieur gauche, il y a peut-être une relation linéaire entre les variables, qui a pourtant une grand variance :
-
-```{r now_vs_onehour, echo = F}
-edge_index = "concorde - saint michel" # We study an arbitrary edge
-df_train = data_train[[paste(edge_index)]]
-df_test = data_test[[paste(edge_index)]]
-
-daysToNumber <- function(day){
-  if(day == "lundi"){return(1)}
-  if(day == "mardi"){return(2)}
-  if(day == "mercredi"){return(3)}
-  if(day == "jeudi"){return(4)}
-  if(day == "vendredi"){return(5)}
-  if(day == "samedi"){return(6)}
-  if(day == "dimanche"){return(7)}
-}
-
-df_train$weekdays <- unlist(lapply(X = df_train$weekdays, FUN = daysToNumber))
-df_test$weekdays <- unlist(lapply(X = df_test$weekdays, FUN = daysToNumber))
-df_train$weekendsIndicator = as.factor(df_train$weekendsIndicator)
-df_test$weekendsIndicator = as.factor(df_test$weekendsIndicator)
-
-gall = ggplot(data=df_train, aes(y = rateCar, x = rateCar_LaggedHour)) + 
-  geom_point() + xlab("rateCar_laggedHour (passé)") +
-  ylab("rateCar (présent)") + 
-  labs(title = "'Rate' de 'concorde - saint michel'")
-
-g8 = ggplot(data=df_train[(df_train$hour == 8),], aes(y = rateCar, x = rateCar_LaggedHour))+ 
-  geom_point() + xlab("rateCar_laggedHour (passé)") +
-  ylab("rateCar (présent)") +  
-  labs(title = paste0("'Rate' actuelle vs. lagged à 8h"))
-
-g12 = ggplot(data=df_train[(df_train$hour == 12),], aes(y = rateCar, x = rateCar_LaggedHour))+ 
-  geom_point() + xlab("rateCar_laggedHour (passé)") +
-  ylab("rateCar (présent)") + 
-  labs(title = paste0("'Rate' actuelle vs. lagged à 12h"))
-
-g13 = ggplot(data=df_train[(df_train$hour == 13),], aes(y = rateCar, x = rateCar_LaggedHour))+ 
-  geom_point() + xlab("rateCar_laggedHour (passé)") +
-  ylab("rateCar (présent)") + 
-  labs(title = paste0("'Rate' actuelle vs. lagged à 13h"))
-
-plot_grid(gall, g8, g12, g13, ncol=2, nrow = 2)
-
-```
-
-Les autres trois plots que nous venons de voir représentent la même comparaison de **rateCar** et de **rateCar_LaggedHours**, mais sur différentes heures. On a bien l'impression que des régressions linéaires pourront nous servir, vu la variance qui est visiblement réduite. Comparer le nuage de points à 8 heures avec ceux de 12 et de 13 heures nous donne envie de regrouper certaines heure. Ce phénomène était déjà observable dans le graphique \@ref(fig:rushhours) : dans l'heure de pointe matinale (morning rushhour), la circulation augmente beaucoup entre 7 et 8 heures tandis qu'entre 12 et 13 heures elle reste plutôt constante.
-
-Afin de regrouper les heures de la journées en "périodes", nous procédons de manière heuristique : pour chaque heure de la journée, nous effectuons une régression linéaire et comparons les coefficients (intercept et slope). Ceci donne le tableau suivant.
-
-```{r linReg_heureclustering, echo = F}
-
-hours_linregs = data.frame(hour = 0:23)
-for (h in 0:23){
-  hour_idxs = df_train$hour == h
-  hour_data = subset(df_train[hour_idxs,], select=c(rateCar, rateCar_LaggedHour))
-  mod = lm(rateCar ~ rateCar_LaggedHour, data = hour_data)
-  hours_linregs$intercept[h + 1] = round(mod$coefficients[1],3)
-  hours_linregs$slope[h + 1] = round(mod$coefficients[2],3)
-}
-print(hours_linregs, row.names=F)
-```
-
-Les résultats sont congruents avec le graphique \@ref(fig:rushhours), par exemple l'explosion de *slope* à 8 heures où commence l'heure de pointe matinale. En nous basant sur ce tableau, nous regroupons de manière heuristique les heures en différents groupes: "night" de 0 à 7 heures, "8heures" à huit heures, "9heures" similairement, "noon" de 10 à 15 heures, "afternoon" de 16 à 17 heures, "evening_rush" de 18 à 20 heures et "evening" de 21 à 23 heures. Ainsi, chaque ligne du dataframe reçoit le nouveau attribut **hour_groups**. Avec ces groupes, nous pouvons établir notre premier modèle `mod1`, une régression linéaire avec un "mixed effect" **hour_groups** * **rateCar_LaggedHour** :
-
-```{r groupes}
-cluster_hours = function(h){
-  if (h %in% c(0,1,2,3,4,5,6)){return("night")}
-  if (h %in% c(7)){return("7heures")}
-  if (h %in% c(8)){return("8heures")}
-  if (h %in% c(9)){return("9heures")}
-  if (h %in% c(10,11,12,13,14,15)){return("noon")}
-  if (h %in% c(16,17)){return("afternoon")}
-  if (h %in% c(18,19,20)){return("evening_rush")}
-  if (h %in% c(21,22,23)){return("evening")}
-  else{return("asfd")}
-}
-df_train$hour_groups = as.factor(sapply(as.factor(df_train$hour), cluster_hours))
-df_test$hour_groups = as.factor(sapply(as.factor(df_test$hour), cluster_hours))
-# for (group in unique(df_train$hour_groups)){
-#   indices = df_train$hour_groups == group
-#   plot(df_train[indices,]$rateCar_LaggedHour, df_train[indices,]$rateCar,
-#        main = group, xlab = "rateCar_laggedHour", ylab = "rateCar")
-# }
-form1 = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour
-mod1 = lm(data = df_train, formula = form1)
-summary(mod1)
-```
-
-Toutes les variables ont une contribution significative d'après les tests de student. Calculons le score de validation croisée pour ce modèle simple pour obtenir
-```{r CV_mod1}
-CV_gam = function(formula, df_train, no_folds){
-  K = no_folds 
-  data = df_train
-  folds <- cut(seq(1,nrow(data)),breaks=K,labels=FALSE)
-  fold_scores = c()
-  start_time = Sys.time()
-  for(i in 1:K){
-    testIndexes <- which(folds==i,arr.ind=TRUE)
-    testData <- data[testIndexes, ]
-    trainData <- data[-testIndexes, ]
-    g = gam(data=trainData, formula=formula)
-    Y_test = testData$rateCar
-    Y_predict = predict(g, newdata=subset(testData, select = -c(rateCar)))
-    fold_scores = c(fold_scores, rmse(Y_test, Y_predict))
-  }
-  exec_time = Sys.time()-start_time
-  score = mean(fold_scores)
-  ret = data.frame(score = score, no_folds = no_folds, exec_time = exec_time, 
-                   formula = paste(as.character(formula)[c(2,1,3)], collapse = " "))
-  return(ret)
-}
-knitr::kable(CV_gam(form1, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-```
-
-Afin de choisir la prochaine variable à rajouter pour expliquer **rateCar**, nous les explorons une par une :
-
-1. **hour** : Circulaire, essayons différents k.
-
-```{r CV_mod1_hour}
-form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(hour, bs="cc", k = 24, by=weekendsIndicator)
-mod1_hour = gam(form1_hour, data=df_train)
-summary(mod1_hour)
-knitr::kable(CV_gam(form1_hour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-#test_score = rmse(predict(mod1_hour, newdata = df_test),  df_test$rateCar)
-#print(test_score)
-```
-
-2. **weekdays** : 
-```{r CV_mod1_wd}
-form1_weekdays = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(weekdays, bs="cc", k = 4,                                  by=as.factor(winterHolidaysIndicator)) 
-# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
-mod1_weekdays = gam(form1_weekdays, data=df_train)
-summary(mod1_weekdays)
-#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
-knitr::kable(CV_gam(form1_weekdays, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-```
-
-3. **state** : 
-```{r CV_mod1_state}
-form1_state = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(state, bs="cr", k = 5)
-# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
-mod1_state = gam(form1_state, data=df_train)
-#summary(mod1_state)
-#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
-knitr::kable(CV_gam(form1_state, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-```
-
-3. **toy** (time of year):
-```{r CV_mod1_toy}
-form1_toy = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(toy, bs="cr", k = 6)
-# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
-# mod1_hour = gam(form1_hour, data=df_train)
-# summary(mod1_hour)
-mod1_toy = gam(form1_toy, data=df_train)
-summary(mod1_toy)
-#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
-knitr::kable(CV_gam(form1_toy, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-```
-
-3. **nbCar_LaggedHour**:
-
-```{r expl_mod1_nbCarHour}
-for (h in 0:23){
-  g = ggplot(data=df_train[(df_train$hour == h),], aes(y = rateCar, x = nbCar_LaggedHour))+ 
-  geom_point() + xlab("nbCar_laggedHour") +
-  ylab("rateCar (présent)") + 
-  labs(title = paste0("Heure ", h))
-plot(g)
-}
-```
-
-
-```{r CV_mod1_nbCarHour}
-form1_nbCarHour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(nbCar_LaggedHour, bs="cr", k = 6, by=hour_groups)
-mod1_nbCarHour = gam(form1_nbCarHour, data=df_train)
-summary(mod1_nbCarHour)
-#plot(mod1_nbCarHour, residuals=T, rug=T, se=T, pch=20)
-#draw(mod1_nbCarHour, residuals=T)
-knitr::kable(CV_gam(form1_nbCarHour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
-```
-
-# Modèles - TODO Jakob: Relire et intégrer à partir d'ici
-
-On présente maintenant les différents types de modèle construits. Pour chacun, on construit un modèle avec et sans arêtes voisines, afin d'observer si ces dernières fournissent de l'information que le modèle convertit en une meilleure prédiction. 
+Commençons par la tâche la plus simple : prédire la circulation de l'heure suivante. On présente les différents types de modèle construits. Pour chacun, on construit un modèle avec et sans arêtes voisines, afin d'observer si ces dernières fournissent de l'information que le modèle convertit en une meilleure prédiction. 
 
 ## Arbres
 
@@ -515,6 +315,253 @@ knitr::include_graphics('figures/analyseRF.png')
 ```
 
 Seules 12 forêts sur 69 ont une performance ''significativement'' meilleure lorsqu'on ajoute les voisins. De plus, pour les arêtes du périphérique, on remarque que les différences sont plus importantes que pour Paris, qu'inclure les voisins est néfastes (à 2 exceptions près) et qu'en général, la circulation sur ces arêtes est moins bien prédite. En effet, les scores pour Paris sont 2.747 (avec voisins) et 2.898 (sans voisins), et les scores du périphérique sont 4.069 (avec voisins) et 3.787 (sans voisins).
+
+## Boosting
+
+On utilise maintenant une méthode de gradient boosting à l'aide du package *XGBoost*. On construit un modèle à base d'arbres (**booster** = bgtree) avec un taux d'apprentissage **eta = 0.1** et le paramètre d'avancement **gamma** = 0.2 arbitraires. On optimise ensuite les autres paramètres à l'aide de *caret*. Cette fois, la validation croisée est réalisée sur 5 blocs car le temps d'exécution est très important (environ 3 heures). La grille de paramètre, parcourue entièrement, est la suivante
+
+```{r xgboostTuningGrid, echo=FALSE}
+df_xgboostTuning <- data.frame("100", "3, 5, 7, 10",
+                               "0.70, 0.75, 0.80, 0.85, 0.90",
+                               "0.1","0.2","1,3,5,7,9",
+                               "0.70, 0.75, 0.80, 0.85, 0.90")
+names(df_xgboostTuning) <- c("nrounds", "max_depth",
+                             "colsample_bytree","eta",
+                             "gamma","min_child_weight",
+                             "subsample")
+
+knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Grille de recherche des paramètres optimaux")
+```
+
+La combinaison optimale trouvée est 
+
+```{r xgboostTuningOpt, echo=FALSE}
+df_xgboostTuning <- data.frame("100", "7",
+                               "0.90",
+                               "0.1","0.2","1",
+                               "0.90")
+names(df_xgboostTuning) <- c("nrounds", "max_depth",
+                             "colsample_bytree","eta",
+                             "gamma","min_child_weight",
+                             "subsample")
+
+knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Paramètres optimaux")
+```
+
+On optimise ensuite le nombre d'itérations **nrounds** à l'aide de la validation croisée sur 5 blocs (fonction *xgb.cv*) et d'un critère d'arrêt à partir de 5 itérations sans amélioration significative de la performance du modèle. On obtient la valeur de 133.
+
+Notre approche d'optimisation n'est pas parfaite et on aurait aimer optimiser les paramètres **gamma**, **eta** et aussi les paramètres de régularisation **lambda** et **alpha**. Cela aurait été utile dans notre cas où le boosting semble sur-apprendre. Une idée serait d'utiliser une méthode d'optimisation moins coûteuse comme de la recherche aléatoire de paramètre dans la grille ou une méthode bayésienne.
+
+Après prédiction des 69 arêtes, on obtient les scores suivants
+
+
+```{r xgboostModeltable, echo=FALSE}
+df_xgboostModels <- data.frame(3.295, 3.284)
+names(df_xgboostModels) <- c("Boosting avec voisins", "Boosting sans voisins")
+
+knitr::kable(df_xgboostModels, align = "cc", caption = "Performances des méthodes de boosting")
+```
+
+Les 2 scores sont très proches et on ne peut déterminer si l'ajout des voisins est pertinent dans cette méthode de boosting. Par rapport aux autres méthodes, ces scores sont meilleurs que ceux des arbres aléatoires mais sensiblement moins bons que ceux des forêts aléatoires. Cela nous pousse à reconsidérer une meilleure optimisation des paramètres car le boosting est régulièrement meilleur que les forêts aléatoires. Enfin, il est possible de visualiser l'importance des variables dans le boosting et de tirer les mêmes conclusions que pour les forêts aléatoires.
+
+## GAM pour une arête
+Pour l'instant, nous nous restreignons à une arête isolée dans le sens que nous ne prenons pas en compte la circulation sur ces voisins. Notre objectif initial était de faire une simple régression linéaire, mais il y a quelques relations pas linéaires du tout. Si on essaie par exemple, d'écrire le taux d'occupation d'une avenue en fonction de l'heure, le graphique suivant montre bien que les heures de pointe seraient mieux décrites par un polynôme que pour une droite :
+
+```{r rushhours, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Une journée typique sur l'arête ", echo = F}
+knitr::include_graphics('figures/rushhours.png')
+```
+
+Pas conséquent nous travaillons plutôt sur des GAM que sur de simples régression. Constituer un modèle additif et en sélectionner le meilleur est une tâche sans fin. C'est pourquoi nous adapterons une approche greedy pour la sélection de modèles où nous rajoutons une variable explicative à la fois. Idéalement ce sera celle qui apporte le plus de puissance prédictive supplémentaire (forward search).
+
+Pour prédire une heure dans le futur, il est incontestable que l'heure présente contient le plus d'informations. La variable **rateCar_LaggedHour** sera donc la première à considérer. L'effet de l'occupation d'une heure à l'autre n'est pourtant pas homogène à travers les heures de la journée. En plus, comme nous voyons dans le plot supérieur gauche, il y a peut-être une relation linéaire entre les variables, qui a pourtant une grand variance :
+
+```{r now_vs_onehour, echo = F, cache=TRUE}
+edge_index = "concorde - saint michel" # We study an arbitrary edge
+df_train = data_train[[paste(edge_index)]]
+df_test = data_test[[paste(edge_index)]]
+
+daysToNumber <- function(day){
+  if(day == "lundi"){return(1)}
+  if(day == "mardi"){return(2)}
+  if(day == "mercredi"){return(3)}
+  if(day == "jeudi"){return(4)}
+  if(day == "vendredi"){return(5)}
+  if(day == "samedi"){return(6)}
+  if(day == "dimanche"){return(7)}
+}
+
+df_train$weekdays <- unlist(lapply(X = df_train$weekdays, FUN = daysToNumber))
+df_test$weekdays <- unlist(lapply(X = df_test$weekdays, FUN = daysToNumber))
+df_train$weekendsIndicator = as.factor(df_train$weekendsIndicator)
+df_test$weekendsIndicator = as.factor(df_test$weekendsIndicator)
+
+gall = ggplot(data=df_train, aes(y = rateCar, x = rateCar_LaggedHour)) + 
+  geom_point() + xlab("rateCar_laggedHour (passé)") +
+  ylab("rateCar (présent)") + 
+  labs(title = "'Rate' de 'concorde - saint michel'")
+
+g8 = ggplot(data=df_train[(df_train$hour == 8),], aes(y = rateCar, x = rateCar_LaggedHour))+ 
+  geom_point() + xlab("rateCar_laggedHour (passé)") +
+  ylab("rateCar (présent)") +  
+  labs(title = paste0("'Rate' actuelle vs. lagged à 8h"))
+
+g12 = ggplot(data=df_train[(df_train$hour == 12),], aes(y = rateCar, x = rateCar_LaggedHour))+ 
+  geom_point() + xlab("rateCar_laggedHour (passé)") +
+  ylab("rateCar (présent)") + 
+  labs(title = paste0("'Rate' actuelle vs. lagged à 12h"))
+
+g13 = ggplot(data=df_train[(df_train$hour == 13),], aes(y = rateCar, x = rateCar_LaggedHour))+ 
+  geom_point() + xlab("rateCar_laggedHour (passé)") +
+  ylab("rateCar (présent)") + 
+  labs(title = paste0("'Rate' actuelle vs. lagged à 13h"))
+
+plot_grid(gall, g8, g12, g13, ncol=2, nrow = 2)
+
+```
+
+Les autres trois plots que nous venons de voir représentent la même comparaison de **rateCar** et de **rateCar_LaggedHours**, mais sur différentes heures. On a bien l'impression que des régressions linéaires pourront nous servir, vu la variance qui est visiblement réduite. Comparer le nuage de points à 8 heures avec ceux de 12 et de 13 heures nous donne envie de regrouper certaines heure. Ce phénomène était déjà observable dans le graphique \@ref(fig:rushhours) : dans l'heure de pointe matinale (morning rushhour), la circulation augmente beaucoup entre 7 et 8 heures tandis qu'entre 12 et 13 heures elle reste plutôt constante.
+
+Afin de regrouper les heures de la journées en "périodes", nous procédons de manière heuristique : pour chaque heure de la journée, nous effectuons une régression linéaire et comparons les coefficients (intercept et slope). Ceci donne le tableau suivant.
+
+```{r linReg_heureclustering, echo = F, cache=TRUE}
+
+hours_linregs = data.frame(hour = 0:23)
+for (h in 0:23){
+  hour_idxs = df_train$hour == h
+  hour_data = subset(df_train[hour_idxs,], select=c(rateCar, rateCar_LaggedHour))
+  mod = lm(rateCar ~ rateCar_LaggedHour, data = hour_data)
+  hours_linregs$intercept[h + 1] = round(mod$coefficients[1],3)
+  hours_linregs$slope[h + 1] = round(mod$coefficients[2],3)
+}
+print(hours_linregs, row.names=F)
+```
+
+Les résultats sont congruents avec le graphique \@ref(fig:rushhours), par exemple l'explosion de *slope* à 8 heures où commence l'heure de pointe matinale. En nous basant sur ce tableau, nous regroupons de manière heuristique les heures en différents groupes: "night" de 0 à 7 heures, "8heures" à huit heures, "9heures" similairement, "noon" de 10 à 15 heures, "afternoon" de 16 à 17 heures, "evening_rush" de 18 à 20 heures et "evening" de 21 à 23 heures. Ainsi, chaque ligne du dataframe reçoit le nouveau attribut **hour_groups**. Avec ces groupes, nous pouvons établir notre premier modèle `mod1`, une régression linéaire avec un "mixed effect" **hour_groups** * **rateCar_LaggedHour** :
+
+```{r groupes, cache=TRUE}
+cluster_hours = function(h){
+  if (h %in% c(0,1,2,3,4,5,6)){return("night")}
+  if (h %in% c(7)){return("7heures")}
+  if (h %in% c(8)){return("8heures")}
+  if (h %in% c(9)){return("9heures")}
+  if (h %in% c(10,11,12,13,14,15)){return("noon")}
+  if (h %in% c(16,17)){return("afternoon")}
+  if (h %in% c(18,19,20)){return("evening_rush")}
+  if (h %in% c(21,22,23)){return("evening")}
+  else{return("asfd")}
+}
+df_train$hour_groups = as.factor(sapply(as.factor(df_train$hour), cluster_hours))
+df_test$hour_groups = as.factor(sapply(as.factor(df_test$hour), cluster_hours))
+# for (group in unique(df_train$hour_groups)){
+#   indices = df_train$hour_groups == group
+#   plot(df_train[indices,]$rateCar_LaggedHour, df_train[indices,]$rateCar,
+#        main = group, xlab = "rateCar_laggedHour", ylab = "rateCar")
+# }
+form1 = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour
+mod1 = lm(data = df_train, formula = form1)
+summary(mod1)
+```
+
+Toutes les variables ont une contribution significative d'après les tests de student. Calculons le score de validation croisée pour ce modèle simple pour obtenir
+```{r CV_mod1, cache=TRUE}
+CV_gam = function(formula, df_train, no_folds){
+  K = no_folds 
+  data = df_train
+  folds <- cut(seq(1,nrow(data)),breaks=K,labels=FALSE)
+  fold_scores = c()
+  start_time = Sys.time()
+  for(i in 1:K){
+    testIndexes <- which(folds==i,arr.ind=TRUE)
+    testData <- data[testIndexes, ]
+    trainData <- data[-testIndexes, ]
+    g = gam(data=trainData, formula=formula)
+    Y_test = testData$rateCar
+    Y_predict = predict(g, newdata=subset(testData, select = -c(rateCar)))
+    fold_scores = c(fold_scores, rmse(Y_test, Y_predict))
+  }
+  exec_time = Sys.time()-start_time
+  score = mean(fold_scores)
+  ret = data.frame(score = score, no_folds = no_folds, exec_time = exec_time, 
+                   formula = paste(as.character(formula)[c(2,1,3)], collapse = " "))
+  return(ret)
+}
+knitr::kable(CV_gam(form1, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+Afin de choisir la prochaine variable à rajouter pour expliquer **rateCar**, nous les explorons une par une :
+
+1. **hour** : Circulaire, essayons différents k.
+
+```{r CV_mod1_hour, cache=TRUE}
+form1_hour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(hour, bs="cc", k = 24, by=weekendsIndicator)
+mod1_hour = gam(form1_hour, data=df_train)
+summary(mod1_hour)
+knitr::kable(CV_gam(form1_hour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+#test_score = rmse(predict(mod1_hour, newdata = df_test),  df_test$rateCar)
+#print(test_score)
+```
+
+2. **weekdays** : 
+```{r CV_mod1_wd, cache=TRUE}
+form1_weekdays = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(weekdays, bs="cc", k = 4,                                  by=as.factor(winterHolidaysIndicator)) 
+# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
+# mod1_hour = gam(form1_hour, data=df_train)
+# summary(mod1_hour)
+mod1_weekdays = gam(form1_weekdays, data=df_train)
+summary(mod1_weekdays)
+#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+knitr::kable(CV_gam(form1_weekdays, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+3. **state** : 
+```{r CV_mod1_state}
+form1_state = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(state, bs="cr", k = 5)
+# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
+# mod1_hour = gam(form1_hour, data=df_train)
+# summary(mod1_hour)
+mod1_state = gam(form1_state, data=df_train)
+#summary(mod1_state)
+#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+knitr::kable(CV_gam(form1_state, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+3. **toy** (time of year):
+```{r CV_mod1_toy, cache=TRUE}
+form1_toy = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(toy, bs="cr", k = 6)
+# + s(weekdays, bs="cc", by=summerHolidaysIndicator) + s(weekdays, bs="cc", by=bankHolidaysIndicator)
+# mod1_hour = gam(form1_hour, data=df_train)
+# summary(mod1_hour)
+mod1_toy = gam(form1_toy, data=df_train)
+summary(mod1_toy)
+#plot(mod1_weekdays, residuals=T, rug=T, se=F, pch=20)
+knitr::kable(CV_gam(form1_toy, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+3. **nbCar_LaggedHour**:
+
+```{r expl_mod1_nbCarHour, cache=TRUE}
+for (h in 0:23){
+  g = ggplot(data=df_train[(df_train$hour == h),], aes(y = rateCar, x = nbCar_LaggedHour))+ 
+  geom_point() + xlab("nbCar_laggedHour") +
+  ylab("rateCar (présent)") + 
+  labs(title = paste0("Heure ", h))
+plot(g)
+}
+```
+
+
+```{r CV_mod1_nbCarHour, cache=TRUE}
+form1_nbCarHour = rateCar ~ hour_groups * rateCar_LaggedHour - hour_groups - rateCar_LaggedHour + s(nbCar_LaggedHour, bs="cr", k = 6, by=hour_groups)
+mod1_nbCarHour = gam(form1_nbCarHour, data=df_train)
+summary(mod1_nbCarHour)
+#plot(mod1_nbCarHour, residuals=T, rug=T, se=T, pch=20)
+#draw(mod1_nbCarHour, residuals=T)
+knitr::kable(CV_gam(form1_nbCarHour, df_train, no_folds = 8), align = "llll", caption = "Model score from CV")
+```
+
+# Modèles - TODO Jakob: Relire et intégrer à partir d'ici
+
+
 
 # Conclusion
 

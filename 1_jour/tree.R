@@ -76,8 +76,10 @@ ptm <- proc.time()
 for(i in 1:69){
   print(i) # to check the progression of the loop
   
-  data_tr = data_train_day[[i]][,c(1:22)]
-  data_te = data_test_day[[i]][,c(1:22)]
+  data_tr = data_train_day[[i]][c(1:16,dim(data_train_day[[i]])[2])]
+  data_te = data_test_day[[i]][c(1:16,dim(data_train_day[[i]])[2])]
+  data_tr$weekdays <- unlist(lapply(X = data_tr$weekdays, FUN = daysToNumber))
+  data_te$weekdays <- unlist(lapply(X = data_te$weekdays, FUN = daysToNumber))
   
   model <- rpart(eq , data = data_tr, method = "anova",
                  control = rpart.control(minsplit = 20,
@@ -105,6 +107,8 @@ for(i in 1:69){
   
   data_tr = data_train_day[[i]]
   data_te = data_test_day[[i]]
+  data_tr$weekdays <- unlist(lapply(X = data_tr$weekdays, FUN = daysToNumber))
+  data_te$weekdays <- unlist(lapply(X = data_te$weekdays, FUN = daysToNumber))
   
   model <- rpart(eq , data = data_tr, method = "anova",
                  control = rpart.control(minsplit = 20,
