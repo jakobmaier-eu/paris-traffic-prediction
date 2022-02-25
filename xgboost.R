@@ -184,7 +184,7 @@ onedf_test_small = onedf_test %>% filter(edgename %in% garder)
 saveRDS(onedf_test_small, file="Data/test_one_small.rds")
 
 
-onesmall_train = readRDS("Data/train_one_small.rds")
+onesmall_train = readRDS("/Data/train_one_small.rds")
 onesmall_test = readRDS("Data/test_one_small.rds")
 
 
@@ -215,10 +215,11 @@ fit_params <- list(
 model <- catboost.train(train_pool, params=fit_params)
 Ypredict <- catboost.predict(model, pool=test_pool)
 
-install.packages("C:/Users/jakob/Dropbox/Uni/1_ProjetML/package/ProjetML1_0.0.tar.gz", repos = NULL, type="source")
+# install.packages("C:/Users/jakob/Dropbox/Uni/1_ProjetML/package/ProjetML1_0.0.tar.gz", repos = NULL, type="source")
 edge_scores = data.frame(edge_name=unique(onesmall_test$edgename))
 i = 1
 for (edge in unique(onesmall_test$edgename)){
+  break
   testdata_edge = onesmall_test%>% filter(edgename==edge)
   test_pool_edge <- catboost.load_pool(
     testdata_edge%>% select(-nexthour_rateCar), 
@@ -230,7 +231,11 @@ for (edge in unique(onesmall_test$edgename)){
 }
 
 
+
+
 saveRDS(model, file="1_heure/catboost_model.rds")
+saveRDS(edge_scores, file = "../1_heure/catboost_scores.rds")
+
 modalt = readRDS("1_heure/catboost_model.rds")
 # Ypred_edge = catboost.predict(modalt, pool = test_pool_edge)
 # rmse(Ypred_edge, testdata_edge$nexthour_rateCar)

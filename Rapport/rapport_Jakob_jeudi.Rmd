@@ -36,7 +36,13 @@ La ville de Paris rend publiquement accès à de nombreux jeux de données sur l
 
 Avant de nous lancer, nous présentons d'abord le jeu de données en détail, sa richesse mais aussi les difficultés qu'il apporte : Sa taille et les valeurs manquantes. Ayant passé une grande partie du projet sur cet aspect, nous présentons nos stratégies pour résumer et compléter ce data set.
 
-Cela fait, nous formulons plusieurs problèmes de prédiction, à différents horizons temporels et en utilisons différentes parties du data set. (TODO: spécifier à la fin pour avoir une petite table de matières ici)
+Cela fait, nous formulons plusieurs problèmes de prédiction, à différents horizons temporels et en utilisons différentes parties du data set.
+
+## Matériel accompagnant ce document
+
+Ce document est un rapport sur notre projet de Machine Learning, il contient peu de code et encore moins de données. Pour accéder à ces ressources, nous recommandons de cloner notre repository sur github : https://github.com/jakobmaier-eu/paris-traffic-prediction.git . Dans le code, nous faisons parfois des références à ce code.
+
+Par ailleurs, nous avons préparé un package qui contient les fonctions les plus utilisées dans nos calculs ainsi que les données que nous avons utilisées pour les prédictions. Il peut être installé à partir du fichier *.tar.gz* qui peut être téléchargé suivant ce lien One Drive : https://1drv.ms/u/s!AorCvx6dgh2IhIo6VoTCkoM5A-Cw5A?e=sdiFvV .
 
 # Préparer le jeu de données
 
@@ -395,7 +401,7 @@ knitr::kable(CV_gam(form1_hour, df_train, no_folds = 8), align = "llll", caption
 
 Nous venons de voir la summary de ce modèle GAM ainsi que son score de validation croisée qui a clairement amélioré. N'oublions pas de mentionner que nous avons aussi rajouté un effet croisée de **hour** avec **weekendsIndicator**. Ceci est dû au simple fait que la circulation a des courbes différentes le week-end, ce qui est confirmé par les p-valeurs des deux variables. Dans le graphique ci-dessous, nous visualisons les fonctions lisses obtenus par GAM, à gause pendant la semaine et à droite le week-end :
 
-```{r draw_mod1_hour, cache=TRUE}
+```{r draw_mod1_hour, out.width='75%', fig.align='center', cache=TRUE}
 draw(mod1_hour)
 ```
 
@@ -433,7 +439,7 @@ knitr::kable(CV_gam(form1_toy, df_train, no_folds = 8), align = "llll", caption 
 
 4. **nbCar_LaggedHour**: cette variable pose la question intéressante si le nombre de voitures peut nous aider à prédire le taux d'occupation. Comme avec **rateCar_LaggedHour**, nous pouvons observer un effet hétérogène de **nbCar_LaggedHour** sur **rateCar** à travers la journée. Voici, par exemple, les nuages de points à 8 et à 14 heures :
 
-```{r expl_mod1_nbCarHour, cache=TRUE}
+```{r expl_mod1_nbCarHour, out.width='50%', fig.align='center', cache=TRUE}
 g_tuple = list(); i=1 
 for (h in c(8,14)){
   g = ggplot(data=df_train[(df_train$hour == h),], aes(y = rateCar, x = nbCar_LaggedHour))+ 
@@ -561,17 +567,21 @@ Seules 12 arêtes sur 69 ont une performance "significativement" meilleure lorsq
 
 
 
-## Analyse des résidus
+### Analyse des résidus
 
-A partir des résidus de la prévision d'un des modèles précédents, nous avons entraîné des modèles SARIMA, lissage exponentiel et de lissage exponentiel Holt-Winters. L'idée est que s'il reste de l'information dans les résidus du premier modèle (ici forêts aléatoires), on l'exploite pour améliorer la prédiction. On intègre la prédiction des nouveaux modèles de manière additive à la prédiction du premier modèle. Nous travaillons sur la première arête uniquement car le temps d'exécution est très important.
+Nous venons de voir les arbres CART et les forêts aléatoires, tous les deux avec une performance pas beaucoup meilleure qu'un simple GAM. On se pose alors la question s'il reste peut-être de l'information dans les résidus : comme nous travaillons sur des séries temporelles, SARIMA ou un lissage exponentiel pourrait découvrir de l'information qui est cachée pour un arbre CART.
 
-Afin de déterminer les paramètres des modèles SARIMA, nous avons utilisé l'approche de Box-Jenkins pour déterminer les valeurs maximales de **p**, **q**, **P** et **Q**. On utilise ensuite ces bornes dans la fonction *auto.arima* pour trouver les paramètres optimaux. Commençons par l'approche de Box-Jenkins. Parmi les saisonnalités (journalières, hebdomadaires, annuelles), on choisit de traiter la saisonnalité journalière. On pose donc **s**=24, **D**=1 et on différentie la série temporelle avec **lag**=24. Affichons les autocorrélogrammes et autocorrélogrammes partiels:
+Supposons alors qu'il reste de l'information dans les résidus des forêts aléatoires. Nous choisissons ce modèle avec de l'espoir qu'on pourra ainsi atteindre la même performance qu'avec GAM. L'information obtenue grâce à l'analyse des résidus sera rajoutée comme terme additif au modèle de base après. Vu la taille de nos données et les temps d’exécution reliés, nous nous restreignons dans cette partie sur une arête du graphe.
 
-```{r analyseACF, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Analyse de la série temporelle de la première arête", echo = F}
+Afin d'intégrer la saisonnalités des résidus dans le modèle, nous nous servons de SARIMA, méthode pour laquelle il faut déterminer plusieurs paramètres. Pour ce faire, nous aimerions nous servir de la fonction `auto.arima` qui trouve des paramètres optimaux. Pourtant, cette fonction exige des bornes supérieures sur les paramètres **p**, **q**, **P** et **Q**. Nous déterminons ces bornes avec l'approche Box - Jenkins :
+
+Parmi les saisonnalités (journalières, hebdomadaires, annuelles), on choisit de traiter la saisonnalité journalière qui semble être la plus importante. On pose donc **s**=24, **D**=1 et on différentie la série temporelle avec **lag**=24. Cela fait, nous affichons les auto-corrélogrammes et les auto-corrélogrammes partiels. Les deux diagrammes du haut se basent sur la première saison, de 1 à 24 observations, et nous servent à déterminer **q** et **p**. Les deux du bas présentent la situation à une échelle temporelle plus grande, 20 et 17 saisons respectivement, et servent à déterminer **P** et **Q**.
+
+```{r analyseACF, out.width='75%', fig.align='center', fig.show='hold', fig.cap="Analyse de la série temporelle de la première arête", echo = F}
 knitr::include_graphics('figures/sarima.png')
 ```
 
-Premièrement, on observe une décroissance exponentielle dans l'autocorrélogramme (haut gauche), on choisit donc **d**=0. Ensuite, on déduit les valeurs **p.max**=9 et **q.max**=15 des 2 figures du haut et **P.max**=15 et **Q.max**=1 des 2 figures du bas. La fonction *auto.arima* choisit le modèle $SARIMA(9,0,0)(4,1,0)[24]$. On analyse ensuite les résidus avec un test de Box-Pierce:
+En haut à gauche, nous observons tout d'abord une décroissance relativement forte, ce qui nous laisse choisir **d**=0. Ensuite, on déduit les valeurs **p.max**=9 et **q.max**=15 des 2 figures du haut et **P.max**=15 et **Q.max**=1 des 2 figures du bas (en comptant les pics). La fonction *auto.arima* utilise ces paramètres pour choisir le modèle $SARIMA(9,0,0)(4,1,0)[24]$. Ce nouveau modèle, qui a pour but d'expliquer les résidus de random forest, a lui-même des résidus. Ce sont ces résidus que nous analysons ensuit avec un test de Box-Pierce:
 
 ```{r boxpierce, echo=FALSE}
 df_box <- data.frame(lags = c(1,24),
@@ -581,25 +591,25 @@ df_box <- data.frame(lags = c(1,24),
 knitr::kable(df_box, align = "ccc", caption = "Test de Box-Pierce")
 ```
 
-L'autocorrélation a bien été éliminée mais pas l'autocorrélation journalière. On peut retrouver ce résultat en observant les résidus de ce modèle SARIMA. La saisonnalité hebdomadaire n'a aussi pas été éliminée. 
+Avec ces p-valeurs, nous jugeons que l'auto-corrélation sur la prochaine heure a bien été éliminée mais il reste clairement de l'auto-corrélation journalière. Ce résultat est confirmé par un plot des résidus qui montre d'ailleurs que la saisonnalité hebdomadaire n'a pas été éliminée non plus. 
 
-Nous avons essayé de modifier les paramètres à la main et en utilisant les critères AIC/BIC pour trouver un meilleur modèle SARIMA. Malheureusement, augmenter la valeur des paramètres est impossible car cela a un coût en mémoire vide trop important. Optimiser ces paramètres est aussi très chronophage et nous avons manqué de temps pour le faire. Concernant l'optimisation des paramètres, elle devrait être appliquée pour chaque arête, ce qui augmenterait d'autent plus le temps d'exécution.
+Nous avons essayé de modifier les paramètres à la main et en utilisant les critères AIC/BIC pour trouver un meilleur modèle SARIMA. Malheureusement, augmenter les valeurs de **Q**, **p** etc. est impossible car cela a un coût en mémoire trop important (nous parlons de vecteurs 13GB pour **P**=16 par exemple). Il y a évidemment d'autres manières d'optimiser ces paramètres, mais nous n'avions pas pris le temps de creuser davantage. En particulier, parce que chaque arête du graphe nécessiterait une optimisation individuelle, si nous voulons obtenir un modèle complet.
 
-Concernant l'idée d'améliorer les performances de nos forêts aléatoires en appliquant ce modèle SARIMA, nous avons échoué. En effet, en reprenant la méthode vue en cours de prédiction séquentielle, on ne fait que dégrader la prévision. 
+Si nous essayons, malgré l'auto-corrélation qui reste, de combiner le modèle SARIMA avec la forêt aléatoire initiale, nous obtenons un RMSE de 8.7. La technique ici était de faire des prédictions séquentielles, comme vu dans le cours avec la fonction *rollArima*. Pour les détails de nos calculs, nous renvoyons au fichier *1_heure/rfArima*. Comme c'est la pire performance parmi nos modèles, nous ne voulons pas insister dessus.
 
-Au lieu d'utiliser un modèle SARIMA sur les résidus, on utilise également des méthodes de lissage exponentiel, fonctions *ets* et *HoltWinters*. Comme précédemment pour SARIMA, on reprend le code du cours et on observe une dégradation des performances.
+En recherche d'une alternative à SARIMA, nous avons aussi essayé des méthodes de lissage exponentiel, les fonctions *ets* et *HoltWinters*. Mais comme avant, nous étions soit bloqués par des restrictions de performance, soit les scores de prédiction étaient terribles.
 
-Pour conclure sur l'idée d'analyser les résidus des forêts aléatoires, on ne parvient pas à un résultat satisfaisant. Nous pensons que l'on pourrait obtenir de meilleurs résultats en reprenant et en poursuivant le travail réalisé.
-
-
-
-
+Pour conclure sur l'idée d'analyser les résidus des forêts aléatoires, on ne parvient pas à un résultat satisfaisant. Avec une hardware plus puissante et plus d'investissement de temps, nous avons pourtant de l'espoir pour une amélioration.
 
 
 
 ## Boosting
 
-On utilise maintenant une méthode de gradient boosting à l'aide du package *XGBoost*. On construit un modèle à base d'arbres (**booster** = bgtree) avec un taux d'apprentissage **eta = 0.1** et le paramètre d'avancement **gamma** = 0.2 arbitraires. On optimise ensuite les autres paramètres à l'aide de *caret*. Cette fois, la validation croisée est réalisée sur 5 blocs car le temps d'exécution est très important (environ 3 heures). La grille de paramètre, parcourue entièrement, est la suivante
+Après les forêts aléatoires, nous voulons essayer un dernier algorithme de Machine Learning pour le scénario de prévision "Google Maps" : Le boosting. Plus précisément, nous nous servons du package *XGBoost* qui est réputé pour de très bonnes performances. 
+
+On construit un modèle à base d'arbres (**booster** = bgtree) et nous fixons arbitrairement le taux d'apprentissage **eta** = 0.1 et le paramètre d'avancement **gamma** = 0.2. Faire ces choix nous évite d'optimiser deux paramètres de plus, mais ce temps de calcul pourrait évidemment coûter en termes de performance.
+
+Il y a tout un ensemble de paramètres que nous optimisons avec la package *caret*. Une validation croisée réalisée sur 5 blocs sert à évaluer les performances. Un nombre de blocs plus élevé serait désirable, mais même de cette manière, le temps d'exécution est très important (environ 3 heures). La recherche de paramètres est effectuée sur la grille suivante qui montre aussi quels valeurs nous optimisons.
 
 ```{r xgboostTuningGrid, echo=FALSE}
 df_xgboostTuning <- data.frame("100", "3, 5, 7, 10",
@@ -614,7 +624,7 @@ names(df_xgboostTuning) <- c("nrounds", "max_depth",
 knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Grille de recherche des paramètres optimaux")
 ```
 
-La combinaison optimale trouvée est 
+La combinaison optimale trouvée par validation croisée est 
 
 ```{r xgboostTuningOpt, echo=FALSE}
 df_xgboostTuning <- data.frame("100", "7",
@@ -631,8 +641,6 @@ knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Paramètres optimau
 
 On optimise ensuite le nombre d'itérations **nrounds** à l'aide de la validation croisée sur 5 blocs (fonction *xgb.cv*) et d'un critère d'arrêt à partir de 5 itérations sans amélioration significative de la performance du modèle. On obtient la valeur de 133.
 
-Notre approche d'optimisation n'est pas parfaite et on aurait aimer optimiser les paramètres **gamma**, **eta** et aussi les paramètres de régularisation **lambda** et **alpha**. Cela aurait été utile dans notre cas où le boosting semble sur-apprendre. Une idée serait d'utiliser une méthode d'optimisation moins coûteuse comme de la recherche aléatoire de paramètre dans la grille ou une méthode bayésienne.
-
 Après prédiction des 69 arêtes, on obtient les scores suivants
 
 
@@ -643,18 +651,68 @@ names(df_xgboostModels) <- c("Boosting avec voisins", "Boosting sans voisins")
 knitr::kable(df_xgboostModels, align = "cc", caption = "Performances des méthodes de boosting")
 ```
 
-Les 2 scores sont très proches et on ne peut déterminer si l'ajout des voisins est pertinent dans cette méthode de boosting. Par rapport aux autres méthodes, ces scores sont meilleurs que ceux des arbres aléatoires mais sensiblement moins bons que ceux des forêts aléatoires. Cela nous pousse à reconsidérer une meilleure optimisation des paramètres car le boosting est régulièrement meilleur que les forêts aléatoires. Enfin, il est possible de visualiser l'importance des variables dans le boosting et de tirer les mêmes conclusions que pour les forêts aléatoires.
+Les 2 scores sont très proches et on ne peut déterminer si l'ajout des voisins est pertinent dans cette méthode de boosting. Par rapport aux autres méthodes, ces scores sont meilleurs que ceux des arbres aléatoires mais moins bons que ceux des forêts aléatoires. C'est surprenant car incongruent avec nos attentes que le boosting ait une meilleure performance. 
 
+Une raison pour cela peut être notre approche d'optimisation qui n'est pas parfaite. On aurait aimé optimiser les paramètres **gamma**, **eta** et aussi les paramètres de régularisation **lambda** et **alpha**. Cela aurait été utile, surtout parce que notre boosting semble sur-apprendre. Une idée serait d'utiliser une méthode d'optimisation moins coûteuse comme de la recherche aléatoire de paramètre dans la grille ou une méthode bayésienne : idées que nous ne poursuivons pas davantage.
 
+## Un modèle pour tout le graphe ?
+
+Jusqu'ici, nous nous sommes beaucoup focalisés sur la tâche de prédiction pour une seule arête. Même si les *voisins* (plus précisément la circulation sur les arêtes adjacentes) font intervenir la dimension spatiale du problème de prédiction, ce sont des modèles très locaux plutôt que globaux. 
+
+Est-ce qu'on peut trouver un seul modèle qui décrit tout ? C'est la question que nous nous sommes posés, inspirés par la régression multivarié et l'espoir que le graphe contient plus d'information que les arêtes individuelles. Pour convertir cela en une tâche de prédiction, il faut d'abord réunir les 69 arêtes dans un grand dataframe que nous appelons "oneDF". Chaque ligne de cet énorme jeu de données contient 
+
+- Le nom d'une arête (**edgename**) et la **rateCar** correspondante à l'heure actuelle.
+- Les taux d'occupation et le nombre de voitures de toutes les autres arêtes à l'heure précédente (69 x 2 = 138 colonnes).
+- Les variables statiques : la météo, l'heure, etc.
+
+Ainsi nous répliquons les 4 ans de données train 69 fois, ce qui résulte en un dataframe de 1.2 Go. Pourtant, cette approche nous permet d'entraîner plusieurs modèles en même temps avec un seul algorithme, l'espoir étant que le nom de l'arête en tant que variable catégorielle suffise pour déclencher la bonne prédiction.
+
+Pour faciliter l'apprentissage, nous rajoutons par ailleurs deux variables reliés à la dimension spatiale: un indicateur si l'arête appartient au périphérique et une variable catégorielle qui divise Paris en *sud*, *centre*, *nord-est* et *ouest*. 
+
+Reste qu'à choisir un algorithme qui arrive à gérer cette quantité de variables sans trop de calibration ni de perte de performance. Nous reprenons alors le boosting, sauf que *xgboost* ne marche pas avec toutes nos variables catégorielles. L'alternative *LGBM* avait besoin de trop de RAM, ce qui nous motive à utiliser *catboost*.
+
+Pas question de tuner les paramètres avec notre énorme dataset, nous reprenons alors les paramètres présentés dans le cours. Après, il faut toujours réduire la taille du dataset : nous retirons quelques variables jusqu'ici inutiles comme **state** et ignorons deux tiers des arêtes. Enfin, *catboost* peut apprendre en un temps raisonnable d'une heure et demi.
+
+Pendant l'apprentissage, *catboost* calcule des scores d'importance pour chaque variable. Nous affichons les cinq variables avec les scores les plus élevés :
+
+```{r catboost, echo=FALSE}
+catboost_model = readRDS("../1_heure/catboost_model.rds")
+ord = order(catboost_model$feature_importances, decreasing = T)
+
+head(catboost_model$feature_importances[ord,], 5)
+```
+
+Notre idée pour le modèle est partiellement validée par ces scores : Le nom des arêtes est le facteur le plus important pour déterminer la circulation et le fait d'appartenir au périphérique joue également un rôle fort. Mais est-ce que ce modèle pseudo-multivarié sert aussi à faire des prédiction ? L'erreur sur test set donne la réponse :
+
+```{r catboost_score,out.width='40%', fig.align='center', echo=FALSE}
+scores = readRDS("../1_heure/catboost_scores.rds")
+hist(scores$test_score, breaks=10, main=paste0(
+  "Performance on oneDF across 23 edges. Mean = ", 
+  round(mean(scores$test_score),2),"."), xlab = "scores on test data")
+```
+
+Une erreur moyenne de 5.07 est mauvaise en comparaison avec nos autres modèles, mais elle bat néanmoins deux modèles naïfs. Considérant le manque de calibration et la complexité du dataset, nous sommes même positivement surpris par ce score.
 
 # Conclusion
 
+Un projet de Machine Learning avec un jeu de données aussi énorme que celui sur la circulation à Paris a deux visages.  
+D'une part, il faut le dompter : agréger les données des milliers de capteurs routiers, compléter les valeurs manquantes et extraire de l'information intéressante de ses données mises à jour quotidiennement. Une étape qui exige de la patience, de l'intuition statistique et même des forêts aléatoires.  
+D'autre part, le jeu de données permet de poser un nombre presque infini de questions. Nous n'avons que gratté la superficie en étudiant plusieurs modèles visant à prédire la circulation de la prochaine heure, souvent arête par arête. A travers les voisins et même un modèle multivarié, nous avons essayé d'ajouter une dimension spatiale à nos problèmes, mais la structure de graphe du réseau routier permettrait des modèles beaucoup plus poussés. Ensuite, il y a la dimension temporelle, la prédiction du prochain jour, de la prochaine semaine. Quelle précision peut-on maintenir en s'éloignant de l'heure dont on veut connaître la densité de circulation ?
 
+Avec toutes ces questions, nous pourrions passer des semaines, voire des mois sur le projet. Mais il faut arrêter à un moment et tirer un bilan. Nous nous sommes principalement intéressés au problème Google Maps, la prédiction de la prochaine heure, pour une ou plusieurs arêtes. Au final, c'est le modèle GAM qui remporte la meilleure performance sur une seule arête, après une calibration détaillée. Pourtant, sur l'ensemble des arêtes, nous obtenons les meilleurs scores avec random forest. C'est peu surprenant vu que ce dernier algorithme apprend automatiquement les charactéristiques de chaque rue tandis que GAM est plutôt rigide.  
+Nous avons vu Boosting et SARIMA échouer, partiellement dû à l'énormité des données et la hardware restrictive de nos laptops. Tout au long du projet, il nous fallait faire des compromis entre temps d'execution, mémoire et complétude de notre analyse. Au fur et à mesure de l'agrégation par exemple, nous nous sommes habitués à faire des choix qui réduisent la complexité du data set tout en gardant de l'interprétabilité et du réalisme.
 
+Si nous tirons une leçon principale de ce projet, c'est le bon compromis qu'il faut souvent chercher : utiliser caret ou une validation croisée manuelle, optimiser un paramètre ou pas, stocker un jeu de donnés de 1.5 Go ou simplifier la tâche ? Notre objectif n'était pas de faire des choix parfaits, mais d'être conscients des possibles erreurs et de bien documenter nos réflexions.
 
+Finalement, nous concluons que prédire la circulation parisienne est une tâche complexe et certaines fluctuations semblent impossible à prédire. Notre modèle sur *oneDF* est d'accord lorsqu'il essaie de prédire l'occupation de l'arête 'saint michel - concorde' sur une journée :
 
-
-
-
+```{r conclusion, echo=FALSE}
+catboost_model = readRDS("../1_heure/catboost_model.rds")
+Ypred_edge = readRDS("../1_heure/Ypred_catboost.rds")
+Yreal = data_test[[3]]$rateCar
+i = 2
+plot(0:23,Ypred_edge[1:24],type="l",col="red", xlab = 'heures', ylab = 'prévisions', main = "Catboost (rouge) vs. test data")
+lines(0:23,Yreal[1:24],col="black")
+```
 
 ## Références
