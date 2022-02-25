@@ -480,7 +480,7 @@ Il existent des arêtes où le score est meilleur que sur *concorde - saint mich
 
 Avant de conclure que GAM généralise mal à travers le graphe, nous revenons brièvement sur le premier modèle qui n'utilisait que **rateCar_LaggedHour** comme variable explicative. Si nous faisons pareil en calculant le RMSE sur le test set, l'erreur à travers des arêtes est 3.35, donc significativement meilleure. Le groupement des heures, le rôle de **nbCar**, semble causer de l'overfitting. Un bon GAM doit alors être bricolé pour chaque arête individuellement.
 
-## Arbres aléatoires
+### Arbres aléatoires
 
 Après cet exercise de bricolage avec GAM, nous passons à d'autres modèles dont le tuning pourra se faire de manière plus automatique. Pour commencer, nous nous intéressons à des arbres CART et nous nous servons du package *rpart* pour les implémenter. Au lieu d'examiner la contribution de chaque variable, le choix des $k$ etc., il suffit de tuner quelques paramètres de l'algorithme. Vu que nous ferons un tuning étendu pour les forêts aléatoires après, nous nous focalisons ici sur un seul paramètre qui est de plus haute importance : le "complexity parameter" `cp`. Dans la construction de l'arbre, si le gain de performance après une découpe n'est pas meilleur d'un facteur de `cp`, alors la découpe n'est pas réalisée. Plus `cp` est grand, moins l'arbre sera alors complexe, dont le nom.
 
@@ -554,6 +554,97 @@ knitr::include_graphics('figures/analyseRF.png')
 ```
 
 Seules 12 arêtes sur 69 ont une performance "significativement" meilleure lorsqu'on ajoute les voisins. De plus, pour les arêtes du périphérique, on remarque qu'inclure les voisins a, à 2 exceptions près, un effet néfaste sur la performance. Même en général, la performance sur le périphérique est moins bonne que dans Paris. En effet, les scores pour Paris sont 2.747 (avec voisins) et 2.898 (sans voisins), et les scores du périphérique sont 4.069 (avec voisins) et 3.787 (sans voisins).
+
+
+
+
+
+
+
+## Analyse des résidus
+
+A partir des résidus de la prévision d'un des modèles précédents, nous avons entraîné des modèles SARIMA, lissage exponentiel et de lissage exponentiel Holt-Winters. L'idée est que s'il reste de l'information dans les résidus du premier modèle (ici forêts aléatoires), on l'exploite pour améliorer la prédiction. On intègre la prédiction des nouveaux modèles de manière additive à la prédiction du premier modèle. Nous travaillons sur la première arête uniquement car le temps d'exécution est très important.
+
+Afin de déterminer les paramètres des modèles SARIMA, nous avons utilisé l'approche de Box-Jenkins pour déterminer les valeurs maximales de **p**, **q**, **P** et **Q**. On utilise ensuite ces bornes dans la fonction *auto.arima* pour trouver les paramètres optimaux. Commençons par l'approche de Box-Jenkins. Parmi les saisonnalités (journalières, hebdomadaires, annuelles), on choisit de traiter la saisonnalité journalière. On pose donc **s**=24, **D**=1 et on différentie la série temporelle avec **lag**=24. Affichons les autocorrélogrammes et autocorrélogrammes partiels:
+
+```{r analyseACF, out.width='50%', fig.align='center', fig.show='hold', fig.cap="Analyse de la série temporelle de la première arête", echo = F}
+knitr::include_graphics('figures/sarima.png')
+```
+
+Premièrement, on observe une décroissance exponentielle dans l'autocorrélogramme (haut gauche), on choisit donc **d**=0. Ensuite, on déduit les valeurs **p.max**=9 et **q.max**=15 des 2 figures du haut et **P.max**=15 et **Q.max**=1 des 2 figures du bas. La fonction *auto.arima* choisit le modèle $SARIMA(9,0,0)(4,1,0)[24]$. On analyse ensuite les résidus avec un test de Box-Pierce:
+
+```{r boxpierce, echo=FALSE}
+df_box <- data.frame(lags = c(1,24),
+                     statistics = c(0.01290686, 781.01125109),
+                     pvalue = c(0.9095483, 0.0000000))
+
+knitr::kable(df_box, align = "ccc", caption = "Test de Box-Pierce")
+```
+
+L'autocorrélation a bien été éliminée mais pas l'autocorrélation journalière. On peut retrouver ce résultat en observant les résidus de ce modèle SARIMA. La saisonnalité hebdomadaire n'a aussi pas été éliminée. 
+
+Nous avons essayé de modifier les paramètres à la main et en utilisant les critères AIC/BIC pour trouver un meilleur modèle SARIMA. Malheureusement, augmenter la valeur des paramètres est impossible car cela a un coût en mémoire vide trop important. Optimiser ces paramètres est aussi très chronophage et nous avons manqué de temps pour le faire. Concernant l'optimisation des paramètres, elle devrait être appliquée pour chaque arête, ce qui augmenterait d'autent plus le temps d'exécution.
+
+Concernant l'idée d'améliorer les performances de nos forêts aléatoires en appliquant ce modèle SARIMA, nous avons échoué. En effet, en reprenant la méthode vue en cours de prédiction séquentielle, on ne fait que dégrader la prévision. 
+
+Au lieu d'utiliser un modèle SARIMA sur les résidus, on utilise également des méthodes de lissage exponentiel, fonctions *ets* et *HoltWinters*. Comme précédemment pour SARIMA, on reprend le code du cours et on observe une dégradation des performances.
+
+Pour conclure sur l'idée d'analyser les résidus des forêts aléatoires, on ne parvient pas à un résultat satisfaisant. Nous pensons que l'on pourrait obtenir de meilleurs résultats en reprenant et en poursuivant le travail réalisé.
+
+
+
+
+
+
+
+## Boosting
+
+On utilise maintenant une méthode de gradient boosting à l'aide du package *XGBoost*. On construit un modèle à base d'arbres (**booster** = bgtree) avec un taux d'apprentissage **eta = 0.1** et le paramètre d'avancement **gamma** = 0.2 arbitraires. On optimise ensuite les autres paramètres à l'aide de *caret*. Cette fois, la validation croisée est réalisée sur 5 blocs car le temps d'exécution est très important (environ 3 heures). La grille de paramètre, parcourue entièrement, est la suivante
+
+```{r xgboostTuningGrid, echo=FALSE}
+df_xgboostTuning <- data.frame("100", "3, 5, 7, 10",
+                               "0.70, 0.75, 0.80, 0.85, 0.90",
+                               "0.1","0.2","1,3,5,7,9",
+                               "0.70, 0.75, 0.80, 0.85, 0.90")
+names(df_xgboostTuning) <- c("nrounds", "max_depth",
+                             "colsample_bytree","eta",
+                             "gamma","min_child_weight",
+                             "subsample")
+
+knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Grille de recherche des paramètres optimaux")
+```
+
+La combinaison optimale trouvée est 
+
+```{r xgboostTuningOpt, echo=FALSE}
+df_xgboostTuning <- data.frame("100", "7",
+                               "0.90",
+                               "0.1","0.2","1",
+                               "0.90")
+names(df_xgboostTuning) <- c("nrounds", "max_depth",
+                             "colsample_bytree","eta",
+                             "gamma","min_child_weight",
+                             "subsample")
+
+knitr::kable(df_xgboostTuning, align = "ccccccc", caption = "Paramètres optimaux")
+```
+
+On optimise ensuite le nombre d'itérations **nrounds** à l'aide de la validation croisée sur 5 blocs (fonction *xgb.cv*) et d'un critère d'arrêt à partir de 5 itérations sans amélioration significative de la performance du modèle. On obtient la valeur de 133.
+
+Notre approche d'optimisation n'est pas parfaite et on aurait aimer optimiser les paramètres **gamma**, **eta** et aussi les paramètres de régularisation **lambda** et **alpha**. Cela aurait été utile dans notre cas où le boosting semble sur-apprendre. Une idée serait d'utiliser une méthode d'optimisation moins coûteuse comme de la recherche aléatoire de paramètre dans la grille ou une méthode bayésienne.
+
+Après prédiction des 69 arêtes, on obtient les scores suivants
+
+
+```{r xgboostModeltable, echo=FALSE}
+df_xgboostModels <- data.frame(3.295, 3.284)
+names(df_xgboostModels) <- c("Boosting avec voisins", "Boosting sans voisins")
+
+knitr::kable(df_xgboostModels, align = "cc", caption = "Performances des méthodes de boosting")
+```
+
+Les 2 scores sont très proches et on ne peut déterminer si l'ajout des voisins est pertinent dans cette méthode de boosting. Par rapport aux autres méthodes, ces scores sont meilleurs que ceux des arbres aléatoires mais sensiblement moins bons que ceux des forêts aléatoires. Cela nous pousse à reconsidérer une meilleure optimisation des paramètres car le boosting est régulièrement meilleur que les forêts aléatoires. Enfin, il est possible de visualiser l'importance des variables dans le boosting et de tirer les mêmes conclusions que pour les forêts aléatoires.
+
 
 
 # Conclusion
