@@ -71,6 +71,9 @@ print(p2, position = c(0.5, 0, 1, 1))
 rmse_list = c()
 mape_list = c()
 
+predictionTrainData <- matrix(nrow = 35060, ncol = 69)
+predictionTestData <- matrix(nrow = 17516, ncol = 69)
+
 ptm <- proc.time()
 
 for(i in 1:69){
@@ -85,6 +88,9 @@ for(i in 1:69){
   
   prediction <- predict(model, newdata=data_te)
   
+  predictionTestData[,i] <- prediction$predictions
+  predictionTrainData[,i] <- model$predictions
+  
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
 }
@@ -97,6 +103,9 @@ print(proc.time() - ptm)
 
 rmse_list = c()
 mape_list = c()
+
+predictionTrainData <- matrix(nrow = 35060, ncol = 69)
+predictionTestData <- matrix(nrow = 17516, ncol = 69)
 
 ptm <- proc.time()
 
@@ -111,6 +120,9 @@ for(i in 1:69){
                                          cp = cpGrid2[which.min(rpart.CV.2$results$RMSE),]))
   
   prediction <- predict(model, newdata=data_te)
+  
+  predictionTestData[,i] <- prediction$predictions
+  predictionTrainData[,i] <- model$predictions
   
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
