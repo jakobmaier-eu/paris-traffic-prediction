@@ -88,8 +88,8 @@ for(i in 1:69){
   
   prediction <- predict(model, newdata=data_te)
   
-  predictionTestData[,i] <- prediction$predictions
-  predictionTrainData[,i] <- model$predictions
+  predictionTestData[,i] <- prediction
+  #predictionTrainData[,i] <- model$predictions
   
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
@@ -124,8 +124,8 @@ for(i in 1:69){
   
   prediction <- predict(model, newdata=data_te)
   
-  predictionTestData[,i] <- prediction$predictions
-  predictionTrainData[,i] <- model$predictions
+  predictionTestData[,i] <- prediction
+  #predictionTrainData[,i] <- model$predictions
   
   rmse_list <- c(rmse_list, rmse(prediction, data_te$rateCar))
   mape_list <- c(mape_list, mape(prediction, data_te$rateCar))
