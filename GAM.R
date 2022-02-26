@@ -296,7 +296,7 @@ for (i in 1:69){
 }
 
 mean(score_edges)
-saveRDS(scores_edges, file="scores_edges_GAM_final.rds")
+saveRDS(scores_edges, file="1_heure/scores_edges_GAM_final.rds")
 
 
 ### -------- Does simple model generalize better ?
@@ -317,28 +317,10 @@ for (i in 1:69){
                           df_test$rateCar)
 }
 mean(scores_edges_simple)
-saveRDS(scores_edges_simple, file="scores_edges_GAM_simple.rds")
+saveRDS(scores_edges_simple, file="1_heure/scores_edges_GAM_simple.rds")
 
 
-# form_simple2 = rateCar ~ hour * rateCar_LaggedHour - hour - rateCar_LaggedHour
-# scores_edges_simple2 = c()
-# for (i in 1:69){
-#   df_train = data_train[[i]]
-#   df_test = data_test[[i]]
-#   
-#   df_train$weekdays <- unlist(lapply(X = df_train$weekdays, FUN = daysToNumber))
-#   df_test$weekdays <- unlist(lapply(X = df_test$weekdays, FUN = daysToNumber))
-#   df_train$GRPS = as.factor(sapply(as.factor(df_train$hour), cluster_hours))
-#   df_test$GRPS = as.factor(sapply(as.factor(df_test$hour), cluster_hours))
-#   
-#   mod_edge = gam(form_simple2, data=df_train)
-#   scores_edges_simple2[i] = rmse( predict(mod_edge, newdata = df_test),  
-#                                  df_test$rateCar)
-# }
-# mean(scores_edges_simple2)
 
-# data_train = readRDS(file = "../Data/imp_edges_train.rds")
-# data_test = readRDS(file = "../Data/imp_edges_test.rds")
 
 predictionTestData_simple <- matrix(nrow = 17516, ncol = 69)
 for (i in 1:69){
@@ -368,5 +350,5 @@ for (i in 1:69){
   predictionTestData_full[,i] <- predict(mod_edge, newdata = df_test)
 }
 
-save(predictionTestData_simple, file="GAM_simpleModel_predictionTestData.RData")
-save(predictionTestData_full, file="GAM_fullModel_predictionTestData.RData")
+save(predictionTestData_simple, file="1_heure/GAM_simpleModel_predictionTestData.RData")
+save(predictionTestData_full, file="1_heure/GAM_fullModel_predictionTestData.RData")

@@ -272,3 +272,133 @@ res$variable.importance[order(res$variable.importance)]
 
 
 
+############################################
+# Number of trees
+############################################
+
+# Errors and times list
+error_list <- c()
+time_list <- c()
+
+# Number of trees tested
+ntree_list <- seq(10,300,10)
+
+# For each number of trees...
+for(n in ntree_list){
+  print(n) # to check the loop
+  
+  ptm <- proc.time() # evaluate execution time
+  
+  # Grow a forest with n trees
+  res <- ranger(rateCar ~., 
+                data=data_train, 
+                num.trees = n,
+                mtry=10,
+                importance='impurity')
+  
+  temp <- proc.time() - ptm
+  
+  time_list <- c(time_list, temp[3])
+  
+  error_list <- c(error_list, res$prediction.error)
+}
+
+# plotting results
+par(mfrow=c(1,2))
+
+p1 <- plot(ntree_list, error_list, 
+           main = "Erreur RMSE selon le nombre d'arbres", 
+           xlab = "Nombre d'arbres ntree", 
+           ylab="RMSE",
+           type = "o",
+           pch=18,
+           col="blue")
+p2 <- plot(ntree_list, time_list, 
+           main = "Temps d'exécution selon le nombre d'arbres", 
+           xlab = "Nombre d'arbres ntree", 
+           ylab="Temps d'exécution (secondes)",
+           type="o",
+           col="blue")
+
+print(p1, position = c(0, 0, 0.5, 1), more = TRUE)
+print(p2, position = c(0.5, 0, 1, 1))
+
+#################
+# Prediction of the 69 edges without neighbors
+#################
+
+rmse_list = c()
+mape_list = c()
+
+ptm <- proc.time()
+
+for(i in 1:69){
+  print(i)
+  
+  data_tr = data_train[[i]][,c(1:22)]
+  data_te = data_test[[i]][,c(1:22)]
+  
+  model <- ranger(rateCar ~ ., 
+                  data=data_tr, 
+                  num.trees = 150, 
+                  mtry = 10,
+                  importance='impurity')
+  
+  prediction <- predict(model, data=data_te)
+  
+  rmse_list <- c(rmse_list, rmse(prediction$predictions, data_te$rateCar))
+  mape_list <- c(mape_list, mape(prediction$predictions, data_te$rateCar))
+}
+
+print(proc.time() - ptm) 
+
+#################
+# Prediction of the 69 edges with neighbors
+#################
+
+rmse_list = c()
+mape_list = c()
+
+ptm <- proc.time()
+
+for(i in 1:69){
+  print(i)
+  
+  data_tr = data_train[[i]]
+  data_te = data_test[[i]]
+  
+  model <- ranger(rateCar ~ ., 
+                  data=data_tr, 
+                  num.trees = 150, 
+                  mtry = 10,
+                  importance='impurity')
+  
+  prediction <- predict(model, data=data_te)
+  
+  rmse_list <- c(rmse_list, rmse(prediction$predictions, data_te$rateCar))
+  mape_list <- c(mape_list, mape(prediction$predictions, data_te$rateCar))
+}
+
+print(proc.time() - ptm) 
+
+################
+# Visualizing importance
+################
+
+model <- ranger(rateCar~., 
+                data=data_train[[1]],
+                mtry = 10,
+                importance='impurity')
+
+prediction <- predict(model, data=data_test[[1]])
+
+vip(model, num_features = 15)
+
+
+
+
+
+
+
+
+

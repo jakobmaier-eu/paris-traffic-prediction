@@ -1,1 +1,0 @@
-Temps d'éxécution de l'aggrégation sur toutes les années des données nettoyées : 1140 secondes
